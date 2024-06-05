@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block title %} School Chale Hum {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+    textarea{
+  display: block;
+  box-sizing: padding-box;
+  overflow: hidden;
+
+  padding: 10px;
+  width: auto;
+  font-size: 14px;
+  margin: 50px auto;
+  border-radius: 6px;
+  box-shadow: 2px 2px 8px rgba(black, .3);
+  border: 0;
+
+  &:focus{
+    border: none;
+    outline: none;
+  }
+}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+<div class="row">
+  <div class="col-12">
+    <div class="card mb-4">
+      <div class="card-body px-0 pt-0 pb-2">
+        <div class="table-responsive p-0">
+            <div style="padding: 20px">
+                <div class="row">
+                    <div class="col-9" ><h3 style="color: lightcoral">School ID: {{ school.id }}</h3>
+                        <h6 class="mb-0 text-lg">Name: {{ school.name }}</h6>
+                        <h6 class="mb-0 text-lg">Country Code: {{ school.country_code }}</h6>
+                        <h6 class="mb-0 text-lg">Phone Number: {{ school.phone_number }}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+    <script>
+
+    </script>
+{% endblock javascripts %}

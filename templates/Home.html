@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} School Chale Hum {% endblock title %}
+{% load custom_tags %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+    textarea{
+  display: block;
+  box-sizing: padding-box;
+  overflow: hidden;
+
+  padding: 10px;
+  width: auto;
+  font-size: 14px;
+  margin: 50px auto;
+  border-radius: 6px;
+  box-shadow: 2px 2px 8px rgba(black, .3);
+  border: 0;
+
+  &:focus{
+    border: none;
+    outline: none;
+  }
+}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+</div>
+{% endblock content %}
+<div class="container-fluid py-4">
+        <h4> Start Your own Project</h4>
+</div>
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+    <script>
+    
+    </script>
+{% endblock javascripts %}

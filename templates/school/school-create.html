@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block title %} School Chale Hum {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+    textarea{
+  display: block;
+  box-sizing: padding-box;
+  overflow: hidden;
+
+  padding: 10px;
+  width: auto;
+  font-size: 14px;
+  margin: 50px auto;
+  border-radius: 6px;
+  box-shadow: 2px 2px 8px rgba(black, .3);
+  border: 0;
+
+  &:focus{
+    border: none;
+    outline: none;
+  }
+}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <div class="row" style="margin-bottom: 10px">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="col-md-12 mb-lg-0 mb-4">
+                <div class="card mt-4">
+              <div class="card-header pb-0 p-3">
+                <div class="row">
+                  <div class="col-4 d-flex align-items-center">
+                    <h6 class="mb-0">Add New School</h6>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body p-3">
+                <div class="row">
+                      {% csrf_token %}
+                    {{ form.as_p }}
+                </div>
+                <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                    <p class="mb-4 text-sm mx-auto">
+                      Want to Create a Student?
+                      <a href="{% url 'student-create' %}" class="text-info text-gradient font-weight-bold">Click here..</a>
+                    </p>
+                </div>
+                 <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                    <p class="mb-4 text-sm mx-auto">
+                      Want to Create a Book?
+                      <a href="{% url 'book-create' %}" class="text-info text-gradient font-weight-bold">Click here..</a>
+                    </p>
+                 </div>
+                 <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                    <input type="submit" value="Create"  class="btn bg-gradient-success " />
+                 </div>
+              </div>
+              </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock content %}
+
+
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+    <script>
+
+    </script>
+{% endblock javascripts %}
