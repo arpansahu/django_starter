@@ -4,7 +4,7 @@ services:
   web:
     build: .
     env_file: ./.env
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8013 django_starter.wsgi"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8016 django_starter.wsgi"
     image: django_starter
     container_name: django_starter
     volumes:
