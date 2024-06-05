@@ -25,7 +25,7 @@ redis==4.3.4
 requests==2.27.1
 s3transfer==0.5.2
 six==1.16.0
-sqlparse==0.4.2
+sqlparse==0.5.0
 urllib3==1.26.9
 whitenoise==6.1.0
 wrapt==1.14.1
