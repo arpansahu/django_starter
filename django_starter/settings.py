@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'account',
-    'custom_tag_app'
+    'custom_tag_app',
 
      # cleans up unused media, always in the end
     'django_cleanup.apps.CleanupConfig'
