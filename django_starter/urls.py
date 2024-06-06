@@ -11,7 +11,6 @@ from account.views import (
     AccountView,
     RegistrationView,
     activate,
-
 )
 
 from .view import (
