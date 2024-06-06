@@ -47,6 +47,9 @@ INSTALLED_APPS = [
 
     'account',
     'custom_tag_app'
+
+     # cleans up unused media, always in the end
+    'django_cleanup.apps.CleanupConfig'
 ]
 
 MIDDLEWARE = [

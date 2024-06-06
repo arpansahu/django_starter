@@ -6,6 +6,7 @@ certifi==2024.6.2
 charset-normalizer==3.3.2
 dj-database-url==2.2.0
 Django==5.0.6
+django-cleanup==8.1.0
 django-redis==5.4.0
 django-storages==1.14.3
 gunicorn==22.0.0
@@ -15,6 +16,7 @@ mailjet-rest==1.3.4
 numpy==1.26.4
 packaging==24.0
 pandas==2.2.2
+pillow==10.3.0
 psycopg2-binary==2.9.9
 python-dateutil==2.9.0.post0
 python-decouple==3.8
