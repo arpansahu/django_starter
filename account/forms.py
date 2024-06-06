@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, _unicode_ci_compare, UserChangeForms
+from django.contrib.auth.forms import UserCreationForm, _unicode_ci_compare, UserChangeForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
@@ -21,7 +21,7 @@ from mailjet_rest import Client
 class CustomAccountCreationForm(UserCreationForm):
     class Meta:
         model = Account
-        fields = ('email', 'username', 'password1', 'password2', 'profile_photo')
+        fields = ('email', 'username', 'password1', 'password2')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,7 +42,7 @@ class CustomAccountCreationForm(UserCreationForm):
 class CustomAccountUpdateForm(UserChangeForm):
     class Meta:
         model = Account
-        fields = ('email', 'username', 'is_active', 'is_staff', 'is_admin', 'profile_photo')
+        fields = ('email', 'username', 'is_active', 'is_staff', 'is_admin')
 
     # Override the __init__ method to customize the form if needed
     def __init__(self, *args, **kwargs):
