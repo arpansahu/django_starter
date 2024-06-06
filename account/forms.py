@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, _unicode_ci_compare
+from django.contrib.auth.forms import UserCreationForm, _unicode_ci_compare, UserChangeForms
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
@@ -15,6 +15,42 @@ UserModel = get_user_model()
 
 from django.conf import settings
 from mailjet_rest import Client
+
+# Django Admin forms
+
+class CustomAccountCreationForm(UserCreationForm):
+    class Meta:
+        model = Account
+        fields = ('email', 'username', 'password1', 'password2', 'profile_photo')
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Example: Add custom CSS classes to fields
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})
+        self.fields['username'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control'})
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.username = self.cleaned_data['username']
+        if commit:
+            user.save()
+        return user
+
+class CustomAccountUpdateForm(UserChangeForm):
+    class Meta:
+        model = Account
+        fields = ('email', 'username', 'is_active', 'is_staff', 'is_admin', 'profile_photo')
+
+    # Override the __init__ method to customize the form if needed
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Example: Add custom CSS classes to fields
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})
+        self.fields['username'].widget.attrs.update({'class': 'form-control'})
+        # Add additional customizations here
 
 
 class LoginForm(forms.Form):
