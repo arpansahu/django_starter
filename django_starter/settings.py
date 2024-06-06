@@ -235,3 +235,5 @@ CACHES = {
         "LOCATION": config('REDISCLOUD_URL'),
     }
 }
+
+CSRF_TRUSTED_ORIGINS = ['https://django-starter.arpansahu.me']
