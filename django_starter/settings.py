@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     'account',
     'custom_tag_app',
+    'check_service_health',
 
      # cleans up unused media, always in the end
     'django_cleanup.apps.CleanupConfig'
@@ -228,12 +229,13 @@ LOGIN_REDIRECT_URL = "/"
 MAIL_JET_API_KEY = config('MAIL_JET_API_KEY')
 MAIL_JET_API_SECRET = config('MAIL_JET_API_SECRET')
 
-#Caching
+# Caching
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": config('REDISCLOUD_URL'),
     }
 }
+
 
 CSRF_TRUSTED_ORIGINS = ['https://django-starter.arpansahu.me']
