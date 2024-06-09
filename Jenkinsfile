@@ -4,7 +4,13 @@ pipeline {
         stage('Dependencies') {
             steps {
                 script {
-                    sh "sudo cp /root/projectenvs/django_starter/.env /var/lib/jenkins/workspace/django_starter"
+                    sh """
+                    if [ -f /root/projectenvs/django_starter/.env ]; then
+                        sudo cp /root/projectenvs/django_starter/.env /var/lib/jenkins/workspace/django_starter
+                    else
+                        echo "File not found: /root/projectenvs/django_starter/.env"
+                    fi
+                    """
                 }
             }
         }
@@ -36,7 +42,7 @@ pipeline {
                                                 "Name": "Development Team"
                                         }
                                 ],
-                                "Subject": "${currentBuild.fullDisplayName} deployed succcessfully",
+                                "Subject": "${currentBuild.fullDisplayName} deployed successfully",
                                 "TextPart": "Hola Development Team, your project ${currentBuild.fullDisplayName} is now deployed",
                                 "HTMLPart": "<h3>Hola Development Team, your project ${currentBuild.fullDisplayName} is now deployed </h3> <br> <p> Build Url: ${env.BUILD_URL}  </p>"
                         }
