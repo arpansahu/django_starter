@@ -1,10 +1,25 @@
 {% extends 'base.html' %}
-
+{% load static %} 
 {% block title %} Sign IN {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
 
+<style>
+  .oblique-bg {
+    background-image: url("{% static 'assets/img/curved6.jpg' %}");
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    z-index: 0;
+    margin-left: -6rem; /* ms-n6 */
+  }
+</style>
+
+{% endblock stylesheets %}
 {% block content %}
 
   <section>
@@ -61,7 +76,7 @@
           </div>
           <div class="col-md-6">
             <div class="oblique position-absolute top-0 h-100 d-md-block d-none me-n8">
-              <div class="oblique-image bg-cover position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6" style="background-image:url('https://jobportal-bucket-s3.s3.ap-south-1.amazonaws.com/static/assets/img/curved-images/curved6.jpg')"></div>
+              <div class="oblique-image bg-cover position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6 oblique-bg"></div>
             </div>
           </div>
         </div>
