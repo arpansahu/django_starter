@@ -4,7 +4,7 @@ metadata:
   name: django-starter-service
 spec:
   selector:
-    app: django_starter
+    app: django-starter
   ports:
     - protocol: TCP
       port: 8016
