@@ -10,5 +10,4 @@ RUN pip3 install -r requirements.txt
 
 EXPOSE 8016
 
-CMD python manage.py collectstatic
-CMD gunicorn --bind 0.0.0.0:8016 django_starter.wsgi
+CMD bash -c "python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8016 django_starter.wsgi"
