@@ -9,7 +9,7 @@ pipeline {
         REPOSITORY = "library/django_starter"
         IMAGE_TAG = "latest"  // or use a specific tag if needed
         KUBECONFIG = "${env.WORKSPACE}/kubeconfig"  // Set the KUBECONFIG environment variable
-        NGINX_CONF = "/etc/nginx/sites-available/django_starter"
+        NGINX_CONF = "/etc/nginx/sites-available/django-starter"
         ENV_PROJECT_NAME = "django_starter"
         DOCKER_PORT = "8016"
         PROJECT_NAME_WITH_DASH = "django-starter"
