@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django_starter-app
+  name: django-starter-app
   labels:
     app: django_starter
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: django_starter
+      app: django-starter
   template:
     metadata:
       labels:
-        app: django_starter
+        app: django-starter
     spec:
       imagePullSecrets:
         - name: harbor-registry-secret
@@ -23,62 +23,62 @@ spec:
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: SECRET_KEY
             - name: DEBUG
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: DEBUG
             - name: ALLOWED_HOSTS
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: ALLOWED_HOSTS
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: AWS_ACCESS_KEY_ID
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: AWS_SECRET_ACCESS_KEY
             - name: AWS_STORAGE_BUCKET_NAME
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: AWS_STORAGE_BUCKET_NAME
             - name: BUCKET_TYPE
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: BUCKET_TYPE
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: DATABASE_URL
             - name: REDISCLOUD_URL
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: REDISCLOUD_URL
             - name: MAIL_JET_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: MAIL_JET_API_KEY
             - name: MAIL_JET_API_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: MAIL_JET_API_SECRET
             - name: MAIL_JET_EMAIL_ADDRESS
               valueFrom:
                 secretKeyRef:
-                  name: django_starter-secret
+                  name: django-starter-secret
                   key: MAIL_JET_EMAIL_ADDRESS
           ports:
             - containerPort: 8016

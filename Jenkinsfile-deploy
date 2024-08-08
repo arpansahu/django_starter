@@ -12,7 +12,7 @@ pipeline {
         NGINX_CONF = "/etc/nginx/sites-available/django_starter"
         ENV_PROJECT_NAME = "django_starter"
         DOCKER_PORT = "8016"
-        PROJECT_NAME_WITH_DASH = "django_starter"
+        PROJECT_NAME_WITH_DASH = "django-starter"
     }
     stages {
         stage('Initialize') {
