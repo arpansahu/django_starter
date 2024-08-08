@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django-starter-app-mac
+  name: django-starter-mac-app
   labels:
-    app: django-starter
+    app: django-starter-mac
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: django-starter
+      app: django-starter-mac
   template:
     metadata:
       labels:
-        app: django-starter
+        app: django-starter-mac
     spec:
       imagePullSecrets:
         - name: harbor-registry-secret
       containers:
         - image: harbor.arpansahu.me/library/django_starter_mac:latest
           imagePullPolicy: Always
-          name: django_starter_mac
+          name: django-starter-mac
           env:
             - name: SECRET_KEY
               valueFrom:
