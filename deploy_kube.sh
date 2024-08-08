@@ -81,14 +81,14 @@ function verify_rollout {
 # Function to set default specific variables
 function set_default_variables {
     IMAGE_NAME="django_starter"
-    KUBE_DEPLOYMENT="django_starter-app"
+    KUBE_DEPLOYMENT="django-starter-app"
     DEPLOYMENT_FILE="deployment.yaml"
 }
 
 # Function to set mac specific variables
 function set_mac_variables {
     IMAGE_NAME="chew_and_chew_mac"
-    KUBE_DEPLOYMENT="django_starter-app-mac"
+    KUBE_DEPLOYMENT="django-starter-app-mac"
     DEPLOYMENT_FILE="deployment-mac.yaml"
 }
 
