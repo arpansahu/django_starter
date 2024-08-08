@@ -80,6 +80,16 @@ spec:
                 secretKeyRef:
                   name: django-starter-secret
                   key: MAIL_JET_EMAIL_ADDRESS
+            - name: DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  name: django-starter-secret
+                  key: DOMAIN
+            - name: PROTOCOL
+              valueFrom:
+                secretKeyRef:
+                  name: django-starter-secret
+                  key: PROTOCOL
           ports:
             - containerPort: 8016
               name: gunicorn
