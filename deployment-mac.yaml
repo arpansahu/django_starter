@@ -18,7 +18,6 @@ spec:
         - name: harbor-registry-secret
       containers:
         - image: harbor.arpansahu.me/library/django_starter_mac:latest
-          imagePullPolicy: Always
           name: django-starter-mac
           env:
             - name: SECRET_KEY
