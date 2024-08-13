@@ -1,8 +1,6 @@
-FROM python:3.10.7
+FROM python:3.10.7-slim
 
 WORKDIR /app
-
-COPY requirements.txt requirements.txt
 
 COPY . .
 
