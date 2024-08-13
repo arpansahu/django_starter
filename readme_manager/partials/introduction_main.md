@@ -1,4 +1,4 @@
-# django_starter | Django Project CRUD using AJAX, DJANGO FORMS, GRAPHQL and DJANGO REST/GRAPHQL APIs
+# Django Starter | Django Base project clone, save the hustle
 
 This is a simple django CRUD project
 
