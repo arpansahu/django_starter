@@ -340,6 +340,7 @@ include_files = {
 
     #kubernetes
     "KIND CONFIG MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/kind-config.md",
+    "KUBELET CONFIG MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/kubelet-config.md",
     "DASHBOARD ADMIN USER MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-adminuser.md",
     "DASHBOARD ADMIN USER ROLE BIND MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-adminuser-rolebinding.md",
     "DASHBOARD SERVICE": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashbord-service.md",
@@ -1093,9 +1094,36 @@ if you remove this tag it will be attached to terminal, and you will be able to 
         hostPort: 7800
       - containerPort: 443
         hostPort: 7801
+      extraMounts:
+      - hostPath: /etc/kubernetes/kubelet-config.yaml
+        containerPath: /var/lib/kubelet/config.yaml
     ```
 
-2. Create the Kind cluster:
+2. 	Create a kubelet configuration file for Kind:
+
+    ```bash
+        touch kubelet-config.yaml
+        vi kubelet-config.yaml
+    ```
+
+    paste the below code into the file
+
+    ```yaml
+    kind: Cluster
+    apiVersion: kind.x-k8s.io/v1alpha4
+    nodes:
+    - role: control-plane
+      extraPortMappings:
+      - containerPort: 80
+        hostPort: 7800
+      - containerPort: 443
+        hostPort: 7801
+      extraMounts:
+      - hostPath: /etc/kubernetes/kubelet-config.yaml
+        containerPath: /var/lib/kubelet/config.yaml
+    ```
+
+3. Create the Kind cluster:
 
     ```bash
         kind create cluster --config kind-config.yaml
