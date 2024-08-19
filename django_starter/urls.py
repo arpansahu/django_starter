@@ -17,6 +17,13 @@ from .view import (
      HomeView,
 )
 
+def trigger_error(request):
+    division_by_zero = 1 / 0
+
+def large_resource(request):
+   time.sleep(4)
+   return HttpResponse("Done!")
+
 urlpatterns = [
     # Admin URL
 
@@ -50,6 +57,10 @@ urlpatterns = [
     path('reset/done/',
          auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
          name='password_reset_complete'),
+
+    #sentry test view 
+    path('sentry-debug/', trigger_error),
+    path('large_resource/', large_resource)
 ]
 
 if settings.DEBUG:

@@ -133,7 +133,7 @@ Use these CACHE settings
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDISCLOUD_URL'),
+        'LOCATION': config('REDIS_CLOUD_URL'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -1522,11 +1522,11 @@ spec:
                 secretKeyRef:
                   name: django-starter-secret
                   key: DATABASE_URL
-            - name: REDISCLOUD_URL
+            - name: REDIS_CLOUD_URL
               valueFrom:
                 secretKeyRef:
                   name: django-starter-secret
-                  key: REDISCLOUD_URL
+                  key: REDIS_CLOUD_URL
             - name: MAIL_JET_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -4251,7 +4251,7 @@ PROTOCOL=
 
 DATABASE_URL=
 
-REDISCLOUD_URL=
+REDIS_CLOUD_URL=
 
 # deploy_kube.sh requirements
 
