@@ -1481,72 +1481,9 @@ spec:
       containers:
         - image: harbor.arpansahu.me/library/django_starter:latest
           name: django-starter
-          env:
-            - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: SECRET_KEY
-            - name: DEBUG
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: DEBUG
-            - name: ALLOWED_HOSTS
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: ALLOWED_HOSTS
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: AWS_ACCESS_KEY_ID
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: AWS_SECRET_ACCESS_KEY
-            - name: AWS_STORAGE_BUCKET_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: AWS_STORAGE_BUCKET_NAME
-            - name: BUCKET_TYPE
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: BUCKET_TYPE
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: DATABASE_URL
-            - name: REDIS_CLOUD_URL
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: REDIS_CLOUD_URL
-            - name: MAIL_JET_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: MAIL_JET_API_KEY
-            - name: MAIL_JET_API_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: MAIL_JET_API_SECRET
-            - name: DOMAIN
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: DOMAIN
-            - name: PROTOCOL
-              valueFrom:
-                secretKeyRef:
-                  name: django-starter-secret
-                  key: PROTOCOL
+          envFrom:
+            - secretRef:
+                name: django-starter-secret
           ports:
             - containerPort: 8016
               name: gunicorn
@@ -2579,6 +2516,11 @@ pipeline {
         ENV_PROJECT_NAME = "django_starter"
         DOCKER_PORT = "8016"
         PROJECT_NAME_WITH_DASH = "django-starter"
+        SERVER_NAME= "django-starter.arpansahu.me"
+        BUILD_PROJECT_NAME = "django_starter_build"
+        JENKINS_DOMAIN = "jenkins.arpansahu.me"
+        SENTRY_ORG="arpansahu"
+        SENTRY_PROJECT="django_starter"
     }
     stages {
         stage('Initialize') {
@@ -2606,14 +2548,62 @@ pipeline {
                 }
             }
         }
-        stage('Extract Port from Dockerfile') {
+        stage('Check & Create Nginx Configuration') {
             steps {
                 script {
-                    env.EXPOSED_PORT = sh(script: "grep '^EXPOSE' Dockerfile | awk '{print \$2}'", returnStdout: true).trim()
-                    if (!env.EXPOSED_PORT) {
-                        error "No EXPOSE directive found in Dockerfile"
+                    // Check if the Nginx configuration file exists
+                    def configExists = sh(script: "test -f ${NGINX_CONF} && echo 'exists' || echo 'not exists'", returnStdout: true).trim()
+
+                    if (configExists == 'not exists') {
+                        echo "Nginx configuration file does not exist. Creating it now..."
+
+                        // Create or overwrite the NGINX_CONF file with the content of nginx.conf using sudo tee
+                        sh "sudo cat nginx.conf | sudo tee ${NGINX_CONF} > /dev/null"
+
+                        // Replace placeholders in the configuration file
+                        sh "sudo sed -i 's|SERVER_NAME|${SERVER_NAME}|g' ${NGINX_CONF}"
+                        sh "sudo sed -i 's|DOCKER_PORT|${DOCKER_PORT}|g' ${NGINX_CONF}"
+
+                        echo "Nginx configuration file created."
+
+                        // Ensure Nginx is aware of the new configuration
+                        sh "sudo ln -sf ${NGINX_CONF} /etc/nginx/sites-enabled/"
                     } else {
-                        echo "Exposed port found in Dockerfile: ${env.EXPOSED_PORT}"
+                        echo "Nginx configuration file already exists."
+                    }                    
+                }
+            }
+        }
+        stage('Retrieve Image Tag from Build Job') {
+            when {
+                expression { params.DEPLOY && params.DEPLOY_TYPE == 'kubernetes' }
+            }
+            steps {
+                script {
+                    echo "Retrieve image tag from ${BUILD_PROJECT_NAME}"
+
+                    // Construct the API URL for the latest build
+                    def api_url = "https://${JENKINS_DOMAIN}/job/${BUILD_PROJECT_NAME}/lastSuccessfulBuild/api/json"
+
+                    // Log the API URL for debugging purposes
+                    echo "Hitting API URL: ${api_url}"
+                    
+                    withCredentials([usernamePassword(credentialsId: 'fc364086-fb8b-4528-bc7f-1ef3f42b71c7', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_PASS')]) {
+                        // Execute the curl command to retrieve the JSON response
+                        echo "usernameVariable: ${JENKINS_USER}, passwordVariable: ${JENKINS_PASS}"
+                        def buildInfoJson = sh(script: "curl -u ${JENKINS_USER}:${JENKINS_PASS} ${api_url}", returnStdout: true).trim()
+
+                        // Log the raw JSON response for debugging
+                        echo "Raw JSON response: ${buildInfoJson}"
+
+                        def imageTag = sh(script: """
+                            echo '${buildInfoJson}' | grep -oP '"number":\\s*\\K\\d+' | head -n 1
+                        """, returnStdout: true).trim()
+
+                        echo "Retrieved image tag (build number): ${imageTag}"
+
+                        // Replace the placeholder in the deployment YAML
+                        sh "sed -i 's|:latest|:${imageTag}|g' ${WORKSPACE}/deployment.yaml"
                     }
                 }
             }
@@ -2649,7 +2639,7 @@ pipeline {
                             // Execute curl and scale down Kubernetes deployment if curl is successful
                             sh """
                                 # Fetch HTTP status code
-                                HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" http://0.0.0.0:${DOCKER_PORT})
+                                HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" -L http://0.0.0.0:${DOCKER_PORT})
                                 echo "HTTP Status: \$HTTP_STATUS"
                                 
                                 # Update Nginx configuration if status code is 200 (OK)
@@ -2771,6 +2761,29 @@ pipeline {
                         }
                     }
                     currentBuild.description = 'DEPLOYMENT_EXECUTED'
+                }
+            }
+        }
+        stage('Sentry release') {
+            when {
+                expression { params.DEPLOY }
+            }
+            steps {
+                script {
+                    echo "Sentry Release ..."
+
+                    sh """
+                        # Get the current git commit hash
+                        VERSION=\$(git rev-parse HEAD)
+
+                        sentry-cli releases -o ${SENTRY_ORG} -p ${SENTRY_PROJECT} new \$VERSION
+
+                        # Associate commits with the release
+                        sentry-cli releases -o ${SENTRY_ORG} -p ${SENTRY_PROJECT} set-commits --auto \$VERSION
+
+                        # Deploy the release (optional step for marking the release as deployed)
+                        sentry-cli releases -o ${SENTRY_ORG} -p ${SENTRY_PROJECT} deploys \$VERSION new -e production
+                    """
                 }
             }
         }
@@ -4235,8 +4248,6 @@ MAIL_JET_API_KEY=
 
 MAIL_JET_API_SECRET=
 
-MY_EMAIL_ADDRESS=
-
 AWS_ACCESS_KEY_ID=
 
 AWS_SECRET_ACCESS_KEY=
@@ -4252,6 +4263,11 @@ PROTOCOL=
 DATABASE_URL=
 
 REDIS_CLOUD_URL=
+
+# SENTRY
+SENTRY_ENVIRONMENT=
+
+SENTRY_DSH_URL=
 
 # deploy_kube.sh requirements
 
