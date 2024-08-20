@@ -2642,7 +2642,7 @@ pipeline {
                         sh 'docker-compose up -d'
 
                         // Wait for a few seconds to let the app start
-                        sleep 10
+                        sleep 60
 
                         // Verify the container is running
                         def containerRunning = sh(script: "docker ps -q -f name=${ENV_PROJECT_NAME}", returnStdout: true).trim()
