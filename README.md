@@ -1022,10 +1022,12 @@ version: '3'
 
 services:
   web:
-    build: .
+    build:  # This section will be used when running locally
+      context: .
+      dockerfile: Dockerfile
+    image: harbor.arpansahu.me/library/django_starter:latest
     env_file: ./.env
     command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8016 django_starter.wsgi"
-    image: django_starter
     container_name: django_starter
     volumes:
       - .:/django_starter
@@ -2604,6 +2606,11 @@ pipeline {
 
                         // Replace the placeholder in the deployment YAML
                         sh "sed -i 's|:latest|:${imageTag}|g' ${WORKSPACE}/deployment.yaml"
+
+                        // Ensure the correct image tag is used in the docker-compose.yml
+                        sh '''
+                        sed -i "s|image: .*|image: ${REGISTRY}/${REPOSITORY}:${imageTag}|" docker-compose.yml
+                        '''
                     }
                 }
             }
@@ -2619,12 +2626,9 @@ pipeline {
                         // Copy the .env file to the workspace
                         sh "sudo cp /root/projectenvs/${ENV_PROJECT_NAME}/.env ${env.WORKSPACE}/"
 
-                        // Ensure the correct image tag is used in the docker-compose.yml
-                        sh '''
-                        sed -i "s|image: .*|image: ${REGISTRY}/${REPOSITORY}:${IMAGE_TAG}|" docker-compose.yml
-                        '''
                         // Deploy using Docker Compose
                         sh 'docker-compose down'
+                        sh 'docker-compose pull'
                         sh 'docker-compose up -d'
 
                         // Wait for a few seconds to let the app start
