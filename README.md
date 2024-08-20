@@ -2578,7 +2578,7 @@ pipeline {
         }
         stage('Retrieve Image Tag from Build Job') {
             when {
-                expression { params.DEPLOY && params.DEPLOY_TYPE == 'kubernetes' }
+                expression { params.DEPLOY}
             }
             steps {
                 script {
