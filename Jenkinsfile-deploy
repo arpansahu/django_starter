@@ -103,9 +103,9 @@ pipeline {
                         sh "sed -i 's|:latest|:${imageTag}|g' ${WORKSPACE}/deployment.yaml"
 
                         // Ensure the correct image tag is used in the docker-compose.yml
-                        sh '''
-                        sed -i "s|image: .*|image: ${REGISTRY}/${REPOSITORY}:${imageTag}|" docker-compose.yml
-                        '''
+                        sh """
+                        sed -i 's|image: .*|image: ${REGISTRY}/${REPOSITORY}:${imageTag}|' docker-compose.yml
+                        """
                     }
                 }
             }
