@@ -5,67 +5,99 @@
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
 <style>
-    #progress-bar {
+    #progress-bar-container {
         width: 100%;
         background-color: #e0e0e0;
+        height: 30px;
         border-radius: 5px;
         overflow: hidden;
-        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+        margin-top: 20px;
     }
-    
-    #progress-fill {
-        width: 0%;
-        height: 30px;
-        background-color: green;
-        transition: width 0.5s ease;
+
+    #progress-bar {
+        width: 0;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(36,198,220,1) 0%, rgba(0,148,255,1) 100%);
+        transition: width 0.4s ease;
+    }
+
+    #start-task {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
         border-radius: 5px;
+        cursor: pointer;
     }
-    
-    .green {
-        background-color: green;
+
+    #start-task:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
     }
-    
-    .yellow {
-        background-color: yellow;
+
+    #progress-bar-message {
+        margin-top: 10px;
+        font-weight: bold;
+        color: #333;
     }
-    
-    .red {
-        background-color: red;
-    }
-    
 </style>
 {% endblock stylesheets %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <h1>Celery Progress Bar with HTMX and WebSockets</h1>
-
-    <!-- Start Task Button -->
-    <button id="start-task-btn" hx-post="/start-task/" hx-trigger="click" hx-swap="none" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>Start Task</button>
-
-    <!-- Progress Bar -->
-    <div id="progress-bar" style="width: 100%; background-color: #e0e0e0;">
-        <div id="progress-fill" style="width: 0%; height: 30px; background-color: green;"></div>
+    <h1>Task Progress</h1>
+    <button id="start-task">Start Task</button>
+    <div id="progress-bar-container">
+        <div id="progress-bar"></div>
     </div>
+    <p id="progress-bar-message">Waiting for task...</p>
 </div>
 {% endblock content %}
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
-<script src="https://unpkg.com/htmx.org"></script>
+<script src="{% static 'celery_progress/celery_progress.js' %}"></script>
+<script src="{% static 'celery_progress/celery_websocket.js' %}"></script>
 <script>
-    // Handle the WebSocket connection when the task starts
-    document.getElementById('start-task-btn').addEventListener('htmx:afterRequest', function(event) {
-        const task_id = JSON.parse(event.detail.xhr.response).task_id;  // Get the task ID from the response
+    const startTaskButton = document.getElementById('start-task');
+    const progressBar = document.getElementById('progress-bar');
+    const progressBarMessage = document.getElementById('progress-bar-message');
 
-        // Create a WebSocket connection using the task ID
-        const ws = new WebSocket(`ws://localhost:8000/ws/progress/${task_id}/`);
+    startTaskButton.addEventListener('click', () => {
+        // Disable the button while the task is in progress
+        startTaskButton.disabled = true;
+        progressBarMessage.textContent = "Task started...";
 
-        // Handle incoming WebSocket messages to update the progress bar
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            document.getElementById('progress-fill').style.width = data.progress + '%';
-        };
+        fetch('/start-task/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const task_id = data.task_id;
+            const wsBar = new CeleryWebSocketProgressBar(`/ws/progress/${task_id}/`, {
+                onProgress(progressBarElement, progressBarMessageElement, progress) {
+                    progressBarElement.style.width = progress.percent + '%';
+                    progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' processed.';
+                },
+                onSuccess(progressBarElement, progressBarMessageElement) {
+                    progressBarElement.style.backgroundColor = '#28a745';  // Change bar color to green on success
+                    progressBarMessageElement.textContent = "Task completed successfully!";
+                    startTaskButton.disabled = false;  // Re-enable the button
+                },
+                onError(progressBarElement, progressBarMessageElement, error) {
+                    progressBarElement.style.backgroundColor = '#dc3545';  // Red on error
+                    progressBarMessageElement.textContent = "Error: " + error;
+                    startTaskButton.disabled = false;  // Re-enable the button
+                }
+            });
+            wsBar.connect();
+        });
     });
 </script>
 {% endblock javascripts %}

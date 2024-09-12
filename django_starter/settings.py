@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     # progress bar apps
     'channels',
     'django_celery_results',  # To store Celery task results
+    'celery_progress_custom_app'
 ]
 
 MIDDLEWARE = [

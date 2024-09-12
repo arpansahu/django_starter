@@ -3,7 +3,8 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
-from .routing import websocket_urlpatterns
+import celery_progress_custom_app.routing as celery_progress_custom_app_routing
+
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django-starter.settings')
 
@@ -14,7 +15,7 @@ application = ProtocolTypeRouter({
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter(
-                websocket_urlpatterns
+                celery_progress_custom_app_routing.websocket_urlpatterns
             )
         ),
     ),
