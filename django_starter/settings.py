@@ -156,59 +156,65 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 # Amazon S3 settings
-# Minio-specific settings
-AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')  # You can change this to match your Minio setup
-AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'  # Custom endpoint for your Minio setup
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.minio.arpansahu.me'  # Custom domain for your Minio instance
-AWS_S3_FILE_OVERWRITE = False  # Avoid overwriting files with the same name
-AWS_DEFAULT_ACL = None  # Ensure files are not public by default
 
-# Static and Media File Storage Settings
-AWS_STATIC_LOCATION = f'portfolio/{PROJECT_NAME}/static'
-STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
+if DEBUG:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    MEDIA_URL = '/media/'
+else:
+    # Minio-specific settings
+    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')  # You can change this to match your Minio setup
+    AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'  # Custom endpoint for your Minio setup
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.minio.arpansahu.me'  # Custom domain for your Minio instance
+    AWS_S3_FILE_OVERWRITE = False  # Avoid overwriting files with the same name
+    AWS_DEFAULT_ACL = None  # Ensure files are not public by default
 
-AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
+    # Static and Media File Storage Settings
+    AWS_STATIC_LOCATION = f'portfolio/{PROJECT_NAME}/static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
 
-AWS_PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
+    AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
 
-# Django 5.0 STORAGES settings
-STORAGES = {
-    'default': {
-        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
-        'OPTIONS': {
-            'location': AWS_PUBLIC_MEDIA_LOCATION,
-            'bucket_name': AWS_STORAGE_BUCKET_NAME,
-            'endpoint_url': AWS_S3_ENDPOINT_URL,  # Required for Minio
-            'access_key': AWS_ACCESS_KEY_ID,
-            'secret_key': AWS_SECRET_ACCESS_KEY,
+    AWS_PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
+
+    # Django 5.0 STORAGES settings
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'OPTIONS': {
+                'location': AWS_PUBLIC_MEDIA_LOCATION,
+                'bucket_name': AWS_STORAGE_BUCKET_NAME,
+                'endpoint_url': AWS_S3_ENDPOINT_URL,  # Required for Minio
+                'access_key': AWS_ACCESS_KEY_ID,
+                'secret_key': AWS_SECRET_ACCESS_KEY,
+            },
         },
-    },
-    'staticfiles': {
-        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
-        'OPTIONS': {
-            'location': AWS_STATIC_LOCATION,
-            'bucket_name': AWS_STORAGE_BUCKET_NAME,
-            'endpoint_url': AWS_S3_ENDPOINT_URL,  # Required for Minio
-            'access_key': AWS_ACCESS_KEY_ID,
-            'secret_key': AWS_SECRET_ACCESS_KEY,
+        'staticfiles': {
+            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'OPTIONS': {
+                'location': AWS_STATIC_LOCATION,
+                'bucket_name': AWS_STORAGE_BUCKET_NAME,
+                'endpoint_url': AWS_S3_ENDPOINT_URL,  # Required for Minio
+                'access_key': AWS_ACCESS_KEY_ID,
+                'secret_key': AWS_SECRET_ACCESS_KEY,
+            },
         },
-    },
-    'private': {
-        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
-        'OPTIONS': {
-            'location': AWS_PRIVATE_MEDIA_LOCATION,
-            'bucket_name': AWS_STORAGE_BUCKET_NAME,
-            'endpoint_url': AWS_S3_ENDPOINT_URL,
-            'access_key': AWS_ACCESS_KEY_ID,
-            'secret_key': AWS_SECRET_ACCESS_KEY,
-            'default_acl': 'private',
-            'custom_domain': False,  # Disable custom domain for private files
+        'private': {
+            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'OPTIONS': {
+                'location': AWS_PRIVATE_MEDIA_LOCATION,
+                'bucket_name': AWS_STORAGE_BUCKET_NAME,
+                'endpoint_url': AWS_S3_ENDPOINT_URL,
+                'access_key': AWS_ACCESS_KEY_ID,
+                'secret_key': AWS_SECRET_ACCESS_KEY,
+                'default_acl': 'private',
+                'custom_domain': False,  # Disable custom domain for private files
+            },
         },
-    },
-}
+    }
 
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), ]
 
