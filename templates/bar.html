@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Django Starter {% endblock title %}
+{% load custom_tags %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+    #progress-bar {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    #progress-fill {
+        width: 0%;
+        height: 30px;
+        background-color: green;
+        transition: width 0.5s ease;
+        border-radius: 5px;
+    }
+    
+    .green {
+        background-color: green;
+    }
+    
+    .yellow {
+        background-color: yellow;
+    }
+    
+    .red {
+        background-color: red;
+    }
+    
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1>Celery Progress Bar with HTMX and WebSockets</h1>
+
+    <!-- Start Task Button -->
+    <button id="start-task-btn" hx-post="/start-task/" hx-trigger="click" hx-swap="none" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>Start Task</button>
+
+    <!-- Progress Bar -->
+    <div id="progress-bar" style="width: 100%; background-color: #e0e0e0;">
+        <div id="progress-fill" style="width: 0%; height: 30px; background-color: green;"></div>
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+<script src="https://unpkg.com/htmx.org"></script>
+<script>
+    // Handle the WebSocket connection when the task starts
+    document.getElementById('start-task-btn').addEventListener('htmx:afterRequest', function(event) {
+        const task_id = JSON.parse(event.detail.xhr.response).task_id;  // Get the task ID from the response
+
+        // Create a WebSocket connection using the task ID
+        const ws = new WebSocket(`ws://localhost:8000/ws/progress/${task_id}/`);
+
+        // Handle incoming WebSocket messages to update the progress bar
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            document.getElementById('progress-fill').style.width = data.progress + '%';
+        };
+    });
+</script>
+{% endblock javascripts %}

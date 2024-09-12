@@ -13,8 +13,10 @@ from account.views import (
     activate,
 )
 
-from .view import (
+from .views import (
      HomeView,
+     start_task,
+     trigger_demo_task,
 )
 
 from file_manager.views import (
@@ -31,6 +33,7 @@ def large_resource(request):
 
 urlpatterns = [
     # Admin URL
+     path('django-admin/', admin.site.urls, name='admin'),
 
     path('', HomeView.as_view(), name='home'),
 
@@ -38,6 +41,9 @@ urlpatterns = [
     path('upload-public/', upload_public_file, name='upload_public_file'),
     path('upload-private/', upload_private_file, name='upload_private_file'),
 
+    # Django Progress Bar View
+    path('start-task/', start_task, name='start-task'),
+    path('trigger-demo-task/', trigger_demo_task, name='trigger_demo_task'),
 
     path('register/', RegistrationView.as_view(), name='register'),
     path('logout/', LogoutView.as_view(), name='logout'),

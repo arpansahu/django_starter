@@ -50,11 +50,13 @@ SENTRY_ENVIRONMENT = config('SENTRY_ENVIRONMENT')  # production Or "staging", "d
 SENTRY_DSH_URL = config('SENTRY_DSH_URL')
 
 PROJECT_NAME = 'django_starter'
+USE_S3 = True
 # ===============================================================================
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -68,8 +70,12 @@ INSTALLED_APPS = [
     'storages',  # Ensure django-storages is installed and added to apps
     'file_manager',
 
-     # cleans up unused media, always in the end
-    'django_cleanup.apps.CleanupConfig'
+    # cleans up unused media, always in the end
+    'django_cleanup.apps.CleanupConfig',
+
+    # progress bar apps
+    'channels',
+    'django_celery_results',  # To store Celery task results
 ]
 
 MIDDLEWARE = [
@@ -103,6 +109,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'django_starter.wsgi.application'
+ASGI_APPLICATION = "django_starter.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -157,7 +164,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 
-if DEBUG:
+if not USE_S3:
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     MEDIA_URL = '/media/'
@@ -165,7 +172,7 @@ else:
     AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
 
     # We have imported AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in the start of settings file
-    
+
     AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
     AWS_DEFAULT_ACL = None  # Ensure files are not public by default
 
@@ -248,6 +255,12 @@ LOGIN_REDIRECT_URL = "/"
 MAIL_JET_API_KEY = MAIL_JET_API_KEY
 MAIL_JET_API_SECRET = MAIL_JET_API_SECRET
 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
 #Caching
 if not DEBUG:
     CACHES = {
@@ -267,6 +280,15 @@ else:
             'LOCATION': 'unique-snowflake',
         }
     }
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],  # Replace with your Redis server address
+        },
+    },
+}
 
 # Get the current git commit hash
 def get_git_commit_hash():

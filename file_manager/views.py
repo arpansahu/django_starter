@@ -22,3 +22,5 @@ def upload_private_file(request):
     else:
         form = PrivateFileForm()
     return render(request, 'file_manager/upload_private_file.html', {'form': form})
+
+    
