@@ -1521,6 +1521,11 @@ spec:
       port: 8016
       targetPort: 8016
       nodePort: 32016
+    - name: celery-flower
+      protocol: TCP
+      port: 8054
+      targetPort: 8054
+      nodePort: 32051
   type: NodePort
 ```
 
