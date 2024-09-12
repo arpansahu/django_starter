@@ -30,6 +30,7 @@ django-storages==1.14.4
 django-upgrade==1.21.0
 flower==2.0.1
 gunicorn==23.0.0
+h11==0.14.0
 humanize==4.10.0
 hyperlink==21.0.0
 idna==3.8
@@ -67,6 +68,7 @@ txaio==23.1.1
 typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.2
+uvicorn==0.30.6
 vine==5.1.0
 wcwidth==0.2.13
 whitenoise==6.7.0

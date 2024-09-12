@@ -256,8 +256,8 @@ LOGIN_REDIRECT_URL = "/"
 MAIL_JET_API_KEY = MAIL_JET_API_KEY
 MAIL_JET_API_SECRET = MAIL_JET_API_SECRET
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = REDIS_CLOUD_URL
+CELERY_RESULT_BACKEND = REDIS_CLOUD_URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -286,7 +286,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],  # Replace with your Redis server address
+            "hosts": [REDIS_CLOUD_URL],  # Replace with your Redis server address
         },
     },
 }

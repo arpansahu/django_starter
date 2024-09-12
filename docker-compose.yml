@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   web:
     build:  # This section will be used when running locally
