@@ -7,10 +7,10 @@ services:
       dockerfile: Dockerfile
     image: harbor.arpansahu.me/library/django_starter:latest
     env_file: ./.env
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8016 django_starter.wsgi"
     container_name: django_starter
     volumes:
       - .:/app
     ports:
       - "8016:8016"
+      - "8054:8054"
     restart: unless-stopped
