@@ -2532,8 +2532,10 @@ pipeline {
         IMAGE_TAG = "latest"  // or use a specific tag if needed
         KUBECONFIG = "${env.WORKSPACE}/kubeconfig"  // Set the KUBECONFIG environment variable
         NGINX_CONF = "/etc/nginx/sites-available/django-starter"
+        NGINX_CONF_FLOWER = "/etc/nginx/sites-available/flower-django-starter"
         ENV_PROJECT_NAME = "django_starter"
         DOCKER_PORT = "8016"
+        FLOWER_PORT = "8054"
         PROJECT_NAME_WITH_DASH = "django-starter"
         SERVER_NAME= "django-starter.arpansahu.me"
         BUILD_PROJECT_NAME = "django_starter_build"
@@ -2649,10 +2651,10 @@ pipeline {
             steps {
                 script {
                     if (params.DEPLOY_TYPE == 'docker') {
-
+                                                
                         // Copy the .env file to the workspace
                         sh "sudo cp /root/projectenvs/${ENV_PROJECT_NAME}/.env ${env.WORKSPACE}/"
-
+                        
                         // Deploy using Docker Compose
                         sh 'docker-compose down'
                         sh 'docker-compose pull'
@@ -2676,6 +2678,7 @@ pipeline {
                                 # Update Nginx configuration if status code is 200 (OK)
                                 if [ "\$HTTP_STATUS" -eq 200 ]; then
                                     sudo sed -i 's|proxy_pass .*;|proxy_pass http://0.0.0.0:${DOCKER_PORT};|' ${NGINX_CONF}
+                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://0.0.0.0:${FLOWER_PORT};|' ${NGINX_CONF_FLOWER}
                                     sudo nginx -s reload
                                     echo 'Nginx configuration updated and reloaded successfully.'
                                 else
@@ -2737,6 +2740,9 @@ pipeline {
                             def nodePort = sh(script: "kubectl get service ${PROJECT_NAME_WITH_DASH}-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
                             echo "Service NodePort: ${nodePort}"
 
+                            def nodePortFlower = sh(script: "kubectl get service ${PROJECT_NAME_WITH_DASH}-service -o=jsonpath='{.spec.ports[1].nodePort}'", returnStdout: true).trim()
+                            echo "Service NodePortFlower: ${nodePortFlower}"
+
                             // Get cluster IP address
                             def clusterIP = sh(script: "kubectl get nodes -o=jsonpath='{.items[0].status.addresses[0].address}'", returnStdout: true).trim()
                             echo "Cluster IP: ${clusterIP}"
@@ -2751,6 +2757,7 @@ pipeline {
 
                                     echo "Updating Nginx configuration at ${NGINX_CONF}..."
                                     sudo sed -i 's|proxy_pass .*;|proxy_pass http://${clusterIP}:${nodePort};|' ${NGINX_CONF}
+                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://${clusterIP}:${nodePortFlower};|' ${NGINX_CONF_FLOWER}
                                     
                                     if [ \$? -ne 0 ]; then
                                         echo "Failed to update Nginx configuration"
@@ -2858,7 +2865,7 @@ pipeline {
                     ], wait: false
                 } else {
                     echo "Skipping common_readme job trigger due to commit message: ${commitMessage}"
-                }            
+                }
             }
         }
         failure {
