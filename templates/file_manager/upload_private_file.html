@@ -10,10 +10,6 @@
 {% block content %}
 
 <div class="container-fluid py-4">
-
-</div>
-{% endblock content %}
-<div class="container-fluid py-4">
     <h2>Upload Private File</h2>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
@@ -21,6 +17,9 @@
         <button type="submit">Upload</button>
     </form>
 </div>
+
+{% endblock content %}
+
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
     <script>

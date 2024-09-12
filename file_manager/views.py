@@ -10,7 +10,7 @@ def upload_public_file(request):
             return redirect('upload_public_file')
     else:
         form = PublicFileForm()
-    return render(request, 'file_manager/upload_public_file.html', {'form': form})
+    return render(request, 'file_manager/public_form.html', {'form': form})
 
 
 def upload_private_file(request):
