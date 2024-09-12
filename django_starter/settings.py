@@ -162,11 +162,14 @@ if DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     MEDIA_URL = '/media/'
 else:
-    # Minio-specific settings
-    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')  # You can change this to match your Minio setup
-    AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'  # Custom endpoint for your Minio setup
+    # Production settings for Minio
+    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')  # Adjust to match your Minio setup
+    AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'  # Custom endpoint for Minio
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.minio.arpansahu.me'  # Custom domain for your Minio instance
-    AWS_S3_FILE_OVERWRITE = False  # Avoid overwriting files with the same name
+    AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
     AWS_DEFAULT_ACL = None  # Ensure files are not public by default
 
     # Static and Media File Storage Settings
@@ -178,10 +181,10 @@ else:
 
     AWS_PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
 
-    # Django 5.0 STORAGES settings
+    # Use your custom storage classes
     STORAGES = {
         'default': {
-            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'BACKEND': f'{PROJECT_NAME}.storage_backends.PublicMediaStorage',  # Use your custom PublicMediaStorage
             'OPTIONS': {
                 'location': AWS_PUBLIC_MEDIA_LOCATION,
                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
@@ -191,7 +194,7 @@ else:
             },
         },
         'staticfiles': {
-            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'BACKEND': f'{PROJECT_NAME}.storage_backends.StaticStorage',  # Use your custom StaticStorage
             'OPTIONS': {
                 'location': AWS_STATIC_LOCATION,
                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
@@ -201,7 +204,7 @@ else:
             },
         },
         'private': {
-            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'BACKEND': f'{PROJECT_NAME}.storage_backends.PrivateMediaStorage',  # Use your custom PrivateMediaStorage
             'OPTIONS': {
                 'location': AWS_PRIVATE_MEDIA_LOCATION,
                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
@@ -214,7 +217,10 @@ else:
         },
     }
 
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    # Assign the custom storage backends to Django settings
+    STATICFILES_STORAGE = f'{PROJECT_NAME}.storage_backends.StaticStorage'
+    DEFAULT_FILE_STORAGE = f'{PROJECT_NAME}.storage_backends.PublicMediaStorage'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), ]
 
