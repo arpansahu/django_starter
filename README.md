@@ -1035,8 +1035,6 @@ CMD ["supervisord", "-c", "supervisord.conf"]
 Create a file named docker-compose.yml and add following lines in it
 
 ```bash
-version: '3'
-
 services:
   web:
     build:  # This section will be used when running locally
