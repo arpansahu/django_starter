@@ -156,129 +156,60 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-# Amazon S3 settings
-
-# if DEBUG:
-#     STATIC_URL = '/static/'
-#     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-#     MEDIA_URL = '/media/'
-# else:
-#     # Production settings for AWS S3
-#     AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')  # AWS S3 region
-#     AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-#     AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-#     AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-    
-#     # Custom domain for AWS S3 (standard domain format for AWS)
-#     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    
-#     AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
-#     AWS_DEFAULT_ACL = None  # Ensure files are not public by default
-
-#     # Static and Media File Storage Settings
-#     AWS_STATIC_LOCATION = f'portfolio/{PROJECT_NAME}/static'
-#     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
-
-#     AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
-#     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
-
-#     AWS_PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
-
-#     # Use your custom storage classes
-#     STORAGES = {
-#         'default': {
-#             'BACKEND': f'{PROJECT_NAME}.storage_backends.PublicMediaStorage',  # Use your custom PublicMediaStorage
-#             'OPTIONS': {
-#                 'location': AWS_PUBLIC_MEDIA_LOCATION,
-#                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
-#                 'access_key': AWS_ACCESS_KEY_ID,
-#                 'secret_key': AWS_SECRET_ACCESS_KEY,
-#                 'region_name': AWS_S3_REGION_NAME,  # Required for AWS S3
-#             },
-#         },
-#         'staticfiles': {
-#             'BACKEND': f'{PROJECT_NAME}.storage_backends.StaticStorage',  # Use your custom StaticStorage
-#             'OPTIONS': {
-#                 'location': AWS_STATIC_LOCATION,
-#                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
-#                 'access_key': AWS_ACCESS_KEY_ID,
-#                 'secret_key': AWS_SECRET_ACCESS_KEY,
-#                 'region_name': AWS_S3_REGION_NAME,  # Required for AWS S3
-#             },
-#         },
-#         'private': {
-#             'BACKEND': f'{PROJECT_NAME}.storage_backends.PrivateMediaStorage',  # Use your custom PrivateMediaStorage
-#             'OPTIONS': {
-#                 'location': AWS_PRIVATE_MEDIA_LOCATION,
-#                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
-#                 'access_key': AWS_ACCESS_KEY_ID,
-#                 'secret_key': AWS_SECRET_ACCESS_KEY,
-#                 'default_acl': 'private',
-#                 'custom_domain': False,  # Disable custom domain for private files
-#                 'region_name': AWS_S3_REGION_NAME,  # Required for AWS S3
-#             },
-#         },
-#     }
-
-#     # Assign the custom storage backends to Django settings
-#     STATICFILES_STORAGE = f'{PROJECT_NAME}.storage_backends.StaticStorage'
-#     DEFAULT_FILE_STORAGE = f'{PROJECT_NAME}.storage_backends.PublicMediaStorage'
-
-# # Development settings (for local media/static handling)
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), ]
 
 if DEBUG:
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     MEDIA_URL = '/media/'
 else:
-    # Production settings for MinIO
-    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')  # MinIO doesn't require this, but boto3 might
-    AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'  # Custom endpoint for your MinIO instance
+    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
     AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
     AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-    
-    # Custom domain for MinIO (all requests will go to this domain)
-    AWS_S3_CUSTOM_DOMAIN = f'minio.arpansahu.me/{AWS_STORAGE_BUCKET_NAME}'  # bucket name in the domain
-    
     AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
     AWS_DEFAULT_ACL = None  # Ensure files are not public by default
+
+    # Switch between MinIO and AWS S3
+    if BUCKET_TYPE == 'MINIO':
+        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'
+        AWS_S3_CUSTOM_DOMAIN = f'minio.arpansahu.me/{AWS_STORAGE_BUCKET_NAME}'
+    elif BUCKET_TYPE == 'AWS':
+        AWS_S3_ENDPOINT_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+        AWS_S3_CUSTOM_DOMAIN = AWS_S3_ENDPOINT_URL
 
     # Static and Media File Storage Settings
     AWS_STATIC_LOCATION = f'portfolio/{PROJECT_NAME}/static'
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
-
+    
     AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
-
+    
     AWS_PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
 
     # Use your custom storage classes
     STORAGES = {
         'default': {
-            'BACKEND': f'{PROJECT_NAME}.storage_backends.PublicMediaStorage',  # Use your custom PublicMediaStorage
+            'BACKEND': f'{PROJECT_NAME}.storage_backends.PublicMediaStorage',
             'OPTIONS': {
                 'location': AWS_PUBLIC_MEDIA_LOCATION,
                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
-                'endpoint_url': AWS_S3_ENDPOINT_URL,  # Required for MinIO
+                'endpoint_url': AWS_S3_ENDPOINT_URL,
                 'access_key': AWS_ACCESS_KEY_ID,
                 'secret_key': AWS_SECRET_ACCESS_KEY,
             },
         },
         'staticfiles': {
-            'BACKEND': f'{PROJECT_NAME}.storage_backends.StaticStorage',  # Use your custom StaticStorage
+            'BACKEND': f'{PROJECT_NAME}.storage_backends.StaticStorage',
             'OPTIONS': {
                 'location': AWS_STATIC_LOCATION,
                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
-                'endpoint_url': AWS_S3_ENDPOINT_URL,  # Required for MinIO
+                'endpoint_url': AWS_S3_ENDPOINT_URL,
                 'access_key': AWS_ACCESS_KEY_ID,
                 'secret_key': AWS_SECRET_ACCESS_KEY,
             },
         },
         'private': {
-            'BACKEND': f'{PROJECT_NAME}.storage_backends.PrivateMediaStorage',  # Use your custom PrivateMediaStorage
+            'BACKEND': f'{PROJECT_NAME}.storage_backends.PrivateMediaStorage',
             'OPTIONS': {
                 'location': AWS_PRIVATE_MEDIA_LOCATION,
                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
