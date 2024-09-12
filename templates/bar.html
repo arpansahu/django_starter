@@ -4,34 +4,21 @@
 {% load custom_tags %}
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-<style>
-    .progress-wrapper {
-        width: 100%;
-        background-color: #e0e0e0;
-        height: 30px;
-        margin-top: 20px;
-    }
-    .progress-bar {
-        height: 100%;
-        width: 0;
-        background-color: #68a9ef;
-        transition: width 0.4s ease;
-    }
-    #progress-bar-message {
-        margin-top: 10px;
-        font-weight: bold;
-    }
-</style>
+
 {% endblock stylesheets %}
 
 {% block content %}
 <div class="container-fluid py-4">
     <h1>Task Progress</h1>
     <button id="start-task" class="btn btn-primary">Start Task</button>
-    <div class="progress-wrapper">
-        <div id="progress-bar" class="progress-bar">&nbsp;</div>
+    <div id="progress-bar-ajax">
+        <div class="progress-wrapper">  
+            <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 0%;">
+                &nbsp;
+            </div>
+        </div>
+        '<div id="progress-bar-message">Waiting for progress to start...</div>
     </div>
-    <div id="progress-bar-message">Waiting for progress to start...</div>
 </div>
 {% endblock content %}
 
@@ -41,12 +28,9 @@
 <script src="{% static 'celery_progress/celery_websocket.js' %}"></script>
 <script>
     const startTaskButton = document.getElementById('start-task');
-    const progressBar = document.getElementById('progress-bar');
-    const progressBarMessage = document.getElementById('progress-bar-message');
 
     startTaskButton.addEventListener('click', () => {
         startTaskButton.disabled = true;
-        progressBarMessage.textContent = "Task started...";
 
         fetch('/start-task/', {
             method: 'POST',
@@ -57,24 +41,8 @@
         })
         .then(response => response.json())
         .then(data => {
-            const task_id = data.task_id;
-            const wsBar = new CeleryWebSocketProgressBar(`/ws/progress/${task_id}/`, {
-                onProgress(progressBarElement, progressBarMessageElement, progress) {
-                    progressBarElement.style.width = progress.percent + '%';
-                    progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' processed.';
-                },
-                onSuccess(progressBarElement, progressBarMessageElement) {
-                    progressBarElement.style.backgroundColor = '#28a745';
-                    progressBarMessageElement.textContent = "Task completed successfully!";
-                    startTaskButton.disabled = false;
-                },
-                onError(progressBarElement, progressBarMessageElement, error) {
-                    progressBarElement.style.backgroundColor = '#dc3545';
-                    progressBarMessageElement.textContent = "Error: " + error;
-                    startTaskButton.disabled = false;
-                }
-            });
-            wsBar.connect();
+            var progressUrl = '/ws/progress/' + data.task_id + '/';
+            CeleryWebSocketProgressBar.initProgressBar(progressUrl);
         })
         .catch(error => {
             progressBarMessage.textContent = "Error starting task: " + error;
