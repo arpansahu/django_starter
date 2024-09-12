@@ -1,8 +1,6 @@
 class CeleryProgressBar {
-
-    constructor(progressUrl, options) {
+    constructor(progressUrl, options = {}) {
         this.progressUrl = progressUrl;
-        options = options || {};
         this.progressBarElement = options.progressBarElement || document.getElementById('progress-bar');
         this.progressBarMessageElement = options.progressBarMessageElement || document.getElementById('progress-bar-message');
         this.pollInterval = options.pollInterval || 500;
@@ -17,31 +15,49 @@ class CeleryProgressBar {
         }, options.messages);
     }
 
+    // Handles the progress display
     onProgress(progress) {
         this.progressBarElement.style.width = progress.percent + "%";
-        if (progress.current === 0) {
-            this.progressBarMessageElement.textContent = this.messages.waiting;
-        } else {
-            this.progressBarMessageElement.textContent = `${progress.current} of ${progress.total} processed.`;
-        }
+        this.progressBarMessageElement.textContent = `${progress.current} of ${progress.total} processed.`;
     }
 
+    // Updates on task success
     onSuccess() {
         this.progressBarElement.style.backgroundColor = this.barColors.success;
+        this.progressBarMessageElement.textContent = "Task completed successfully!";
     }
 
+    // Updates on task error
     onError() {
         this.progressBarElement.style.backgroundColor = this.barColors.error;
+        this.progressBarMessageElement.textContent = "An error occurred during the task!";
     }
 
     async connect() {
-        const response = await fetch(this.progressUrl);
-        const data = await response.json();
-        if (data.complete) {
-            this.onSuccess();
-        } else {
-            this.onProgress(data.progress);
-            setTimeout(() => this.connect(), this.pollInterval);
+        let response;
+        try {
+            response = await fetch(this.progressUrl);
+        } catch (networkError) {
+            this.onError();
+            return;
         }
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.complete) {
+                this.onSuccess();
+            } else {
+                this.onProgress(data.progress);
+                setTimeout(() => this.connect(), this.pollInterval);
+            }
+        } else {
+            this.onError();
+        }
+    }
+
+    // A static method to simplify progress bar initialization
+    static initProgressBar(progressUrl, options) {
+        const progressBar = new CeleryProgressBar(progressUrl, options);
+        progressBar.connect();
     }
 }

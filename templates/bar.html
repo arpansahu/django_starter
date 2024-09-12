@@ -5,42 +5,21 @@
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
 <style>
-    #progress-bar-container {
+    .progress-wrapper {
         width: 100%;
         background-color: #e0e0e0;
         height: 30px;
-        border-radius: 5px;
-        overflow: hidden;
         margin-top: 20px;
     }
-
-    #progress-bar {
-        width: 0;
+    .progress-bar {
         height: 100%;
-        background: linear-gradient(90deg, rgba(36,198,220,1) 0%, rgba(0,148,255,1) 100%);
+        width: 0;
+        background-color: #68a9ef;
         transition: width 0.4s ease;
     }
-
-    #start-task {
-        margin-top: 20px;
-        padding: 10px 20px;
-        font-size: 16px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    #start-task:disabled {
-        background-color: #6c757d;
-        cursor: not-allowed;
-    }
-
     #progress-bar-message {
         margin-top: 10px;
         font-weight: bold;
-        color: #333;
     }
 </style>
 {% endblock stylesheets %}
@@ -48,11 +27,11 @@
 {% block content %}
 <div class="container-fluid py-4">
     <h1>Task Progress</h1>
-    <button id="start-task">Start Task</button>
-    <div id="progress-bar-container">
-        <div id="progress-bar"></div>
+    <button id="start-task" class="btn btn-primary">Start Task</button>
+    <div class="progress-wrapper">
+        <div id="progress-bar" class="progress-bar">&nbsp;</div>
     </div>
-    <p id="progress-bar-message">Waiting for task...</p>
+    <div id="progress-bar-message">Waiting for progress to start...</div>
 </div>
 {% endblock content %}
 
@@ -66,7 +45,6 @@
     const progressBarMessage = document.getElementById('progress-bar-message');
 
     startTaskButton.addEventListener('click', () => {
-        // Disable the button while the task is in progress
         startTaskButton.disabled = true;
         progressBarMessage.textContent = "Task started...";
 
@@ -86,17 +64,21 @@
                     progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' processed.';
                 },
                 onSuccess(progressBarElement, progressBarMessageElement) {
-                    progressBarElement.style.backgroundColor = '#28a745';  // Change bar color to green on success
+                    progressBarElement.style.backgroundColor = '#28a745';
                     progressBarMessageElement.textContent = "Task completed successfully!";
-                    startTaskButton.disabled = false;  // Re-enable the button
+                    startTaskButton.disabled = false;
                 },
                 onError(progressBarElement, progressBarMessageElement, error) {
-                    progressBarElement.style.backgroundColor = '#dc3545';  // Red on error
+                    progressBarElement.style.backgroundColor = '#dc3545';
                     progressBarMessageElement.textContent = "Error: " + error;
-                    startTaskButton.disabled = false;  // Re-enable the button
+                    startTaskButton.disabled = false;
                 }
             });
             wsBar.connect();
+        })
+        .catch(error => {
+            progressBarMessage.textContent = "Error starting task: " + error;
+            startTaskButton.disabled = false;
         });
     });
 </script>

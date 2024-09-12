@@ -1,25 +1,38 @@
 class CeleryWebSocketProgressBar extends CeleryProgressBar {
-
-    constructor(progressUrl, options) {
+    constructor(progressUrl, options = {}) {
         super(progressUrl, options);
+        this.websocketUrl = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + progressUrl;
     }
 
-    async connect() {
-        const ws = new WebSocket(`ws://${window.location.host}${this.progressUrl}`);
-        ws.onopen = () => ws.send(JSON.stringify({'type': 'check_task_completion'}));
+    connect() {
+        const socket = new WebSocket(this.websocketUrl);
 
-        ws.onmessage = (event) => {
+        socket.onopen = () => {
+            socket.send(JSON.stringify({ 'type': 'check_task_completion' }));
+        };
+
+        socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.complete) {
-                this.onSuccess();
-                ws.close();
+                if (data.success) {
+                    this.onSuccess();
+                } else {
+                    this.onError();
+                }
+                socket.close();
             } else {
                 this.onProgress(data.progress);
             }
         };
 
-        ws.onerror = () => {
+        socket.onerror = () => {
             this.onError();
         };
+    }
+
+    // A static method to simplify WebSocket progress bar initialization
+    static initProgressBar(progressUrl, options) {
+        const progressBar = new CeleryWebSocketProgressBar(progressUrl, options);
+        progressBar.connect();
     }
 }
