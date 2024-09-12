@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'account',
     'custom_tag_app',
     'check_service_health',
+    'storages',  # Ensure django-storages is installed and added to apps
 
      # cleans up unused media, always in the end
     'django_cleanup.apps.CleanupConfig'
@@ -154,95 +155,63 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-if not DEBUG:
-    if BUCKET_TYPE == 'AWS':
-        AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-        AWS_DEFAULT_ACL = 'public-read'
-        AWS_S3_OBJECT_PARAMETERS = {
-            'CacheControl': 'max-age=86400'
-        }
-        AWS_LOCATION = 'static'
-        AWS_QUERYSTRING_AUTH = False
-        AWS_HEADERS = {
-            'Access-Control-Allow-Origin': '*',
-        }
-        # s3 static settings
-        AWS_STATIC_LOCATION = f'portfolio/{PROJECT_NAME}/static'
-        STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
-        STATICFILES_STORAGE = f'{PROJECT_NAME}.storage_backends.StaticStorage'
-        # s3 public media settings
-        AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
-        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
-        DEFAULT_FILE_STORAGE = f'{PROJECT_NAME}.storage_backends.PublicMediaStorage'
-        # s3 private media settings
-        PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
-        PRIVATE_FILE_STORAGE = f'{PROJECT_NAME}.storage_backends.PrivateMediaStorage'
+# Amazon S3 settings
+# Minio-specific settings
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')  # You can change this to match your Minio setup
+AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'  # Custom endpoint for your Minio setup
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.minio.arpansahu.me'  # Custom domain for your Minio instance
+AWS_S3_FILE_OVERWRITE = False  # Avoid overwriting files with the same name
+AWS_DEFAULT_ACL = None  # Ensure files are not public by default
 
-    elif BUCKET_TYPE == 'BLACKBLAZE':
-        AWS_S3_REGION_NAME = 'us-east-005'
+# Static and Media File Storage Settings
+AWS_STATIC_LOCATION = f'portfolio/{PROJECT_NAME}/static'
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
 
-        AWS_S3_ENDPOINT = f's3.{AWS_S3_REGION_NAME}.backblazeb2.com'
-        AWS_S3_ENDPOINT_URL = f'https://{AWS_S3_ENDPOINT}'
-        
-        AWS_DEFAULT_ACL = 'public-read'
-        AWS_S3_OBJECT_PARAMETERS = {
-            'CacheControl': 'max-age=86400',
-        }
+AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
 
-        AWS_LOCATION = 'static'
-        AWS_QUERYSTRING_AUTH = False
-        AWS_HEADERS = {
-            'Access-Control-Allow-Origin': '*',
-        }
-        # s3 static settings
-        AWS_STATIC_LOCATION = f'portfolio/{PROJECT_NAME}/static'
-        STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_STATIC_LOCATION}/'
-        STATICFILES_STORAGE = f'{PROJECT_NAME}.storage_backends.StaticStorage'
-        # s3 public media settings
-        AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
-        MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_PUBLIC_MEDIA_LOCATION}/'
-        DEFAULT_FILE_STORAGE = f'{PROJECT_NAME}.storage_backends.PublicMediaStorage'
-        # s3 private media settings
-        PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
-        PRIVATE_FILE_STORAGE = f'{PROJECT_NAME}.storage_backends.PrivateMediaStorage'
+AWS_PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
 
-    elif BUCKET_TYPE == 'MINIO':
-        AWS_S3_REGION_NAME = 'us-east-1'  # MinIO doesn't require this, but boto3 does
-        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'
-        AWS_DEFAULT_ACL = 'public-read'
-        AWS_S3_OBJECT_PARAMETERS = {
-            'CacheControl': 'max-age=86400',
-        }
-        AWS_LOCATION = 'static'
-        AWS_QUERYSTRING_AUTH = False
-        AWS_HEADERS = {
-            'Access-Control-Allow-Origin': '*',
-        }
+# Django 5.0 STORAGES settings
+STORAGES = {
+    'default': {
+        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+        'OPTIONS': {
+            'location': AWS_PUBLIC_MEDIA_LOCATION,
+            'bucket_name': AWS_STORAGE_BUCKET_NAME,
+            'endpoint_url': AWS_S3_ENDPOINT_URL,  # Required for Minio
+            'access_key': AWS_ACCESS_KEY_ID,
+            'secret_key': AWS_SECRET_ACCESS_KEY,
+        },
+    },
+    'staticfiles': {
+        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+        'OPTIONS': {
+            'location': AWS_STATIC_LOCATION,
+            'bucket_name': AWS_STORAGE_BUCKET_NAME,
+            'endpoint_url': AWS_S3_ENDPOINT_URL,  # Required for Minio
+            'access_key': AWS_ACCESS_KEY_ID,
+            'secret_key': AWS_SECRET_ACCESS_KEY,
+        },
+    },
+    'private': {
+        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+        'OPTIONS': {
+            'location': AWS_PRIVATE_MEDIA_LOCATION,
+            'bucket_name': AWS_STORAGE_BUCKET_NAME,
+            'endpoint_url': AWS_S3_ENDPOINT_URL,
+            'access_key': AWS_ACCESS_KEY_ID,
+            'secret_key': AWS_SECRET_ACCESS_KEY,
+            'default_acl': 'private',
+            'custom_domain': False,  # Disable custom domain for private files
+        },
+    },
+}
 
-        # s3 static settings
-        AWS_STATIC_LOCATION = f'portfolio/{PROJECT_NAME}/static'
-        STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}/{AWS_STATIC_LOCATION}/'
-        STATICFILES_STORAGE = f'{PROJECT_NAME}.storage_backends.StaticStorage'
-
-        # s3 public media settings
-        AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
-        MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}/{AWS_PUBLIC_MEDIA_LOCATION}/'
-        DEFAULT_FILE_STORAGE = f'{PROJECT_NAME}.storage_backends.PublicMediaStorage'
-
-        # s3 private media settings
-        PRIVATE_MEDIA_LOCATION = 'portfolio/borcelle_crm/private'
-        PRIVATE_FILE_STORAGE = 'borcelle_crm.storage_backends.PrivateMediaStorage'
-else:
-    # Static files (CSS, JavaScript, Images)
-    # https://docs.djangoproject.com/en/3.2/howto/static-files/
-
-    STATIC_URL = '/static/'
-
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    MEDIA_URL = '/media/'
-
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), ]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 

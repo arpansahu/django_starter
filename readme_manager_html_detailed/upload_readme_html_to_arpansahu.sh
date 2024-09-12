@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define variables
-TARGET_REPO_URL="https://github.com/arpansahu/django_starter.git"
+TARGET_REPO_URL="https://github.com/arpansahu/arpansahu_dot_me.git"
 COMMIT_MESSAGE="Automatic Update readme.html"
 RELATIVE_PATH="templates/modules/project_detailed/project_partials/django_starter/"
 

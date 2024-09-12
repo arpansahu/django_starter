@@ -58,3 +58,5 @@ tmtagsHistory
 socialauth
 
 **/migrations/**
+**/__pycache__/**
+__pycache__/
