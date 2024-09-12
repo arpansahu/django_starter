@@ -17,6 +17,11 @@ from .view import (
      HomeView,
 )
 
+from file_manager.views import (
+     upload_public_file,
+     upload_private_file,
+)
+
 def trigger_error(request):
     division_by_zero = 1 / 0
 
@@ -29,7 +34,10 @@ urlpatterns = [
 
     path('', HomeView.as_view(), name='home'),
 
-    # autocomplete views
+    # file manager views
+    path('upload-public/', upload_public_file, name='upload_public_file'),
+    path('upload-private/', upload_private_file, name='upload_private_file'),
+
 
     path('register/', RegistrationView.as_view(), name='register'),
     path('logout/', LogoutView.as_view(), name='logout'),

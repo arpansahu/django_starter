@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Django Starter {% endblock title %}
+{% load custom_tags %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+</div>
+{% endblock content %}
+<div class="container-fluid py-4">
+    <h2>Upload Private File</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Upload</button>
+    </form>
+</div>
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+    <script>
+    
+    </script>
+{% endblock javascripts %}
