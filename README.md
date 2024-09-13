@@ -1518,7 +1518,8 @@ spec:
   selector:
     app: django-starter
   ports:
-    - protocol: TCP
+    - name: uvicorn
+      protocol: TCP
       port: 8016
       targetPort: 8016
       nodePort: 32016
