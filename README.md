@@ -2080,7 +2080,7 @@ Now it's time to enable HTTPS for this server
        * Add the following lines to the file
 
          ```bash
-         0 */12 * * * certbot renew --manual --test-cert --preferred-challenges dns --manual-auth-hook 'acme-dns-client'
+         0 */12 * * * certbot renew --manual --preferred-challenges dns --manual-auth-hook 'acme-dns-client
          ```
 
 After all these steps your Nginx configuration file located at /etc/nginx/sites-available/arpansahu will be looking similar to this
