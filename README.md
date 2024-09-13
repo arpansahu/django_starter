@@ -1526,7 +1526,7 @@ spec:
       protocol: TCP
       port: 8054
       targetPort: 8054
-      nodePort: 32051
+      nodePort: 32054
   type: NodePort
 ```
 
