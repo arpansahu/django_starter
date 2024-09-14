@@ -343,17 +343,21 @@ include_files = {
     "INCLUDE FILES": "https://raw.githubusercontent.com/arpansahu/common_readme/main/include_files.py",
     "MONITORING": "https://raw.githubusercontent.com/arpansahu/arpansahu-one-scripts/main/README.md?token=GHSAT0AAAAAACTHOPGXTRCHN6GJQNHQ43QKZUKVMPA",
 
-    #kubernetes
-    "KIND CONFIG MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/kind-config.md",
-    "KUBELET CONFIG MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/kubelet-config.md",
-    "DASHBOARD ADMIN USER MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-adminuser.md",
-    "DASHBOARD ADMIN USER ROLE BIND MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-adminuser-rolebinding.md",
-    "DASHBOARD SERVICE": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashbord-service.md",
-    "DASHBOARD ADMIN SA MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-admin-sa.md",
-    "DASHBOARD ADMIN SA BINDING": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-admin-sa-binding.md",
-    "DASHBOARD ADMIN SA SECRET": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-admin-sa-secret.md",
-    "KUBE WITH DASHBOARD" : "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/kube_with_dashboard.md", 
-    "KUBE DEPLOYMENT": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/deployment.md",
+    #kubernetes with kind
+    # "KIND CONFIG MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/kind-config.md",
+    # "KUBELET CONFIG MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/kubelet-config.md",
+    # "DASHBOARD ADMIN USER MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-adminuser.md",
+    # "DASHBOARD ADMIN USER ROLE BIND MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-adminuser-rolebinding.md",
+    # "DASHBOARD SERVICE": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashbord-service.md",
+    # "DASHBOARD ADMIN SA MD": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-admin-sa.md",
+    # "DASHBOARD ADMIN SA BINDING": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-admin-sa-binding.md",
+    # "DASHBOARD ADMIN SA SECRET": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/yaml_md_files/dashboard-admin-sa-secret.md",
+    # "KUBE WITH DASHBOARD" : "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/kube_with_dashboard.md", 
+    # "KUBE DEPLOYMENT": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes/deployment.md",
+
+    # kubernetes with rancher
+    "KUBE WITH DASHBOARD" : "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes_with_rancher/kube_with_dashboard.md", 
+    "KUBE DEPLOYMENT": "https://raw.githubusercontent.com/arpansahu/common_readme/main/AWS%20Deployment/kubernetes_with_rancher/deployment.md",
 
     # project files
     "env.example": "../env.example",
@@ -1074,17 +1078,9 @@ if you remove this tag it will be attached to terminal, and you will be able to 
 
 ## Installing Kubernetes cluster and Setting A Dashboard
 
-### Install Kind and Kubernetes CLI (kubectl)
+### Install Kubernetes CLI (kubectl)
 
-1.	Install Kind:
-
-    ```bash
-        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.14.0/kind-linux-amd64
-        chmod +x ./kind
-        sudo mv ./kind /usr/local/bin/kind
-    ```
-
-2. Install kubectl:
+1. Install kubectl:
 
     ```bash
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -1092,69 +1088,49 @@ if you remove this tag it will be attached to terminal, and you will be able to 
         sudo mv kubectl /usr/local/bin/
     ```
 
-### Create a Kind Cluster with Port Mappings
+### Create a Rancher Cluster and Local Agent with Port Mappings in Docker 
 
-1. 	Create a configuration file for Kind:
-
-    ```bash
-        touch kind-config.yaml
-        vi kind-config.yaml
-    ```
-
-    paste the below code into the file
-
-    ```yaml
-    kind: Cluster
-    apiVersion: kind.x-k8s.io/v1alpha4
-    nodes:
-    - role: control-plane
-      extraPortMappings:
-      - containerPort: 80
-        hostPort: 7800
-      - containerPort: 443
-        hostPort: 7801
-      extraMounts:
-      - hostPath: /etc/kubernetes/kubelet-config.yaml
-        containerPath: /var/lib/kubelet/config.yaml
-    ```
-
-2. 	Create a kubelet configuration file for Kind:
+1. 	Run Below Docker Command:
 
     ```bash
-        touch kubelet-config.yaml
-        vi kubelet-config.yaml
+        docker run -d --restart=unless-stopped \
+            -p 9380:80 -p 9343:443 \
+            -v /etc/letsencrypt/live/arpansahu.me/fullchain.pem:/etc/rancher/ssl/cert.pem \
+            -v /etc/letsencrypt/live/arpansahu.me/privkey.pem:/etc/rancher/ssl/key.pem \
+            --privileged \
+            --name rancher \
+            rancher/rancher:latest \
+            --no-cacerts
     ```
 
-    paste the below code into the file
+    Key points to note here: I already have lets encrypt generated certificates and they are automatically renewed too, so thats why,
+    we are using this example from their official documentation
 
-    ```yaml
-    kind: Cluster
-    apiVersion: kind.x-k8s.io/v1alpha4
-    nodes:
-    - role: control-plane
-      extraPortMappings:
-      - containerPort: 80
-        hostPort: 7800
-      - containerPort: 443
-        hostPort: 7801
-      extraMounts:
-      - hostPath: /etc/kubernetes/kubelet-config.yaml
-        containerPath: /var/lib/kubelet/config.yaml
-    ```
+    This will deploy Rancher Dashboard with the specified ports 
 
-3. Create the Kind cluster:
+2. Create User Password via UI:
+
+    Go to public_ip:9343 or running in local use localhost/0.0.0.0:9343
+
+    it will give u a command similar to the below command 
 
     ```bash
-        kind create cluster --config kind-config.yaml
+        docker logs container-id  2>&1 | grep "Bootstrap Password:"
     ```
 
-###  Label the Node
+    Run this command it will give you one time password
+    copy it and fill it in ui and then you will get option to set the password and username is admin (default)
 
-1. Label the node to match the required node selectors:
+3. Copy Kube Config from the dashboard
+
+    step 1: Click on home page 
+    step 2: Click on local cluster
+    step 3: beside the profile photo you can see a download or copy kube config button
+
+4. Edit Kube Config in you terminal
 
     ```bash
-        kubectl label node kind-control-plane ingress-ready=true
-        kubectl label node kind-control-plane kubernetes.io/os=linux
+        vi ~/.kube/config
     ```
 
 ### Deploy the Kubernetes Dashboard
@@ -1183,11 +1159,7 @@ if you remove this tag it will be attached to terminal, and you will be able to 
     copy and paste below content into it
 
     ```yaml
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: admin-user
-      namespace: kubernetes-dashboard
+        [DASHBOARD ADMIN USER MD]
     ```
 
 4. Create ClusterRoleBinding:
@@ -1202,18 +1174,7 @@ if you remove this tag it will be attached to terminal, and you will be able to 
     copy and paste below content into it
 
     ```yaml
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRoleBinding
-    metadata:
-      name: admin-user
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: cluster-admin
-    subjects:
-    - kind: ServiceAccount
-      name: admin-user
-      namespace: kubernetes-dashboar
+        [DASHBOARD ADMIN USER ROLE BIND MD]
     ```
 5. Apply both the files
 
@@ -1239,43 +1200,7 @@ if you remove this tag it will be attached to terminal, and you will be able to 
 2. Modify the service to use NodePort (do not copy blindly just make the mentioned changes):
 
     ```yaml
-    # Please edit the object below. Lines beginning with a '#' will be ignored,
-    # and an empty file will abort the edit. If an error occurs while saving this file will be
-    # reopened with the relevant failures.
-    #
-    apiVersion: v1
-    kind: Service
-    metadata:
-      annotations:
-        kubectl.kubernetes.io/last-applied-configuration: |
-          {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"k8s-app":"kubernetes-dashboard"},"name":"kubernetes-dashboard","namespace":"kubernetes-dashboard"},"spec":{"ports":[{"port":443,"targetPort":8443}],"selector":{"k8s-app":"kubernetes-dashboard"}}}
-      creationTimestamp: "2024-07-06T11:14:04Z"
-      labels:
-        k8s-app: kubernetes-dashboard
-      name: kubernetes-dashboard
-      namespace: kubernetes-dashboard
-      resourceVersion: "1668"
-      uid: e4211a82-97a1-4a65-b52e-be3bcb3b5150
-    spec:
-      clusterIP: 10.96.128.226
-      clusterIPs:
-      - 10.96.128.226
-      externalTrafficPolicy: Cluster
-      internalTrafficPolicy: Cluster
-      ipFamilies:
-      - IPv4
-      ipFamilyPolicy: SingleStack
-      ports:
-      - nodePort: 31000
-        port: 443
-        protocol: TCP
-        targetPort: 8443
-      selector:
-        k8s-app: kubernetes-dashboard
-      sessionAffinity: None
-      type: NodePort
-    status:
-      loadBalancer: {}
+        [DASHBOARD SERVICE]
     ```
 
 
@@ -1297,37 +1222,56 @@ if you remove this tag it will be attached to terminal, and you will be able to 
         ```
 
 
-2. To know Internal ip of kind cluster
-
-    ```bash
-        kubectl get nodes -o wide
-    ```
-
 3. Add this server configuration
 
     ```bash
+    # Map block to handle WebSocket upgrade
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+    }
+
     server {
         listen         80;
-        server_name    kube.arpansahu.me;
-        # force https-redirects
+        server_name    rancher.arpansahu.me;
+
+        # Redirect all HTTP traffic to HTTPS
         if ($scheme = http) {
             return 301 https://$server_name$request_uri;
-            }
-
-        location / {
-            proxy_pass              proxy_pass https://<INTERNAL-IP>:31000;
-            proxy_set_header        Host $host;
-            proxy_set_header    X-Forwarded-Proto $scheme;
         }
 
+        location / {
+            proxy_pass https://0.0.0.0:9343;
+            proxy_set_header        Host $host;
+            proxy_set_header    X-Forwarded-Proto $scheme;
+
+            # WebSocket support
+            proxy_http_version      1.1;
+            proxy_set_header        Upgrade $http_upgrade;
+            proxy_set_header        Connection $connection_upgrade;
+        }
+
+        # Disable HTTP/2 by ensuring http2 is not included in the listen directive
         listen 443 ssl; # managed by Certbot
-        ssl_certificate /etc/letsencrypt/live/arpansahu.me/fullchain.pem; # managed by Certbot
-        ssl_certificate_key /etc/letsencrypt/live/arpansahu.me/privkey.pem; # managed by Certbot
-        include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+        ssl_certificate           /etc/letsencrypt/live/arpansahu.me/fullchain.pem; # managed by Certbot
+        ssl_certificate_key       /etc/letsencrypt/live/arpansahu.me/privkey.pem;   # managed by Certbot
+        include                   /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+        ssl_dhparam               /etc/letsencrypt/ssl-dhparams.pem;       # managed by Certbot
     }
     ```
 
+    It is a key thing to note here since we are using External Nginx, it causes every request to upgrade to websocket when using 
+    Rancher API through kubectl command so thats why we use below function 
+
+    ```bash
+        # Map block to handle WebSocket upgrade
+        map $http_upgrade $connection_upgrade {
+            default upgrade;
+            ''      close;
+        }
+    ```
+
+    Note: The purpose of this block is to prepare the Nginx configuration to handle WebSocket connections properly. When a client tries to initiate a WebSocket connection, it sends an Upgrade header. This block checks for that header and sets the $connection_upgrade variable to either upgrade (if a WebSocket upgrade is requested) or close (if it isn't).
 
 4. Test the Nginx Configuration
 
@@ -1341,121 +1285,11 @@ if you remove this tag it will be attached to terminal, and you will be able to 
     sudo systemctl reload nginx
     ```
 
-### Get the admin user token for login:
-
-    Access:  https://kube.arpansahu.me
-
-    then generate token from host server by running the following command
-
-    ```bash
-        kubectl -n kubernetes-dashboard create token admin-user
-    ```
-
-    Note: The token generated by this command will have expiry and you may need to generate token again and again
-
-### Generate token without expiry
-
-1.	Delete the old ServiceAccount and ClusterRoleBinding:
-
-    ```bash
-        kubectl -n kubernetes-dashboard delete serviceaccount admin-user
-        kubectl delete clusterrolebinding admin-user
-    ```
-
-2. Create and apply the ServiceAccount:
-
-    ```bash
-        touch dashboard-admin-sa.yaml
-        vi dashboard-admin-sa.yaml
-    ```
-
-    copy this and past it in the file
-
-    ```yaml
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: dashboard-admin-sa
-      namespace: kubernetes-dashboard
-    ```
-
-3. Create and apply the ClusterRoleBinding:
-
-    ```bash
-        touch dashboard-admin-sa-binding.yaml
-        vi dashboard-admin-sa-binding.yaml
-    ```
-
-    copy this and past it in the file
-
-    ```yaml
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRoleBinding
-    metadata:
-      name: dashboard-admin-sa-binding
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: cluster-admin
-    subjects:
-    - kind: ServiceAccount
-      name: dashboard-admin-sa
-      namespace: kubernetes-dashboard
-    ``` 
-
-4. Create the secret for the ServiceAccount:
-
-    ```bash
-        touch dashboard-admin-sa-secret.yaml
-        vi dashboard-admin-sa-secret.yaml
-    ```
-
-    copy this and past it in the file
-
-    ```yaml
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: dashboard-admin-sa-token
-      namespace: kubernetes-dashboard
-      annotations:
-        kubernetes.io/service-account.name: dashboard-admin-sa
-    type: kubernetes.io/service-account-token
-    ``` 
-
-
-5. Apply all the files
-
-    ```bash
-        kubectl apply -f dashboard-admin-sa.yaml
-        kubectl apply -f dashboard-admin-sa-binding.yaml
-        kubectl apply -f dashboard-admin-sa-secret.yaml
-    ```
-
-6. Check the Secret
-
-    ```bash
-        kubectl -n kubernetes-dashboard get secret dashboard-admin-sa-token
-    ```
-
-7. Patch the ServiceAccount:
-
-    ```bash
-        kubectl -n kubernetes-dashboard patch serviceaccount dashboard-admin-sa -p '{"secrets":[{"name":"dashboard-admin-sa-token"}]}'
-    ```
-
-8. Retrieve the token:
-
-    ```bash
-        SECRET_NAME=$(kubectl -n kubernetes-dashboard get sa dashboard-admin-sa -o jsonpath="{.secrets[0].name}")
-        kubectl -n kubernetes-dashboard get secret $SECRET_NAME -o jsonpath="{.data.token}" | base64 --decode
-    ```
-
 ### Accessing 
 
 Access the Dashboard
 
-https://kube.arpansahu.me
+https://rancher.arpansahu.me
 
 you will be required to fill token for login
 
@@ -1464,6 +1298,8 @@ Access the cluster via Cli using kubectl
 ```bash
     kubectl get nodes
 ```
+
+Note: 
 ### Deployment
 
 1. Create Harbor Secret
