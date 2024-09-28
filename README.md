@@ -1409,6 +1409,7 @@ random-hash-id	IPv4	HTTP	TCP	80	0.0.0.0/0	–
 Open a new Nginx Configuration file name can be anything i am choosing arpansahu since my domain is arpansahu.me. there is already a default configuration file but we will leave it like that only
 
 ```bash
+touch /etc/nginx/sites-available/arpansahu
 sudo vi /etc/nginx/sites-available/arpansahu
 ```
 
@@ -1419,13 +1420,17 @@ server_tokens               off;
 access_log                  /var/log/nginx/supersecure.access.log;
 error_log                   /var/log/nginx/supersecure.error.log;
 
+
 server {
-  server_name               arpansahu.me;        
-  listen                    80;
-  location / {
-    proxy_pass              http://{ip_of_home_server/localhost}:8000;
-    proxy_set_header        Host $host;
-  }
+    listen 80;
+    server_name arpansahu.me www.arpansahu.me;
+    location / {
+        proxy_pass http://127.0.0.1:your_port_here;  # Adjust the proxy_pass or root if serving static files
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 }
 ```
 
@@ -1434,14 +1439,13 @@ This single Nginx File will be hosting all the multiple projects which I have li
 Checking if the configurations file is correct
 
 ```bash
-sudo service nginx configtest /etc/nginx/sites-available/arpansahu
+sudo nginx -t
 ```
 
 Now you need to symlink this file to the sites-enabled directory:
 
 ```bash
-cd /etc/nginx/sites-enabled
-sudo ln -s ../sites-available/arpansahu
+sudo ln -s /etc/nginx/sites-available/arpansahu /etc/nginx/sites-enabled/
 ```
 
 Restarting Nginx Server 
@@ -1484,7 +1488,7 @@ Now it's time to enable HTTPS for this server
     Now installing certificate
     
     ```bash
-    sudo certbot --nginx --rsa-key-size 4096 --no-redirect
+    sudo certbot --nginx --rsa-key-size 4096 --no-redirect -d arpansahu.me -d www.arpansahu.me
     ```
     
     It will ask for the domain name then you can enter your base domain 
@@ -1495,11 +1499,11 @@ Now it's time to enable HTTPS for this server
     Now These lines will be added to your # Nginx configuration: /etc/nginx/sites-available/arpansahu
     
     ```bash
-    listen 443 ssl;
-    ssl_certificate /etc/letsencrypt/live/www.supersecure.codes/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/www.supersecure.codes/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/arpansahu.me/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/arpansahu.me/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
     ```
     
     Redirecting HTTP to HTTPS
@@ -1551,7 +1555,7 @@ Now it's time to enable HTTPS for this server
     Run the following Command
 
     ```bash
-    sudo certbot certonly --manual --preferred-challenges dns
+    sudo certbot certonly --manual --preferred-challenges dns -d "*.arpansahu.me" -d "arpansahu.me"
     ```
     
     Again you will be asked domain name and here you will use *.arpansahu.me. and second domain you will use is
@@ -1837,7 +1841,7 @@ Now it's time to enable HTTPS for this server
           -s http://localhost:8080
          ```
 
-         Note: When we edited acme-dns config file there we mentioned the port 8090 and thats why we are using this port here also
+         Note: When we edited acme-dns config file there we mentioned the port 8090(now 8080) and thats why we are using this port here also
          
        * Creating Another DNS Entry 
 
@@ -1889,7 +1893,7 @@ Now it's time to enable HTTPS for this server
          --test-cert \ 
          --dry-run \ 
          --preferred-challenges dns \
-         --manual-auth-hook 'acme-dns-client'       
+         --manual-auth-hook 'acme-dns-client'
          ```
          
        * Renew certificate (actually)
