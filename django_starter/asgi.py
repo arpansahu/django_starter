@@ -6,7 +6,7 @@ from channels.security.websocket import AllowedHostsOriginValidator
 import celery_progress_custom_app.routing as celery_progress_custom_app_routing
 
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django-starter.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_starter.settings')
 
 django_asgi_app = get_asgi_application()
 
