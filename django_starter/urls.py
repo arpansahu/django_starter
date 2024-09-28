@@ -4,6 +4,8 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import re_path
+
 from account.views import (
     CustomPasswordResetView,
     LogoutView,
@@ -49,7 +51,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('login/', LoginView.as_view(), name='login'),
     path('account/', AccountView.as_view(), name='account'),
-    path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',
+    re_path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',
          activate, name='account_activate'),
     path('password_change/done/',
          auth_views.PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'),
