@@ -32,29 +32,37 @@
     <link rel="stylesheet" href="https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css"/>
   {% block stylesheets %}
     <style>
-          html {
+      html {
         {#font-size: 14px;#}
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Full viewport height */
+      }
+      .main-content {
+          flex-grow: 1; /* Expands to take available space, pushing footer down */
+      } 
+      footer {
+          /* Optional: add styling if needed */
       }
     </style>
   {% endblock stylesheets %}
 </head>
-<body class="g-sidenav-show  bg-gray-100">
-
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+<body class="d-flex flex-column min-vh-100 g-sidenav-show bg-gray-100">
+  <!-- Main content with flex-grow to take available space -->
+  <main class="main-content flex-grow-1 position-relative max-height-vh-100 h-100 border-radius-lg">
       {% include 'snippets/header.html' %}
-
-      {% block content %}{% endblock content %}
-
-      <div class="container-fluid py-4">
-          {% include 'snippets/footer.html' %}
-      </div>
-
+      {% block content %}{% endblock %}
   </main>
 
-  {% include "snippets/scripts.html" %}
+  <!-- Footer at the bottom -->
+  <footer class="container-fluid py-4">
+      {% include 'snippets/footer.html' %}
+  </footer>
 
-  <!-- Specific JS goes HERE -->
+  {% include "snippets/scripts.html" %}
   <script src="{% static 'js/jquery.js' %}"></script>
-  {% block javascripts %}{% endblock javascripts %}
+  {% block javascripts %}{% endblock %}
 </body>
 </html>
