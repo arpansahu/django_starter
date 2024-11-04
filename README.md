@@ -28,7 +28,7 @@ Can be cloned and used as a base project for any django project
 7. Used Self Hosted Redis VPS for redis which is not accessible outside AWS, Used Redis Server, hosted on Home Server itself as Redis on Home Server
 8. Used PostgresSql Schema based Database, all projects are using single Postgresql. 
 9. PostgresSQL is also hosted on VPS Server Itself.
-10. Using MiniIo as self hosted S3 Storage Server. Running at: https://minio.arpansahu.me
+10. Using MinIO as self hosted S3 Storage Server. Running at: https://minio.arpansahu.me
 11. Using Harbor as Self Hosted Docker Registry. Running at: https://harbor.arpansahu.me
 12. Using Sentry for logging and debugging. Running at: https://arpansahu.sentry.io
 
@@ -3623,7 +3623,7 @@ Now, redis-commander is running in the background managed by pm2. You can view i
 My Redis Commander can be accessed here : https://redis.arpansahu.me/
 
 
-## MiniIo (Self hosted S3 Storage)
+## MinIO (Self hosted S3 Storage)
 
 MinIO is a high-performance, distributed object storage system designed for large-scale data infrastructures. It is open-source and compatible with the Amazon S3 API, making it a popular choice for organizations looking for scalable, secure, and cost-effective storage solutions. 
 
@@ -3886,7 +3886,7 @@ Note: Nginx is already set in the other steps as seen before right now I will di
         ./update_minio_certs.sh
     ```
 
-You can connect to my MiniIo Server using terminal 
+You can connect to my MinIO Server using terminal 
 ```bash
   mc alias set myminio https://arpansahu.me api_key api_secret --api S3v4
   mc ls
