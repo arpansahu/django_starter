@@ -1,7 +1,7 @@
 pipeline {
     agent { label 'local' }
     parameters {
-        booleanParam(name: 'DEPLOY', defaultValue: true, description: 'Skip the Check for Changes stage')
+        booleanParam(name: 'DEPLOY', defaultValue: true, description: 'Enable deployment')
         choice(name: 'DEPLOY_TYPE', choices: ['kubernetes', 'docker'], description: 'Select deployment type')
         string(name: 'IMAGE_TAG', defaultValue: '', description: 'Image tag to deploy (leave empty to auto-detect from build)')
     }
@@ -38,9 +38,10 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 script {
+                    echo "Loading environment variables from Jenkins credentials..."
                     withCredentials([string(credentialsId: 'django_starter_env_file', variable: 'ENV_CONTENT')]) {
                         writeFile file: '.env', text: env.ENV_CONTENT
-                        echo '.env file created successfully from credentials'
+                        echo "✅ Environment file created successfully"
                     }
                 }
             }
