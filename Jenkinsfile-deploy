@@ -111,6 +111,37 @@ pipeline {
                 }
             }
         }
+        stage('Setup Flower Basic Auth') {
+            steps {
+                script {
+                    // Check if htpasswd file exists
+                    def htpasswdExists = sh(script: "test -f /etc/nginx/.htpasswd_flower && echo 'exists' || echo 'not exists'", returnStdout: true).trim()
+
+                    if (htpasswdExists == 'not exists') {
+                        echo "Creating htpasswd file for Flower basic auth..."
+                        
+                        // Get credentials from .env file
+                        def flowerUsername = sh(script: "grep FLOWER_ADMIN_USERNAME .env | cut -d '=' -f2", returnStdout: true).trim()
+                        def flowerPassword = sh(script: "grep FLOWER_ADMIN_PASS .env | cut -d '=' -f2", returnStdout: true).trim()
+                        
+                        // Create htpasswd file
+                        sh "sudo htpasswd -cb /etc/nginx/.htpasswd_flower ${flowerUsername} ${flowerPassword}"
+                        
+                        // Add basic auth to flower nginx config
+                        sh """
+                            sudo sed -i '/location \\/ {/a\\        auth_basic "Flower Monitoring";\\n        auth_basic_user_file /etc/nginx/.htpasswd_flower;' ${NGINX_CONF_FLOWER}
+                        """
+                        
+                        // Reload nginx
+                        sh "sudo nginx -t && sudo nginx -s reload"
+                        
+                        echo "✅ Flower basic auth configured successfully"
+                    } else {
+                        echo "Flower htpasswd file already exists."
+                    }
+                }
+            }
+        }
         stage('Retrieve Image Tag from Build Job') {
             when {
                 expression { params.DEPLOY}
