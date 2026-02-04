@@ -19,18 +19,23 @@ Can be cloned and used as a base project for any django project
 
 -Deployed on AWS / Now in My Own Home Ubuntu Server LTS 22.0 / Hostinger VPS Server
 
-1. Used Ubuntu 22.0 LTS
-2. Used Nginx as a Web Proxy Server
-3. Used Let's Encrypt Wildcard certificate 
-4. Used Acme-dns server for automating renewal of wildcard certificates
-5. Used docker/kubernetes to run inside a container since other projects are also running on the same server. Can be managed using Portainer and Kube Dashboard. Running at https://portainer.arpansahu.space and https://kube.arpansahu.space respectively.
-6. Used Jenkins for CI/CD Integration Jenkins Server. Running at: https://jenkins.arpansahu.space
-7. Used Self Hosted Redis VPS for redis which is not accessible outside AWS, Used Redis Server, hosted on Home Server itself as Redis on Home Server
-8. Used PostgresSql Schema based Database, all projects are using single Postgresql. 
-9. PostgresSQL is also hosted on VPS Server Itself.
-10. Using MinIO as self hosted S3 Storage Server. Running at: https://minio.arpansahu.space
-11. Using Harbor as Self Hosted Docker Registry. Running at: https://harbor.arpansahu.space
-12. Using Sentry for logging and debugging. Running at: https://arpansahu.sentry.io
+1. **Ubuntu 22.0 LTS** - Base operating system
+2. **Nginx** - Web proxy server with HTTPS
+3. **Wildcard SSL** - Let's Encrypt certificate via acme.sh
+4. **Acme-dns** - Automated wildcard certificate renewal
+5. **Docker/Kubernetes** - Container orchestration with k3s, managed via Portainer at https://portainer.arpansahu.space
+6. **Jenkins** - CI/CD pipeline at https://jenkins.arpansahu.space
+7. **PostgreSQL** - Schema-based database with TLS stream proxy at https://postgres.arpansahu.space:9552
+8. **PgAdmin** - PostgreSQL management UI at https://pgadmin.arpansahu.space
+9. **Redis** - Caching and message broker with TLS stream proxy at https://redis.arpansahu.space:9551
+10. **Redis Commander** - Redis management UI at https://redis.arpansahu.space
+11. **MinIO** - Self-hosted S3 storage server at https://minio.arpansahu.space (Console) and https://minioapi.arpansahu.space (API)
+12. **Harbor** - Self-hosted Docker registry at https://harbor.arpansahu.space
+13. **RabbitMQ** - Message queue broker at https://rabbitmq.arpansahu.space
+14. **Kafka/AKHQ** - Event streaming platform with UI at https://kafka.arpansahu.space
+15. **SSH Web Terminal** - Browser-based SSH access at https://ssh.arpansahu.space
+16. **Sentry** - Error tracking and monitoring at https://arpansahu.sentry.io
+17. **Monitoring Stack** - Prometheus, Grafana, and node-exporter for system monitoring
 
 ## What is Python ?
 Python is a high-level, general-purpose programming language. Its design philosophy emphasizes code readability with the
@@ -3008,34 +3013,46 @@ sudo grep error /var/log/nginx/error.log | tail -20
 After all these steps your Nginx configuration file located at /etc/nginx/sites-available/django_starter will be looking similar to this
 
 ```bash
-server_tokens               off;
-access_log                  /var/log/nginx/supersecure.access.log;
-error_log                   /var/log/nginx/supersecure.error.log;
+# ================= SERVICE PROXY TEMPLATE =================
 
+# HTTP → HTTPS redirect
 server {
-    listen         80;
-    server_name    django-starter.arpansahu.space;
-    # force https-redirects
-    if ($scheme = http) {
-        return 301 https://$server_name$request_uri;
-        }
+    listen 80;
+    listen [::]:80;
+
+    server_name django-starter.arpansahu.space;
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS reverse proxy
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name django-starter.arpansahu.space;
+
+    # 🔐 Wildcard SSL (acme.sh + Namecheap DNS-01)
+    ssl_certificate     /etc/nginx/ssl/arpansahu.space/fullchain.pem;
+    ssl_certificate_key /etc/nginx/ssl/arpansahu.space/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
 
     location / {
-         proxy_pass              http://{ip_of_home_server}:8016;
-         proxy_set_header        Host $host;
-         proxy_set_header        X-Forwarded-Proto $scheme;
+        proxy_pass http://0.0.0.0:8016;
 
-	 # WebSocket support
-         proxy_http_version 1.1;
-         proxy_set_header Upgrade $http_upgrade;
-         proxy_set_header Connection "upgrade";
+        proxy_http_version 1.1;
+
+        # Required headers
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+
+        # WebSocket support (safe for all services)
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
     }
-
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/nginx/ssl/arpansahu.space/fullchain.pem; # managed by acme.sh
-    ssl_certificate_key /etc/nginx/ssl/arpansahu.space/privkey.pem; # managed by acme.sh
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 ```
 
@@ -4396,7 +4413,7 @@ My Jenkins instance: https://jenkins.arpansahu.space
 For Harbor integration, see harbor.md documentation.
 
 
-# Services on AWS EC2/ Home Server Ubuntu 22.0 LTS s
+# Backend Services Used
 
 ## PostgreSQL Server (System Service)
 
@@ -5594,1124 +5611,6 @@ Use PgAdmin for GUI management:
 - **TLS Proxy:** Nginx stream proxies TLS connections to PostgreSQL
 
 
-## PgAdmin - PostgreSQL Administration Tool
-
-PgAdmin is the most popular open-source PostgreSQL administration and development platform. This setup runs PgAdmin as a Docker container with HTTPS access via Nginx.
-
-**Note:** PgAdmin is a web-based management interface. Unlike PostgreSQL, Redis, or RabbitMQ (which applications connect to programmatically), PgAdmin is accessed only through a web browser for database administration tasks.
-
----
-
-## Step-by-Step Installation Guide
-
-### Step 1: Create Environment Configuration
-
-First, create the environment configuration file that will store your PgAdmin credentials.
-
-**Create `.env.example` (Template file):**
-
-```bash
-# PgAdmin Configuration
-PGADMIN_EMAIL=admin@arpansahu.space
-PGADMIN_PASSWORD=your_secure_password_here
-PGADMIN_PORT=5050
-```
-
-**Create your actual `.env` file:**
-
-```bash
-cd "AWS Deployment/Pgadmin"
-cp .env.example .env
-nano .env
-```
-
-**Your `.env` file should look like this (with your actual credentials):**
-
-```bash
-# PgAdmin Configuration
-PGADMIN_EMAIL=admin@arpansahu.space
-PGADMIN_PASSWORD=${PGADMIN_PASSWORD}
-PGADMIN_PORT=5050
-```
-
-**⚠️ Important:** 
-- Always use a strong password in production!
-- Never commit your `.env` file to version control
-- Keep the `.env.example` file as a template
-
----
-
-### Step 2: Run Installation Script
-
-The `install.sh` script creates a Docker volume and runs the PgAdmin container.
-
-**Make the script executable and run:**
-
-```bash
-chmod +x install.sh
-./install.sh
-```
-
-**What the script does:**
-1. Loads configuration from `.env` file
-2. Creates Docker volume `pgadmin_data` for persistent storage
-3. Runs PgAdmin container with provided credentials
-4. Binds to localhost:5050 only (not directly accessible from outside)
-5. Verifies the container is running
-
-**Expected output:**
-```
-=== PgAdmin Installation Script ===
-Loading configuration from .env
-Step 1: Creating Docker volume for PgAdmin data
-✓ Volume created
-Step 2: Running PgAdmin Container
-Step 3: Waiting for PgAdmin to start...
-Step 4: Verifying Installation
-✓ PgAdmin container is running
-========================================
-PgAdmin installed successfully!
-========================================
-```
-
----
-
-### Step 3: Configure Nginx for HTTPS Access
-
-For secure HTTPS access to PgAdmin, we need to add its configuration to the Nginx services file.
-
-**Run the Nginx configuration script:**
-
-```bash
-chmod +x add-nginx-config.sh
-sudo ./add-nginx-config.sh
-```
-
-**What this script does:**
-1. Backs up the current Nginx services configuration
-2. Adds PgAdmin reverse proxy configuration
-3. Configures HTTPS with SSL certificates
-4. Tests and reloads Nginx
-5. Verifies PgAdmin is accessible
-
-**The nginx configuration includes:**
-- HTTP to HTTPS redirect
-- SSL/TLS encryption using existing certificates
-- WebSocket support for PgAdmin features
-- Proper proxy headers for secure connection
-
----
-
-### Step 4: Router Port Forwarding (Optional)
-
-**⚠️ Only required for external access (from outside your home network)**
-
-If you want to access PgAdmin from outside your local network:
-
-**Steps for Airtel Router:**
-
-1. **Login to router admin panel:**
-   - Open browser: `http://192.168.1.1`
-   - Enter admin credentials
-
-2. **Navigate to Port Forwarding:**
-   - Go to `NAT` → `Port Forwarding` tab
-   - Click "Add new rule"
-
-3. **Configure for HTTPS (port 443):**
-   - **Service Name:** User Define
-   - **External Start Port:** 443
-   - **External End Port:** 443
-   - **Internal Start Port:** 443
-   - **Internal End Port:** 443
-   - **Server IP Address:** 192.168.1.200
-   - **Protocol:** TCP
-
-4. **Activate the rule** and verify it appears in the list
-
-**Note:** This is typically already configured if you've set up other HTTPS services.
-
----
-
-### Step 5: Verify Installation
-
-**Open PgAdmin in your browser:**
-
-1. Navigate to https://pgadmin.arpansahu.space
-2. You should see the PgAdmin login page
-3. Login with your credentials from `.env` file:
-   - **Email:** admin@arpansahu.space
-   - **Password:** (from your `.env` file)
-4. After successful login, you should see the PgAdmin dashboard
-
-**Troubleshooting:**
-- If you get a 502 Bad Gateway error, wait 30-60 seconds for PgAdmin to fully start
-- Check container status: `docker ps | grep pgadmin`
-- Check logs: `docker logs pgadmin`
-
----
-
-## Adding PostgreSQL Servers to PgAdmin
-
-### Option 1: Connect to Local PostgreSQL (Same Server)
-
-1. **Login to PgAdmin:** https://pgadmin.arpansahu.space
-   - Email: (from your `.env` file)
-   - Password: (from your `.env` file)
-
-2. **Add Server:**
-   - Right-click "Servers" → Register → Server
-
-3. **General Tab:**
-   - Name: `Local PostgreSQL`
-
-4. **Connection Tab:**
-   - Host name/address: `192.168.1.200` (server IP)
-   - Port: `5432`
-   - Maintenance database: `postgres`
-   - Username: `postgres`
-   - Password: `Gandu302postgres`
-   - Save password: ✓
-
-### Option 2: Connect via Nginx Proxy (Port 9552)
-
-For connections from outside the local network:
-
-**Connection Tab:**
-- Host name/address: `postgres.arpansahu.space`
-- Port: `9552`
-- Maintenance database: `postgres`
-- Username: `postgres`
-- Password: `Gandu302postgres`
-- SSL mode: `Prefer` or `Require`
-- Save password: ✓
-
----
-
-## Common Tasks in PgAdmin
-
-### Query Database
-
-1. Navigate to: Server → Database → Schemas → public → Tables
-2. Right-click table → View/Edit Data
-3. Choose "All Rows" or "First 100 Rows"
-
-### Execute SQL
-
-1. Tools → Query Tool (or right-click database → Query Tool)
-2. Write your SQL query
-3. Click Execute (▶️) or press F5
-4. View results in the Data Output panel
-
-### Backup Database
-
-1. Right-click database → Backup
-2. Choose format:
-   - **Custom:** Best for pg_restore (recommended)
-   - **Tar:** Unix archive format
-   - **Plain:** SQL script
-3. Set filename and location
-4. Configure options (data only, schema only, etc.)
-5. Click Backup
-
-### Restore Database
-
-1. Right-click database → Restore
-2. Select backup file
-3. Choose format (auto-detects from file)
-4. Configure options
-5. Click Restore
-
-### Create Database
-
-1. Right-click "Databases" → Create → Database
-2. **General Tab:**
-   - Database name: `myapp_db`
-   - Owner: `postgres`
-3. Click Save
-
-### Manage Users
-
-1. Right-click "Login/Group Roles" → Create → Login/Group Role
-2. **General Tab:** Set username
-3. **Definition Tab:** Set password
-4. **Privileges Tab:** Configure permissions
-5. Click Save
-
----
-
-## Configuration and Shortcuts
-
-### Keyboard Shortcuts
-
-- **Execute query:** F5
-- **Explain query:** F7
-- **Explain analyze:** Shift+F7
-- **Save:** Ctrl+S (Cmd+S on Mac)
-- **New query tab:** Ctrl+T
-- **Auto-complete:** Ctrl+Space
-- **Comment lines:** Ctrl+/
-
-### Preferences
-
-Access via: File → Preferences
-
-**Useful settings:**
-- **Query Tool → Auto-completion:** Enable for suggestions
-- **Query Tool → Display:** Set row limit, font size
-- **Browser → Display:** Customize tree view
-- **Keyboard Shortcuts:** Customize keybindings
-
----
-
-## Docker Commands
-
-### View Logs
-
-```bash
-# Follow logs in real-time
-docker logs -f pgadmin
-
-# View last 50 lines
-docker logs --tail 50 pgadmin
-```
-
-### Restart Container
-
-```bash
-docker restart pgadmin
-```
-
-### Stop/Start Container
-
-```bash
-# Stop
-docker stop pgadmin
-
-# Start
-docker start pgadmin
-```
-
-### Update PgAdmin
-
-```bash
-# Pull latest image
-docker pull dpage/pgadmin4:latest
-
-# Stop and remove old container
-docker stop pgadmin
-docker rm pgadmin
-
-# Run installation script again
-./install.sh
-```
-
-### Backup PgAdmin Configuration
-
-```bash
-# Backup to tar.gz file
-docker run --rm \
-  -v pgadmin_data:/data \
-  -v $(pwd):/backup \
-  alpine tar czf /backup/pgadmin-backup-$(date +%Y%m%d).tar.gz -C /data .
-```
-
-### Restore PgAdmin Configuration
-
-```bash
-# Restore from tar.gz file
-docker run --rm \
-  -v pgadmin_data:/data \
-  -v $(pwd):/backup \
-  alpine sh -c "cd /data && tar xzf /backup/pgadmin-backup.tar.gz"
-```
-
----
-
-## Troubleshooting
-
-### Can't Login to PgAdmin
-
-**Check container logs:**
-```bash
-docker logs pgadmin
-```
-
-**Verify credentials:**
-```bash
-# Check .env file
-cat .env | grep PGADMIN_
-```
-
-**Restart container:**
-```bash
-docker restart pgadmin
-```
-
-**Reset password (recreate container):**
-```bash
-docker stop pgadmin && docker rm pgadmin
-./install.sh
-```
-
----
-
-### Can't Connect to PostgreSQL from PgAdmin
-
-**Test PostgreSQL from server:**
-```bash
-psql -h localhost -U postgres -d postgres
-```
-
-**Check PostgreSQL is running:**
-```bash
-sudo systemctl status postgresql
-```
-
-**Verify PostgreSQL allows connections:**
-```bash
-PG_VERSION=$(ls /etc/postgresql/)
-sudo cat /etc/postgresql/$PG_VERSION/main/pg_hba.conf | grep "0.0.0.0/0"
-# Should show: host all all 0.0.0.0/0 md5
-```
-
-**Check firewall (if connecting remotely):**
-```bash
-# For port 5432 (local)
-sudo ufw status | grep 5432
-
-# For port 9552 (via nginx)
-sudo ufw status | grep 9552
-```
-
-**Test connection from server to PostgreSQL:**
-```bash
-# Direct connection
-psql -h 192.168.1.200 -p 5432 -U postgres -d postgres
-
-# Via nginx proxy
-psql "host=postgres.arpansahu.space port=9552 user=postgres dbname=postgres sslmode=prefer"
-```
-
----
-
-### PgAdmin Not Accessible via HTTPS
-
-**Check nginx configuration:**
-```bash
-sudo nginx -t
-```
-
-**Check if PgAdmin config exists:**
-```bash
-grep -A 10 "pgadmin.arpansahu.space" /etc/nginx/sites-available/services
-```
-
-**Test local access:**
-```bash
-curl http://localhost:5050
-```
-
-**Check nginx logs:**
-```bash
-sudo tail -50 /var/log/nginx/error.log
-```
-
-**Reload nginx:**
-```bash
-sudo systemctl reload nginx
-```
-
----
-
-### Slow Query Execution
-
-**Check PostgreSQL performance:**
-```bash
-# Check active connections
-sudo -u postgres psql -c "SELECT count(*) FROM pg_stat_activity;"
-
-# Check long-running queries
-sudo -u postgres psql -c "SELECT pid, now() - query_start as duration, query FROM pg_stat_activity WHERE state = 'active' ORDER BY duration DESC;"
-```
-
-**Use EXPLAIN in PgAdmin:**
-```sql
-EXPLAIN ANALYZE SELECT * FROM your_table WHERE condition;
-```
-
-**Enable query caching in PgAdmin:**
-- File → Preferences → Query Tool → Results grid
-- Enable "Cache data"
-
----
-
-## Security Best Practices
-
-1. **Strong Password:** Always use a strong password for PgAdmin login
-2. **HTTPS Only:** Never access PgAdmin over plain HTTP in production
-3. **Keep Updated:** Regularly update PgAdmin to the latest version
-4. **Limited Database Access:** Use database users with minimal required permissions
-5. **Regular Backups:** Schedule automated backups of important databases
-6. **Firewall Rules:** Use firewall to restrict access to PostgreSQL ports
-7. **Don't Save Passwords:** Consider using pgpass file instead of saving in PgAdmin
-8. **Monitor Logs:** Regularly check PgAdmin and PostgreSQL logs
-
-### Using pgpass File (Alternative to Saving Passwords)
-
-```bash
-# Create pgpass file
-nano ~/.pgpass
-
-# Add connection details (format: hostname:port:database:username:password)
-192.168.1.200:5432:*:postgres:Gandu302postgres
-postgres.arpansahu.space:9552:*:postgres:Gandu302postgres
-
-# Set proper permissions (required)
-chmod 600 ~/.pgpass
-```
-
----
-
-## Connection Details
-
-### Access Information
-
-- **Web Interface:** https://pgadmin.arpansahu.space
-- **Local URL:** http://localhost:5050 (server only)
-- **Email:** (from `.env` file)
-- **Password:** (from `.env` file)
-- **Container Name:** `pgadmin`
-- **Docker Volume:** `pgadmin_data`
-
-### PostgreSQL Connection Options
-
-**Option 1: Direct to PostgreSQL (Local Network)**
-- Host: `192.168.1.200`
-- Port: `5432`
-- Username: `postgres`
-- Password: `Gandu302postgres`
-- SSL: Prefer/Require
-
-**Option 2: Via Nginx Proxy (External Access)**
-- Host: `postgres.arpansahu.space`
-- Port: `9552`
-- Username: `postgres`
-- Password: `Gandu302postgres`
-- SSL: Prefer/Require
-
----
-
-## Quick Reference
-
-### Important Files
-
-- **Environment template:** [`.env.example`](./.env.example)
-- **Environment config:** `.env` (create from .env.example)
-- **Installation script:** [`install.sh`](./install.sh)
-- **Nginx setup script:** [`add-nginx-config.sh`](./add-nginx-config.sh)
-- **Nginx config:** [`nginx.conf`](./nginx.conf)
-
-### Important Commands
-
-```bash
-# Install PgAdmin
-./install.sh
-
-# Configure Nginx
-sudo ./add-nginx-config.sh
-
-# Access PgAdmin
-# Open https://pgadmin.arpansahu.space in your browser
-
-# Container management
-docker ps | grep pgadmin
-docker logs -f pgadmin
-docker restart pgadmin
-docker stop pgadmin
-docker start pgadmin
-
-# Update PgAdmin
-docker pull dpage/pgadmin4:latest
-docker stop pgadmin && docker rm pgadmin
-./install.sh
-
-# Backup/Restore
-docker run --rm -v pgadmin_data:/data -v $(pwd):/backup alpine tar czf /backup/pgadmin-backup.tar.gz -C /data .
-```
-
----
-
-## Database Connection Examples
-
-### Python (psycopg2)
-
-```python
-import psycopg2
-
-# Connect to PostgreSQL
-conn = psycopg2.connect(
-    host="postgres.arpansahu.space",
-    port=9552,
-    database="arpansahu_one_db",
-    user="postgres",
-    password="Gandu302postgres",
-    sslmode="prefer"
-)
-
-# Execute query
-cursor = conn.cursor()
-cursor.execute("SELECT version();")
-print(cursor.fetchone())
-cursor.close()
-conn.close()
-```
-
-### Django Settings
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'arpansahu_one_db',
-        'USER': 'postgres',
-        'PASSWORD': 'Gandu302postgres',
-        'HOST': 'postgres.arpansahu.space',
-        'PORT': '9552',
-        'OPTIONS': {
-            'sslmode': 'prefer',
-        }
-    }
-}
-```
-
-### Command Line (psql)
-
-```bash
-# Via nginx proxy (external)
-psql "host=postgres.arpansahu.space port=9552 user=postgres dbname=arpansahu_one_db sslmode=prefer"
-
-# Direct connection (local network)
-psql -h 192.168.1.200 -p 5432 -U postgres -d arpansahu_one_db
-```
-
----
-
-## Related Documentation
-
-- [PostgreSQL Installation](../Postgres/README.md) - Set up PostgreSQL server
-- [Redis Setup](../Redis/README.md) - Redis cache server
-- [RabbitMQ Setup](../Rabbitmq/README.md) - Message broker
-
----
-
-
-## Portainer - Docker Management UI
-
-Portainer is a lightweight management UI for Docker, allowing you to easily manage containers, images, networks, volumes, and more through a web interface.
-
-**Note:** Portainer is a web-based management interface. Like PgAdmin, it is accessed only through a web browser and does not require programmatic connection testing.
-
----
-
-## Prerequisites
-
-### Docker Installation Required
-
-**Portainer requires Docker to be installed first.** If Docker is not installed, follow the Docker installation guide:
-
-📄 **[Docker Installation Guide](../docker/docker_installation.md)**
-
-**Quick verification:**
-```bash
-docker --version
-docker compose version
-```
-
-Expected output:
-```
-Docker version 24.0.7 or later
-Docker Compose version v2.23.0 or later
-```
-
-If these commands fail, Docker is not installed. Install Docker first, then return to this guide.
-
----
-
-## Step-by-Step Installation Guide
-
-### Step 1: Run Installation Script
-
-Portainer does not require a `.env` file as it doesn't support environment variables for initial user creation. The admin user must be created through the web interface on first access.
-
-**Make the script executable and run:**
-
-```bash
-chmod +x install.sh
-./install.sh
-```
-
-**What the script does:**
-1. Creates Docker volume `portainer_data` for persistent storage
-2. Runs Portainer container with Docker socket access
-3. Binds to localhost:9443 only (HTTPS with self-signed certificate)
-4. Verifies the container is running
-
-**Expected output:**
-```
-=== Portainer Installation Script ===
-Step 1: Creating Portainer Volume
-✓ Volume created
-Step 2: Running Portainer Container
-Step 3: Waiting for Portainer to start...
-Step 4: Verifying Installation
-✓ Portainer container is running
-========================================
-Portainer installed successfully!
-========================================
-```
-
----
-
-### Step 2: Configure Nginx for HTTPS Access
-
-For secure HTTPS access to Portainer, we need to add its configuration to the Nginx services file.
-
-**Run the Nginx configuration script:**
-
-```bash
-chmod +x add-nginx-config.sh
-sudo ./add-nginx-config.sh
-```
-
-**What this script does:**
-1. Backs up the current Nginx services configuration
-2. Adds Portainer reverse proxy configuration
-3. Configures HTTPS with SSL certificates
-4. Proxies to Portainer's HTTPS backend (port 9443)
-5. Tests and reloads Nginx
-6. Verifies Portainer is accessible
-
-**The nginx configuration includes:**
-- HTTP to HTTPS redirect
-- SSL/TLS encryption using existing certificates
-- WebSocket support for real-time updates
-- Proxy to Portainer's self-signed HTTPS endpoint
-- SSL verification disabled for backend (self-signed cert)
-
----
-
-### Step 3: Router Port Forwarding (Optional)
-
-**⚠️ Only required for external access (from outside your home network)**
-
-If you want to access Portainer from outside your local network:
-
-**Steps for Airtel Router:**
-
-1. **Login to router admin panel:**
-   - Open browser: `http://192.168.1.1`
-   - Enter admin credentials
-
-2. **Navigate to Port Forwarding:**
-   - Go to `NAT` → `Port Forwarding` tab
-   - Click "Add new rule"
-
-3. **Configure for HTTPS (port 443):**
-   - **Service Name:** User Define
-   - **External Start Port:** 443
-   - **External End Port:** 443
-   - **Internal Start Port:** 443
-   - **Internal End Port:** 443
-   - **Server IP Address:** 192.168.1.200
-   - **Protocol:** TCP
-
-4. **Activate the rule** and verify it appears in the list
-
-**Note:** This is typically already configured if you've set up other HTTPS services.
-
----
-
-### Step 4: Create Admin User
-
-**On first access to Portainer, you must create an admin user:**
-
-1. **Open Portainer:** https://portainer.arpansahu.space
-
-2. **Create Admin User:**
-   - Username: `arpansahu` (as per creds.txt)
-   - Password: `Gandu302@portainer` (as per creds.txt)
-   - Confirm Password
-
-3. **Click "Create user"**
-
-4. **Connect to Docker Environment:**
-   - Select "Get Started" or "Docker"
-   - Portainer will auto-detect the local Docker environment
-   - Socket: `/var/run/docker.sock` (already configured)
-
-5. **You should now see the Portainer dashboard** with your Docker containers, images, volumes, etc.
-
-⚠️ **Important:** You must create the admin user within the first 5 minutes of starting Portainer. If you don't, Portainer will disable the setup page for security. If this happens, restart the container: `docker restart portainer`
-
----
-
-### Step 5: Verify Installation
-
-**Access Portainer in your browser:**
-
-1. Navigate to https://portainer.arpansahu.space
-2. Login with the credentials you created
-3. You should see the Portainer dashboard with:
-   - Container list
-   - Image management
-   - Volume management
-   - Network management
-   - And more Docker resources
-
----
-
-## Common Tasks in Portainer
-
-### Managing Containers
-
-**Start/Stop/Restart:**
-1. Go to "Containers" in left sidebar
-2. Select container(s)
-3. Click action buttons at top or use individual container controls
-
-**View Logs:**
-1. Click on container name
-2. Click "Logs" tab
-3. Use filters and auto-refresh options
-
-**Access Console:**
-1. Click on container name
-2. Click "Console" tab
-3. Select shell (sh, bash, etc.)
-4. Click "Connect"
-
-**Inspect Container:**
-1. Click on container name
-2. View detailed information, environment variables, networks, volumes
-
-### Managing Images
-
-**Pull Images:**
-1. Go to "Images" → "Import"
-2. Enter image name (e.g., `nginx:latest`)
-3. Click "Pull the image"
-
-**Build Images:**
-1. Go to "Images" → "Build"
-2. Upload Dockerfile or provide URL
-3. Configure build options
-4. Click "Build the image"
-
-**Remove Images:**
-1. Go to "Images"
-2. Select image(s)
-3. Click "Remove"
-
-### Managing Volumes
-
-**Create Volume:**
-1. Go to "Volumes" → "Add volume"
-2. Enter volume name
-3. Optional: Set driver options
-4. Click "Create the volume"
-
-**Browse Volume:**
-1. Click on volume name
-2. View size and containers using it
-
-### Managing Networks
-
-**Create Network:**
-1. Go to "Networks" → "Add network"
-2. Enter network name
-3. Select driver (bridge, overlay, etc.)
-4. Configure options
-5. Click "Create the network"
-
-### Stacks (Docker Compose)
-
-**Deploy Stack:**
-1. Go to "Stacks" → "Add stack"
-2. Enter stack name
-3. Paste docker-compose.yml content or upload file
-4. Configure environment variables if needed
-5. Click "Deploy the stack"
-
-**Update Stack:**
-1. Click on stack name
-2. Edit YAML content
-3. Click "Update the stack"
-
----
-
-## Docker Commands
-
-### View Logs
-
-```bash
-# Follow logs in real-time
-docker logs -f portainer
-
-# View last 50 lines
-docker logs --tail 50 portainer
-```
-
-### Restart Container
-
-```bash
-docker restart portainer
-```
-
-### Stop/Start Container
-
-```bash
-# Stop
-docker stop portainer
-
-# Start
-docker start portainer
-```
-
-### Update Portainer
-
-```bash
-# Pull latest image
-docker pull portainer/portainer-ce:latest
-
-# Stop and remove old container
-docker stop portainer
-docker rm portainer
-
-# Run installation script again
-./install.sh
-```
-
-### Backup Portainer Configuration
-
-```bash
-# Backup to tar.gz file
-docker run --rm \
-  -v portainer_data:/data \
-  -v $(pwd):/backup \
-  alpine tar czf /backup/portainer-backup-$(date +%Y%m%d).tar.gz -C /data .
-```
-
-### Restore Portainer Configuration
-
-```bash
-# Restore from tar.gz file
-docker run --rm \
-  -v portainer_data:/data \
-  -v $(pwd):/backup \
-  alpine sh -c "cd /data && tar xzf /backup/portainer-backup.tar.gz"
-```
-
----
-
-## Troubleshooting
-
-### Can't Access Portainer
-
-**Check container is running:**
-```bash
-docker ps | grep portainer
-```
-
-**Check logs:**
-```bash
-docker logs portainer
-```
-
-**Restart container:**
-```bash
-docker restart portainer
-```
-
----
-
-### Setup Page Timeout
-
-If you see "Portainer instance timed out" or can't create admin user:
-
-**Reason:** Portainer disables the setup page after 5 minutes for security.
-
-**Solution:**
-```bash
-# Restart container to reset the timer
-docker restart portainer
-
-# Wait 10 seconds
-sleep 10
-
-# Quickly access https://portainer.arpansahu.space and create user
-```
-
----
-
-### Portainer Not Accessible via HTTPS
-
-**Check nginx configuration:**
-```bash
-sudo nginx -t
-```
-
-**Check if Portainer config exists:**
-```bash
-grep -A 10 "portainer.arpansahu.space" /etc/nginx/sites-available/services
-```
-
-**Test local access:**
-```bash
-curl -k https://localhost:9443
-```
-
-**Check nginx logs:**
-```bash
-sudo tail -50 /var/log/nginx/error.log
-```
-
-**Reload nginx:**
-```bash
-sudo systemctl reload nginx
-```
-
----
-
-### Lost Admin Password
-
-If you forgot the admin password:
-
-**Option 1: Reset via Docker**
-```bash
-# Stop portainer
-docker stop portainer
-
-# Remove container and volume
-docker rm portainer
-docker volume rm portainer_data
-
-# Reinstall (loses all settings)
-./install.sh
-```
-
-**Option 2: Reset Password (if enabled)**
-- Some Portainer versions support password reset
-- Check Portainer documentation for your version
-
----
-
-## Security Best Practices
-
-1. **Strong Password:** Use a strong password for the admin account
-2. **HTTPS Only:** Always access Portainer over HTTPS, never HTTP
-3. **Keep Updated:** Regularly update Portainer to the latest version
-4. **Limited Users:** Create specific users with limited permissions for team members
-5. **Regular Backups:** Schedule automated backups of Portainer configuration
-6. **Audit Logs:** Regularly check Portainer's audit logs for suspicious activity
-7. **Firewall Rules:** Use firewall to restrict access
-8. **2FA:** Consider enabling two-factor authentication (if available in your version)
-
----
-
-## Access Details
-
-### Connection Information
-
-- **Web Interface:** https://portainer.arpansahu.space
-- **Local URL:** https://localhost:9443 (server only)
-- **Username:** arpansahu (as per creds.txt)
-- **Password:** Gandu302@portainer (as per creds.txt)
-- **Container Name:** `portainer`
-- **Docker Volume:** `portainer_data`
-
----
-
-## Quick Reference
-
-### Important Files
-
-- **Environment template:** [`.env.example`](./.env.example) (reference only)
-- **Installation script:** [`install.sh`](./install.sh)
-- **Nginx setup script:** [`add-nginx-config.sh`](./add-nginx-config.sh)
-- **Nginx config:** [`nginx.conf`](./nginx.conf)
-
-### Important Commands
-
-```bash
-# Install Portainer
-./install.sh
-
-# Configure Nginx
-sudo ./add-nginx-config.sh
-
-# Access Portainer
-# Open https://portainer.arpansahu.space in your browser
-
-# Container management
-docker ps | grep portainer
-docker logs -f portainer
-docker restart portainer
-docker stop portainer
-docker start portainer
-
-# Update Portainer
-docker pull portainer/portainer-ce:latest
-docker stop portainer && docker rm portainer
-./install.sh
-
-# Backup/Restore
-docker run --rm -v portainer_data:/data -v $(pwd):/backup alpine tar czf /backup/portainer-backup.tar.gz -C /data .
-```
-
----
-
-## Useful Features
-
-### App Templates
-
-Portainer includes pre-configured app templates for quick deployment:
-- Nginx
-- MySQL
-- Redis
-- PostgreSQL
-- WordPress
-- And many more
-
-Access via: "App Templates" in the left sidebar
-
-### Registry Management
-
-Connect to Docker registries (Docker Hub, private registries, Harbor):
-1. Go to "Registries"
-2. Click "Add registry"
-3. Select type and provide credentials
-4. Click "Add registry"
-
-### Edge Computing
-
-Portainer supports managing remote Docker hosts:
-1. Install Portainer Edge Agent on remote host
-2. Add edge endpoint in Portainer
-3. Manage remote Docker from central Portainer instance
-
----
-
-## Related Documentation
-
-- [PostgreSQL Installation](../Postgres/README.md) - Database server management
-- [Redis Setup](../Redis/README.md) - Cache server management  
-- [RabbitMQ Setup](../Rabbitmq/README.md) - Message broker management
-- [PgAdmin Setup](../Pgadmin/README.md) - PostgreSQL web UI
-
----
-
-
 ## Redis Server (Docker + Nginx STREAM + TLS)
 
 Redis is a high-performance in-memory data store. This setup provides secure Redis with TLS encryption via Nginx.
@@ -7515,914 +6414,6 @@ Let's Encrypt certificates at `/etc/nginx/ssl/arpansahu.space/` are automaticall
 
 # ❌ WRONG - Insecure, don't use in production
 'ssl_cert_reqs': ssl.CERT_NONE
-```
-
-
-# Redis Commander - Web-Based Redis Management UI
-
-Redis Commander is a web-based management tool that provides an intuitive interface to interact with Redis databases. This guide covers installation via npm + PM2 with nginx reverse proxy and HTTPS.
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Architecture](#architecture)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Nginx Setup](#nginx-setup)
-- [Verification](#verification)
-- [Management](#management)
-- [Troubleshooting](#troubleshooting)
-- [Security](#security)
-
-## 🎯 Overview
-
-This deployment provides:
-- **Redis Commander** installed via npm
-- **PM2** for process management and auto-restart
-- **Nginx** reverse proxy with HTTPS
-- **Built-in HTTP authentication** (no separate htpasswd needed)
-- **WebSocket support** for real-time updates
-
-**Access:** `https://redis.arpansahu.space`
-
-## ✨ Features
-
-Redis Commander provides:
-- **Visual Key Browser**: Browse keys with tree view
-- **Key Management**: View, edit, delete keys
-- **Multiple Data Types**: Support for strings, lists, sets, hashes, sorted sets
-- **TTL Management**: View and set key expiration
-- **Command Console**: Execute Redis commands directly
-- **Real-time Updates**: WebSocket-based live updates
-- **Multiple Connections**: Connect to multiple Redis instances
-- **Import/Export**: Backup and restore data
-
-## ✅ Prerequisites
-
-### Required
-
-- **Ubuntu 22.04** or later
-- **Redis Server** installed and running
-  ```bash
-  redis-cli -h 127.0.0.1 -p 6380 -a your_password ping
-  # Should return: PONG
-  ```
-
-- **Node.js** (v16 or later) and npm
-  ```bash
-  # Install Node.js 20.x
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-  ```
-
-- **Nginx** with SSL certificates at `/etc/nginx/ssl/arpansahu.space/`
-
-### Verify Prerequisites
-
-```bash
-# Check Redis
-redis-cli -h 127.0.0.1 -p 6380 -a your_password ping
-
-# Check Node.js
-node --version  # Should be v16+
-npm --version
-
-# Check Nginx
-nginx -v
-ls -la /etc/nginx/ssl/arpansahu.space/
-```
-
-## 🏗️ Architecture
-
-### System Architecture
-
-```
-┌──────────────────────────────────────────┐
-│  Internet (HTTPS)                        │
-│  https://redis.arpansahu.space           │
-└────────────────┬─────────────────────────┘
-                 │
-                 │ Port 443 (HTTPS)
-                 │
-         ┌───────▼────────┐
-         │  Nginx (443)   │
-         │  SSL + Proxy   │
-         └───────┬────────┘
-                 │
-                 │ HTTP (localhost)
-                 │
-    ┌────────────▼──────────────┐
-    │  Redis Commander (8082)   │
-    │  Node.js + PM2            │
-    │  HTTP Auth enabled        │
-    └────────────┬──────────────┘
-                 │
-                 │ Redis Protocol
-                 │
-         ┌───────▼────────┐
-         │  Redis (6380)  │
-         │  Localhost     │
-         └────────────────┘
-```
-
-### Security Layers
-
-1. **HTTPS Encryption**: All traffic encrypted via SSL/TLS
-2. **HTTP Basic Auth**: Built-in authentication in Redis Commander
-3. **Localhost Binding**: Redis Commander only accessible locally
-4. **Redis Password**: Redis requires authentication
-5. **No Public Exposure**: Redis never exposed to internet
-
-### Process Management
-
-```
-PM2 Daemon
-    └─ redis-commander
-        ├─ Auto-restart on crash
-        ├─ Auto-start on boot
-        ├─ Log rotation
-        └─ Resource monitoring
-```
-
-## 📦 Installation
-
-### Step 1: Prepare Environment
-
-Navigate to the Redis Commander deployment directory:
-
-```bash
-cd "AWS Deployment/redis_commander"
-```
-
-Copy the example environment file and configure:
-
-```bash
-cp .env.example .env
-nano .env
-```
-
-**Configure `.env`:**
-
-```bash
-# Redis Connection
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6380
-REDIS_PASSWORD=your_actual_redis_password
-
-# Redis Commander Port
-REDIS_COMMANDER_PORT=8082
-
-# HTTP Authentication (built-in)
-HTTP_AUTH_USERNAME=arpansahu
-HTTP_AUTH_PASSWORD=your_strong_password_here
-
-# Domain
-DOMAIN=redis.arpansahu.space
-```
-
-**Important Notes:**
-
-1. **REDIS_PASSWORD**: Must match your Redis server password
-2. **HTTP_AUTH_PASSWORD**: This protects Redis Commander UI
-3. **PORT 8082**: Ensure this port is free (check with `ss -lntp | grep 8082`)
-
-### Step 2: Run Installation Script
-
-The installation script will:
-- Install redis-commander via npm (if not present)
-- Install PM2 process manager (if not present)
-- Test Redis connection
-- Start Redis Commander with PM2
-- Configure PM2 startup script
-
-```bash
-chmod +x install.sh
-./install.sh
-```
-
-**Expected Output:**
-
-```
-========================================
-Redis Commander Installation
-========================================
-
-✓ Loaded configuration from .env
-Node.js version: v20.20.0
-NPM version: 10.9.2
-✓ PM2 already installed
-✓ Redis Commander already installed
-✓ Redis connection successful
-Starting Redis Commander with PM2...
-✓ Redis Commander started
-✓ Redis Commander is online
-Saving PM2 process list...
-✓ PM2 startup configured
-
-========================================
-Installation Complete!
-========================================
-
-┌─────┬───────────────────┬─────────────┬─────────┬─────────┬──────────┐
-│ id  │ name              │ namespace   │ version │ mode    │ status   │
-├─────┼───────────────────┼─────────────┼─────────┼─────────┼──────────┤
-│ 0   │ redis-commander   │ default     │ N/A     │ fork    │ online   │
-└─────┴───────────────────┴─────────────┴─────────┴─────────┴──────────┘
-
-Redis Commander is running at:
-  http://127.0.0.1:8082
-
-Next steps:
-  1. Run: sudo ./add-nginx-config.sh
-  2. Access via: https://redis.arpansahu.space
-```
-
-### Step 3: Verify Local Access
-
-Test Redis Commander is running locally:
-
-```bash
-# Check process
-pm2 list
-
-# Check port is listening
-ss -lntp | grep 8082
-
-# Test HTTP access (with auth)
-curl -u "arpansahu:your_password" http://127.0.0.1:8082
-```
-
-Expected: HTML response with Redis Commander UI
-
-## ⚙️ Configuration
-
-### Redis Commander CLI Options
-
-The PM2 process uses these arguments:
-
-| Option | Value | Description |
-|--------|-------|-------------|
-| `--redis-host` | 127.0.0.1 | Redis server hostname |
-| `--redis-port` | 6380 | Redis server port |
-| `--redis-password` | password | Redis authentication |
-| `--port` | 8082 | Redis Commander listen port |
-| `--http-auth-username` | arpansahu | UI username |
-| `--http-auth-password` | password | UI password |
-
-### Additional Options
-
-For multiple Redis instances:
-
-```bash
-pm2 start redis-commander \
-    --name redis-commander \
-    -- \
-    --redis-host "redis1:127.0.0.1:6380:0:password,redis2:127.0.0.1:6381:0:password2"
-```
-
-For specific Redis database:
-
-```bash
---redis-db 0  # Use database 0
-```
-
-For read-only mode:
-
-```bash
---read-only true
-```
-
-### Environment Variables
-
-Redis Commander also supports environment variables:
-
-```bash
-export REDIS_HOSTS=local:127.0.0.1:6380:0:password
-export HTTP_USER=arpansahu
-export HTTP_PASSWORD=your_password
-export PORT=8082
-
-pm2 start redis-commander --name redis-commander
-```
-
-## 🌐 Nginx Setup
-
-### Step 1: Configure Nginx
-
-Run the nginx configuration script:
-
-```bash
-chmod +x add-nginx-config.sh
-sudo ./add-nginx-config.sh
-```
-
-**What it does:**
-
-1. ✅ Validates nginx and SSL certificates
-2. ✅ Checks Redis Commander is running
-3. ✅ Detects and removes existing configuration
-4. ✅ Adds server blocks for HTTP → HTTPS redirect
-5. ✅ Configures HTTPS with WebSocket support
-6. ✅ Tests and reloads nginx
-
-**Expected Output:**
-
-```
-========================================
-Redis Commander Nginx Configuration
-========================================
-
-✓ Configuration added
-✓ Nginx configuration test passed
-✓ Nginx reloaded successfully
-
-========================================
-Configuration Complete!
-========================================
-
-Redis Commander is now accessible at:
-https://redis.arpansahu.space
-```
-
-### Step 2: Verify Nginx Configuration
-
-```bash
-# Check syntax
-sudo nginx -t
-
-# View configuration
-sudo grep -A 20 "Redis Commander" /etc/nginx/sites-available/services
-
-# Check nginx is listening
-sudo ss -lntp | grep :443
-```
-
-### Manual Nginx Configuration
-
-If you prefer manual setup, add this to `/etc/nginx/sites-available/services`:
-
-```nginx
-# Redis Commander
-server {
-    listen 80;
-    listen [::]:80;
-    server_name redis.arpansahu.space;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name redis.arpansahu.space;
-
-    ssl_certificate /etc/nginx/ssl/arpansahu.space/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/arpansahu.space/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-
-    location / {
-        proxy_pass http://127.0.0.1:8082;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # WebSocket support (important for real-time updates)
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        
-        # Timeouts
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-}
-```
-
-Then:
-
-```bash
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-## ✔️ Verification
-
-### Check All Components
-
-```bash
-# 1. Redis is running
-redis-cli -h 127.0.0.1 -p 6380 -a your_password ping
-# Expected: PONG
-
-# 2. PM2 status
-pm2 status
-# Expected: redis-commander | online
-
-# 3. Redis Commander port
-ss -lntp | grep 8082
-# Expected: LISTEN 127.0.0.1:8082
-
-# 4. Nginx status
-sudo systemctl status nginx
-# Expected: active (running)
-
-# 5. HTTPS access
-curl -I https://redis.arpansahu.space
-# Expected: HTTP/2 200
-```
-
-### Test Local Access
-
-```bash
-# With authentication
-curl -u "arpansahu:your_password" http://127.0.0.1:8082
-
-# Check authentication is required
-curl http://127.0.0.1:8082
-# Expected: 401 Unauthorized
-```
-
-### Test Web Access
-
-1. **Open Browser**: Navigate to `https://redis.arpansahu.space`
-
-2. **Login Prompt**: You should see HTTP Basic Auth dialog
-   - Username: `arpansahu`
-   - Password: Your configured password
-
-3. **Redis Commander UI**: After login, you should see:
-   - Redis connection status (green = connected)
-   - Key browser on the left
-   - Command console at bottom
-   - Database selector (db0, db1, etc.)
-
-4. **Test Functionality**:
-   - Browse existing keys
-   - Create a test key: `test:key` with value `hello`
-   - View the key
-   - Delete the key
-
-### Verify PM2 Auto-Start
-
-```bash
-# Check PM2 is configured for startup
-pm2 startup
-
-# Should show: "PM2 startup script already configured"
-
-# Verify process is saved
-ls ~/.pm2/dump.pm2
-# File should exist
-
-# Test by simulating reboot
-pm2 kill
-pm2 resurrect
-# redis-commander should come back online
-```
-
-## 🔧 Management
-
-### PM2 Commands
-
-**View Status:**
-```bash
-pm2 status
-pm2 info redis-commander
-```
-
-**View Logs:**
-```bash
-# Real-time logs
-pm2 logs redis-commander
-
-# Last 100 lines
-pm2 logs redis-commander --lines 100
-
-# Error logs only
-pm2 logs redis-commander --err
-
-# Log files location
-ls ~/.pm2/logs/redis-commander-*.log
-```
-
-**Restart:**
-```bash
-# Restart process
-pm2 restart redis-commander
-
-# Restart with new environment
-pm2 restart redis-commander --update-env
-```
-
-**Stop/Start:**
-```bash
-# Stop
-pm2 stop redis-commander
-
-# Start
-pm2 start redis-commander
-
-# Start with different config
-pm2 start redis-commander -- --port 9000
-```
-
-**Delete Process:**
-```bash
-pm2 delete redis-commander
-pm2 save
-```
-
-**Monitoring:**
-```bash
-# Real-time monitoring
-pm2 monit
-
-# Web-based dashboard
-pm2 plus
-```
-
-### Update Redis Commander
-
-```bash
-# Stop current process
-pm2 stop redis-commander
-
-# Update globally
-sudo npm update -g redis-commander
-
-# Check new version
-redis-commander --version
-
-# Restart
-pm2 restart redis-commander
-```
-
-### Change Configuration
-
-To update Redis connection or port:
-
-```bash
-# Update .env file
-nano .env
-
-# Delete and recreate process
-pm2 delete redis-commander
-./install.sh
-```
-
-Or manually:
-
-```bash
-pm2 delete redis-commander
-
-pm2 start redis-commander \
-    --name redis-commander \
-    -- \
-    --redis-host 127.0.0.1 \
-    --redis-port 6381 \
-    --redis-password new_password \
-    --port 8082 \
-    --http-auth-username arpansahu \
-    --http-auth-password new_ui_password
-
-pm2 save
-```
-
-## 🔍 Troubleshooting
-
-### Issue 1: Redis Commander Won't Start
-
-**Symptoms**: PM2 shows status as "stopped" or "errored"
-
-**Diagnosis:**
-```bash
-pm2 logs redis-commander
-```
-
-**Common Causes & Solutions:**
-
-1. **Redis connection failed**
-   ```
-   Error: connect ECONNREFUSED 127.0.0.1:6380
-   ```
-   
-   Fix:
-   ```bash
-   # Verify Redis is running
-   redis-cli -h 127.0.0.1 -p 6380 -a password ping
-   
-   # Start Redis if needed
-   sudo systemctl start redis-server
-   ```
-
-2. **Wrong Redis password**
-   ```
-   Error: NOAUTH Authentication required
-   ```
-   
-   Fix: Update `.env` with correct password and reinstall
-
-3. **Port already in use**
-   ```
-   Error: listen EADDRINUSE: address already in use :::8082
-   ```
-   
-   Fix:
-   ```bash
-   # Find what's using the port
-   sudo ss -lntp | grep 8082
-   
-   # Kill the process or use different port
-   pm2 delete redis-commander
-   pm2 start redis-commander -- --port 9000
-   ```
-
-### Issue 2: Cannot Access via Browser
-
-**Symptoms**: HTTPS timeout or connection refused
-
-**Diagnosis:**
-```bash
-# Test locally first
-curl -u "arpansahu:password" http://127.0.0.1:8082
-
-# Test HTTPS
-curl -I https://redis.arpansahu.space
-```
-
-**Solutions:**
-
-1. **Nginx not running**
-   ```bash
-   sudo systemctl status nginx
-   sudo systemctl start nginx
-   ```
-
-2. **Nginx configuration error**
-   ```bash
-   sudo nginx -t
-   # Fix any errors shown
-   sudo systemctl reload nginx
-   ```
-
-3. **DNS not resolving**
-   ```bash
-   nslookup redis.arpansahu.space
-   # Should return your server IP
-   ```
-
-4. **Firewall blocking**
-   ```bash
-   sudo ufw status
-   sudo ufw allow 443/tcp
-   ```
-
-### Issue 3: Authentication Fails
-
-**Symptoms**: Browser shows "401 Unauthorized" repeatedly
-
-**Causes:**
-
-1. **Wrong credentials in browser**
-   - Clear browser cache and cookies
-   - Use correct username/password from `.env`
-
-2. **Credentials not passed to Redis Commander**
-   ```bash
-   pm2 info redis-commander
-   # Check script args include --http-auth-username and --http-auth-password
-   ```
-   
-   Fix:
-   ```bash
-   pm2 delete redis-commander
-   ./install.sh  # Recreate with proper auth
-   ```
-
-3. **Special characters in password**
-   - Wrap password in quotes in `.env`
-   - Avoid characters like `$`, `` ` ``, `\` in passwords
-
-### Issue 4: PM2 Not Persisting After Reboot
-
-**Symptoms**: Redis Commander not running after server restart
-
-**Fix:**
-
-```bash
-# Configure PM2 startup
-pm2 startup
-
-# Copy and run the command it outputs, example:
-sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u arpansahu --hp /home/arpansahu
-
-# Save current process list
-pm2 save
-
-# Test by killing and resurrecting
-pm2 kill
-pm2 resurrect
-```
-
-### Issue 5: High Memory Usage
-
-**Symptoms**: Redis Commander using excessive RAM
-
-**Diagnosis:**
-```bash
-pm2 monit
-# Check memory usage
-```
-
-**Solutions:**
-
-1. **Restart periodically** (via cron):
-   ```bash
-   # Add to crontab
-   0 3 * * * /usr/bin/pm2 restart redis-commander
-   ```
-
-2. **Limit memory** in PM2:
-   ```bash
-   pm2 start redis-commander --max-memory-restart 200M
-   ```
-
-### Issue 6: WebSocket Connection Failed
-
-**Symptoms**: UI loads but doesn't update in real-time
-
-**Fix in nginx config:**
-
-```nginx
-location / {
-    proxy_pass http://127.0.0.1:8082;
-    proxy_http_version 1.1;
-    
-    # These are critical for WebSocket
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-}
-```
-
-Then:
-```bash
-sudo systemctl reload nginx
-```
-
-## 🔒 Security
-
-### Best Practices
-
-1. **Use Strong Passwords**
-   ```bash
-   # Generate secure password
-   openssl rand -base64 32
-   ```
-
-2. **Keep Software Updated**
-   ```bash
-   # Update Redis Commander
-   sudo npm update -g redis-commander
-   
-   # Update Node.js
-   sudo apt update && sudo apt upgrade nodejs
-   
-   # Update PM2
-   sudo npm update -g pm2
-   ```
-
-3. **Monitor Access Logs**
-   ```bash
-   # Nginx access logs
-   sudo tail -f /var/log/nginx/access.log | grep redis
-   
-   # PM2 logs
-   pm2 logs redis-commander
-   ```
-
-4. **Restrict by IP** (Optional)
-   
-   Add to nginx server block:
-   ```nginx
-   location / {
-       allow 192.168.1.0/24;  # Local network
-       allow YOUR_OFFICE_IP;   # Office IP
-       deny all;
-       
-       proxy_pass http://127.0.0.1:8082;
-       ...
-   }
-   ```
-
-5. **Use Read-Only Mode** (for monitoring only)
-   ```bash
-   pm2 start redis-commander -- --read-only true
-   ```
-
-### What NOT to Do
-
-❌ **Don't expose Redis Commander port directly**
-```bash
-# BAD: Binding to all interfaces
-pm2 start redis-commander -- --address 0.0.0.0
-```
-
-❌ **Don't disable HTTP authentication**
-```bash
-# BAD: No auth
-pm2 start redis-commander  # without --http-auth-*
-```
-
-❌ **Don't use weak passwords**
-```bash
-# BAD: Weak passwords
-HTTP_AUTH_PASSWORD=admin
-HTTP_AUTH_PASSWORD=12345678
-```
-
-❌ **Don't expose Redis to internet**
-```nginx
-# BAD: Redis accessible externally
-listen 0.0.0.0:6380;
-```
-
-### Security Checklist
-
-✅ Redis Commander only on 127.0.0.1  
-✅ HTTP authentication enabled  
-✅ HTTPS encryption via nginx  
-✅ Strong passwords configured  
-✅ Redis never exposed publicly  
-✅ PM2 logs rotated  
-✅ Regular updates applied  
-✅ Access logs monitored  
-
-## 📚 Additional Resources
-
-- [Redis Commander GitHub](https://github.com/joeferner/redis-commander)
-- [PM2 Documentation](https://pm2.keymetrics.io/docs/usage/quick-start/)
-- [Redis Documentation](https://redis.io/documentation)
-- [Nginx Reverse Proxy Guide](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/)
-
-## 🆘 Support
-
-For issues:
-
-1. Check [Troubleshooting](#troubleshooting) section
-2. Review PM2 logs: `pm2 logs redis-commander`
-3. Check nginx error logs: `sudo tail -f /var/log/nginx/error.log`
-4. Verify all services are running:
-   ```bash
-   pm2 status
-   sudo systemctl status nginx
-   sudo systemctl status redis-server
-   ```
-
-## 📝 Summary
-
-**Deployment Components:**
-
-✅ Redis Commander (npm package)  
-✅ PM2 process manager  
-✅ Nginx reverse proxy with HTTPS  
-✅ Built-in HTTP authentication  
-✅ Auto-restart and boot persistence  
-
-**Access Information:**
-
-- **URL**: https://redis.arpansahu.space
-- **Username**: From `.env` (HTTP_AUTH_USERNAME)
-- **Password**: From `.env` (HTTP_AUTH_PASSWORD)
-- **Internal**: http://127.0.0.1:8082
-
-**Key Files:**
-
-- Configuration: `AWS Deployment/redis_commander/.env`
-- Install script: `AWS Deployment/redis_commander/install.sh`
-- Nginx script: `AWS Deployment/redis_commander/add-nginx-config.sh`
-- PM2 logs: `~/.pm2/logs/redis-commander-*.log`
-- Nginx config: `/etc/nginx/sites-available/services`
-
-**Useful Commands:**
-
-```bash
-# Status
-pm2 status
-
-# Logs
-pm2 logs redis-commander
-
-# Restart
-pm2 restart redis-commander
-
-# Access
-https://redis.arpansahu.space
 ```
 
 
@@ -9695,6 +7686,2450 @@ All deployment files are in: `AWS Deployment/Minio/`
 - Logs: `docker logs minio`
 
 ---
+
+
+## Jenkins (CI/CD Automation Server)
+
+Jenkins is an open-source automation server that enables developers to build, test, and deploy applications through continuous integration and continuous delivery (CI/CD). This guide provides a complete, production-ready setup with Java 21, Jenkins LTS, Nginx reverse proxy, and comprehensive credential management.
+
+### Prerequisites
+
+Before installing Jenkins, ensure you have:
+
+1. Ubuntu Server 22.04 LTS
+2. Nginx with SSL certificates configured
+3. Domain name (example: jenkins.arpansahu.space)
+4. Wildcard SSL certificate already issued (via acme.sh)
+5. Minimum 2GB RAM, 20GB disk space
+6. Root or sudo access
+7. Docker installed (for containerized builds)
+
+### Architecture Overview
+
+```
+Internet (HTTPS)
+   │
+   └─ Nginx (Port 443) - TLS Termination
+        │
+        └─ jenkins.arpansahu.space
+             │
+             └─ Jenkins (localhost:8080)
+                  │
+                  ├─ Jenkins Controller (Web UI + API)
+                  ├─ Build Agents (local/remote)
+                  ├─ Workspace (/var/lib/jenkins)
+                  └─ Credentials Store
+```
+
+Key Principles:
+- Jenkins runs on localhost only (port 8080)
+- Nginx handles all TLS termination
+- Credentials stored in Jenkins encrypted store
+- Pipelines defined as code (Jenkinsfile)
+- Docker-based builds for isolation
+
+### Why Jenkins
+
+**Advantages:**
+- Open-source and free
+- Extensive plugin ecosystem (1800+)
+- Pipeline as Code (Jenkinsfile)
+- Distributed builds
+- Docker integration
+- GitHub/GitLab integration
+- Email notifications
+- Role-based access control
+
+**Use Cases:**
+- Automated builds on commit
+- Automated testing
+- Docker image building
+- Deployment automation
+- Scheduled jobs
+- Integration with Harbor registry
+- Multi-branch pipelines
+
+### Part 1: Install Java 21
+
+Jenkins requires Java to run. We'll install OpenJDK 21 (latest LTS).
+
+**⚠️ Important:** Java 17 support ends March 31, 2026. Use Java 21 for continued support.
+
+#### Check Current Java Version
+
+```bash
+java -version
+```
+
+If you see Java 17 or older, follow the upgrade steps below.
+
+#### Upgrade from Java 17 to Java 21 (If Needed)
+
+If Jenkins is already installed on Java 17:
+
+1. Install Java 21
+
+    ```bash
+    sudo apt update
+    sudo apt install -y openjdk-21-jdk
+    ```
+
+2. Check Jenkins service status
+
+    ```bash
+    sudo systemctl status jenkins
+    ```
+
+3. Update Jenkins to use Java 21
+
+    ```bash
+    sudo systemctl stop jenkins
+    sudo update-alternatives --config java
+    ```
+
+    Select Java 21 from the list (e.g., `/usr/lib/jvm/java-21-openjdk-amd64/bin/java`)
+
+4. Verify Java version
+
+    ```bash
+    java -version
+    ```
+
+    Should show: `openjdk version "21.0.x"`
+
+5. Update JAVA_HOME for Jenkins
+
+    ```bash
+    sudo nano /etc/default/jenkins
+    ```
+
+    Add or update:
+    ```bash
+    JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
+    JENKINS_JAVA_CMD="$JAVA_HOME/bin/java"
+    ```
+
+6. Restart Jenkins
+
+    ```bash
+    sudo systemctl start jenkins
+    sudo systemctl status jenkins
+    ```
+
+7. Verify in Jenkins UI
+
+    Dashboard → Manage Jenkins → System Information → Look for `java.version` (should be 21.x)
+
+#### Fresh Installation of Java 21
+
+For new installations:
+
+1. Update system packages
+
+    ```bash
+    sudo apt update
+    ```
+
+2. Install OpenJDK 21
+
+    ```bash
+    sudo apt install -y openjdk-21-jdk
+    ```
+
+3. Verify Java installation
+
+    ```bash
+    java -version
+    ```
+
+    Expected output:
+    ```
+    openjdk version "21.0.x" 2024-xx-xx
+    OpenJDK Runtime Environment (build 21.0.x+x)
+    OpenJDK 64-Bit Server VM (build 21.0.x+x, mixed mode, sharing)
+    ```
+
+4. Set JAVA_HOME (optional but recommended)
+
+    ```bash
+    sudo nano /etc/environment
+    ```
+
+    Add:
+    ```bash
+    JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
+    ```
+
+    Apply changes:
+    ```bash
+    source /etc/environment
+    echo $JAVA_HOME
+    ```
+
+### Part 2: Install Jenkins LTS
+
+Jenkins Long-Term Support (LTS) releases are recommended for production environments. Current LTS: **2.528.3**
+
+1. Add Jenkins repository key (both legacy and modern format for compatibility)
+
+    ```bash
+    # Modern keyring format (recommended)
+    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo gpg --dearmor -o /usr/share/keyrings/jenkins-archive-keyring.gpg
+    
+    # Also add legacy key for repository compatibility
+    gpg --keyserver keyserver.ubuntu.com --recv-keys 7198F4B714ABFC68
+    gpg --export 7198F4B714ABFC68 > /tmp/jenkins-key.gpg
+    sudo gpg --dearmor < /tmp/jenkins-key.gpg > /usr/share/keyrings/jenkins-old-keyring.gpg
+    ```
+
+2. Add Jenkins repository
+
+    ```bash
+    echo "deb [signed-by=/usr/share/keyrings/jenkins-old-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+    ```
+
+3. Update package list
+
+    ```bash
+    sudo apt update
+    ```
+
+4. Install Jenkins (latest LTS)
+
+    ```bash
+    # Install latest LTS version
+    sudo apt install -y jenkins
+    
+    # Or install specific LTS version
+    # sudo apt install -y jenkins=2.528.3
+    ```
+
+5. Check installed version
+
+    ```bash
+    jenkins --version
+    ```
+
+    Expected: `2.528.3` or newer LTS
+
+6. Enable Jenkins service
+
+    ```bash
+    sudo systemctl enable jenkins
+    ```
+
+7. Start Jenkins service
+
+    ```bash
+    sudo systemctl start jenkins
+    ```
+
+8. Verify Jenkins is running
+
+    ```bash
+    sudo systemctl status jenkins
+    ```
+
+    Expected: Active (running)
+
+9. Check Jenkins is listening on port 8080
+
+    ```bash
+    sudo ss -tulnp | grep 8080
+    ```
+
+    Expected: Jenkins listening on 127.0.0.1:8080
+
+### Part 2.1: Upgrade Jenkins to Latest LTS
+
+To upgrade an existing Jenkins installation:
+
+1. Check current version
+
+    ```bash
+    jenkins --version
+    # Or via API:
+    curl -s -I https://jenkins.arpansahu.space/api/json | grep X-Jenkins
+    ```
+
+2. Check available versions
+
+    ```bash
+    apt-cache policy jenkins | head -30
+    ```
+
+    Note: Look for versions 2.xxx.x (LTS releases), not 2.5xx+ (weekly releases)
+
+3. Backup Jenkins before upgrade
+
+    ```bash
+    sudo tar -czf /tmp/jenkins-backup-$(date +%Y%m%d-%H%M%S).tar.gz /var/lib/jenkins/
+    ```
+
+4. Stop Jenkins
+
+    ```bash
+    sudo systemctl stop jenkins
+    ```
+
+5. Upgrade to latest LTS
+
+    ```bash
+    sudo apt update
+    sudo apt install --only-upgrade jenkins -y
+    
+    # Or install specific LTS version:
+    # sudo apt install jenkins=2.528.3 -y
+    ```
+
+6. Start Jenkins
+
+    ```bash
+    sudo systemctl start jenkins
+    ```
+
+7. Verify upgrade
+
+    ```bash
+    jenkins --version
+    sudo systemctl status jenkins
+    ```
+
+8. Check Jenkins UI
+
+    https://jenkins.arpansahu.space → Manage Jenkins → About Jenkins
+
+### Part 3: Configure Nginx Reverse Proxy
+
+1. Edit Nginx configuration
+
+    ```bash
+    sudo nano /etc/nginx/sites-available/services
+    ```
+
+2. Add Jenkins server block
+
+    ```nginx
+    # Jenkins CI/CD - HTTP → HTTPS
+    server {
+        listen 80;
+        listen [::]:80;
+        server_name jenkins.arpansahu.space;
+        return 301 https://$host$request_uri;
+    }
+
+    # Jenkins CI/CD - HTTPS
+    server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+        server_name jenkins.arpansahu.space;
+
+        ssl_certificate     /etc/nginx/ssl/arpansahu.space/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/arpansahu.space/privkey.pem;
+
+        ssl_protocols TLSv1.2 TLSv1.3;
+
+        # Jenkins-specific timeouts
+        proxy_read_timeout 300;
+        proxy_connect_timeout 300;
+        proxy_send_timeout 300;
+
+        location / {
+            proxy_pass http://127.0.0.1:8080;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+
+            # Required for Jenkins CLI and agent connections
+            proxy_http_version 1.1;
+            proxy_request_buffering off;
+        }
+    }
+    ```
+
+3. Test Nginx configuration
+
+    ```bash
+    sudo nginx -t
+    ```
+
+4. Reload Nginx
+
+    ```bash
+    sudo systemctl reload nginx
+    ```
+
+### Part 4: Initial Jenkins Setup
+
+1. Get initial admin password
+
+    ```bash
+    sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+    ```
+
+    Copy this password (example: a1b2c3d4e5f6...)
+
+2. Access Jenkins Web UI
+
+    Go to: https://jenkins.arpansahu.space
+
+3. Enter initial admin password
+
+    Paste the password from step 1.
+
+4. Install suggested plugins
+
+    - Click: Install suggested plugins
+    - Wait for plugin installation (5-10 minutes)
+
+5. Create admin user
+
+    Configure:
+    - Username: `admin`
+    - Password: (your strong password)
+    - Full name: `Admin User`
+    - Email: your-email@example.com
+
+    Click: Save and Continue
+
+6. Configure Jenkins URL
+
+    Jenkins URL: `https://jenkins.arpansahu.space`
+
+    Click: Save and Finish
+
+7. Start using Jenkins
+
+    Click: Start using Jenkins
+
+### Part 5: Configure Jenkins Credentials
+
+Jenkins stores credentials securely for use in pipelines. We'll configure 4 essential credentials.
+
+#### 5.1: GitHub Authentication Credentials
+
+1. Navigate to credentials
+
+    Dashboard → Manage Jenkins → Credentials → System → Global credentials → Add Credentials
+
+2. Configure GitHub credentials
+
+    - **Kind**: Username with password
+    - **Scope**: Global
+    - **Username**: `arpansahu` (your GitHub username)
+    - **Password**: `ghp_xxxxxxxxxxxx` (GitHub Personal Access Token)
+    - **ID**: `github-auth`
+    - **Description**: `Github Auth`
+
+    Click: Create
+
+    Note: Generate GitHub PAT at https://github.com/settings/tokens with scopes: repo, admin:repo_hook
+
+#### 5.2: Harbor Registry Credentials
+
+1. Add Harbor credentials
+
+    Dashboard → Manage Jenkins → Credentials → System → Global credentials → Add Credentials
+
+2. Configure Harbor credentials
+
+    - **Kind**: Username with password
+    - **Scope**: Global
+    - **Username**: `admin` (or robot account: `robot$ci-bot`)
+    - **Password**: (Harbor password or robot token)
+    - **ID**: `harbor-credentials`
+    - **Description**: `harbor-credentials`
+
+    Click: Create
+
+#### 5.3: Jenkins Admin API Credentials
+
+1. Add Jenkins admin credentials
+
+    Dashboard → Manage Jenkins → Credentials → System → Global credentials → Add Credentials
+
+2. Configure Jenkins API credentials
+
+    - **Kind**: Username with password
+    - **Scope**: Global
+    - **Username**: `admin` (Jenkins admin username)
+    - **Password**: (Jenkins admin password)
+    - **ID**: `jenkins-admin-credentials`
+    - **Description**: `Jenkins admin credentials for API authentication and pipeline usage`
+
+    Click: Create
+
+    Use case: Pipeline triggers, REST API calls, remote job execution
+
+#### 5.4: Sentry Authentication Token
+
+1. Add Sentry CLI token
+
+    Dashboard → Manage Jenkins → Credentials → System → Global credentials → Add Credentials
+
+2. Configure Sentry credentials
+
+    - **Kind**: Secret text
+    - **Scope**: Global
+    - **Secret**: (Sentry auth token from https://sentry.io/settings/account/api/auth-tokens/)
+    - **ID**: `sentry-auth-token`
+    - **Description**: `Sentry CLI Authentication Token`
+
+    Click: Create
+
+    Use case: Sentry release tracking, source map uploads, error monitoring integration
+
+#### 5.5: GitHub Authentication Credentials
+
+1. Add GitHub credentials
+
+    Dashboard → Manage Jenkins → Credentials → System → Global credentials → Add Credentials
+
+2. Configure GitHub credentials
+
+    - **Kind**: Username with password
+    - **Scope**: Global
+    - **Username**: (GitHub username)
+    - **Password**: (GitHub Personal Access Token with repo permissions)
+    - **ID**: `github_auth`
+    - **Description**: `GitHub authentication for branch merging and repository operations`
+
+    Click: Create
+
+    **How to generate GitHub PAT:**
+    1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+    2. Generate new token with permissions: `repo` (Full control of private repositories)
+    3. Copy token immediately (shown only once)
+
+    Use case: Automated branch merging, repository operations, deployment workflows
+
+### Part 6: Configure Global Jenkins Variables
+
+Global variables are available to all Jenkins pipelines.
+
+1. Navigate to system configuration
+
+    Dashboard → Manage Jenkins → System
+
+2. Scroll to Global properties
+
+    Check: Environment variables
+
+3. Add global variables
+
+    Click: Add (for each variable)
+
+    | Name | Value | Description |
+    | ---- | ----- | ----------- |
+    | MAIL_JET_API_KEY | (your Mailjet API key) | Email notification service |
+    | MAIL_JET_API_SECRET | (your Mailjet secret) | Email notification service |
+    | MAIL_JET_EMAIL_ADDRESS | noreply@arpansahu.space | Sender email address |
+    | MY_EMAIL_ADDRESS | your-email@example.com | Notification recipient |
+
+4. Save configuration
+
+    Scroll down and click: Save
+
+### Part 7: Configure Jenkins for Docker Builds
+
+Jenkins needs Docker access to build containerized applications.
+
+1. Add Jenkins user to Docker group
+
+    ```bash
+    sudo usermod -aG docker jenkins
+    ```
+
+2. Restart Jenkins to apply group changes
+
+    ```bash
+    sudo systemctl restart jenkins
+    ```
+
+3. Verify Jenkins can access Docker
+
+    ```bash
+    sudo -u jenkins docker ps
+    ```
+
+    Expected: Docker container list (even if empty)
+
+### Part 8: Configure Jenkins Sudo Access (Optional)
+
+Required if pipelines need to copy files from protected directories.
+
+1. Edit sudoers file
+
+    ```bash
+    sudo visudo
+    ```
+
+2. Add Jenkins sudo permissions
+
+    Add at end of file:
+    ```bash
+    # Allow Jenkins to run specific commands without password
+    jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/mkdir, /bin/chown
+    ```
+
+    Or for full sudo access (less secure):
+    ```bash
+    jenkins ALL=(ALL) NOPASSWD: ALL
+    ```
+
+3. Save and exit
+
+    In nano: `Ctrl + O`, `Enter`, `Ctrl + X`
+    In vi: `Esc`, `:wq`, `Enter`
+
+4. Verify sudo access
+
+    ```bash
+    sudo -u jenkins sudo -l
+    ```
+
+### Part 9: Create Project Nginx Configuration
+
+Each project needs its own Nginx configuration for deployment.
+
+1. Create project Nginx configuration
+
+    ```bash
+    sudo nano /etc/nginx/sites-available/my-django-app
+    ```
+
+2. Add project server block (Docker deployment)
+
+    ```nginx
+    # Django App - HTTP → HTTPS
+    server {
+        listen 80;
+        listen [::]:80;
+        server_name myapp.arpansahu.space;
+        return 301 https://$host$request_uri;
+    }
+
+    # Django App - HTTPS
+    server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+        server_name myapp.arpansahu.space;
+
+        ssl_certificate     /etc/nginx/ssl/arpansahu.space/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/arpansahu.space/privkey.pem;
+
+        ssl_protocols TLSv1.2 TLSv1.3;
+
+        location / {
+            proxy_pass http://127.0.0.1:8000;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+
+            # WebSocket support
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+        }
+    }
+    ```
+
+3. For Kubernetes deployment (alternative)
+
+    Replace `proxy_pass` line:
+    ```nginx
+    proxy_pass http://<CLUSTER_IP>:30080;
+    ```
+
+4. Enable site configuration
+
+    ```bash
+    sudo ln -s /etc/nginx/sites-available/my-django-app /etc/nginx/sites-enabled/
+    ```
+
+5. Test Nginx configuration
+
+    ```bash
+    sudo nginx -t
+    ```
+
+6. Reload Nginx
+
+    ```bash
+    sudo systemctl reload nginx
+    ```
+
+### Part 10: Create Jenkinsfile for Build Pipeline
+
+Create `Jenkinsfile-build` in your project repository root.
+
+Example Jenkinsfile-build:
+
+```groovy
+pipeline {
+    agent { label 'local' }
+    
+    environment {
+        HARBOR_URL = 'harbor.arpansahu.space'
+        HARBOR_PROJECT = 'library'
+        IMAGE_NAME = 'my-django-app'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}")
+                }
+            }
+        }
+        
+        stage('Push to Harbor') {
+            steps {
+                script {
+                    docker.withRegistry("https://${HARBOR_URL}", 'harbor-credentials') {
+                        docker.image("${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        docker.image("${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}").push('latest')
+                    }
+                }
+            }
+        }
+        
+        stage('Trigger Deploy') {
+            steps {
+                build job: 'my-django-app-deploy', wait: false
+            }
+        }
+    }
+    
+    post {
+        success {
+            emailext(
+                subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build completed successfully.",
+                to: "${env.MY_EMAIL_ADDRESS}"
+            )
+        }
+        failure {
+            emailext(
+                subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build failed. Check Jenkins console output.",
+                to: "${env.MY_EMAIL_ADDRESS}"
+            )
+        }
+    }
+}
+```
+
+### Part 11: Create Jenkinsfile for Deploy Pipeline
+
+Create `Jenkinsfile-deploy` in your project repository root.
+
+Example Jenkinsfile-deploy:
+
+```groovy
+pipeline {
+    agent { label 'local' }
+    
+    environment {
+        HARBOR_URL = 'harbor.arpansahu.space'
+        HARBOR_PROJECT = 'library'
+        IMAGE_NAME = 'my-django-app'
+        CONTAINER_NAME = 'my-django-app'
+        CONTAINER_PORT = '8000'
+    }
+    
+    stages {
+        stage('Stop Old Container') {
+            steps {
+                script {
+                    sh """
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
+                    """
+                }
+            }
+        }
+        
+        stage('Pull Latest Image') {
+            steps {
+                script {
+                    docker.withRegistry("https://${HARBOR_URL}", 'harbor-credentials') {
+                        docker.image("${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_NAME}:latest").pull()
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy Container') {
+            steps {
+                script {
+                    sh """
+                        docker run -d \
+                          --name ${CONTAINER_NAME} \
+                          --restart unless-stopped \
+                          -p ${CONTAINER_PORT}:8000 \
+                          --env-file /var/lib/jenkins/.env/${IMAGE_NAME} \
+                          ${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_NAME}:latest
+                    """
+                }
+            }
+        }
+        
+        stage('Health Check') {
+            steps {
+                script {
+                    sleep(time: 10, unit: 'SECONDS')
+                    sh "curl -f http://localhost:${CONTAINER_PORT}/health || exit 1"
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            emailext(
+                subject: "Deploy Success: ${env.JOB_NAME}",
+                body: "Deployment completed successfully.",
+                to: "${env.MY_EMAIL_ADDRESS}"
+            )
+        }
+        failure {
+            emailext(
+                subject: "Deploy Failed: ${env.JOB_NAME}",
+                body: "Deployment failed. Check Jenkins console output.",
+                to: "${env.MY_EMAIL_ADDRESS}"
+            )
+        }
+    }
+}
+```
+
+### Part 12: Create Jenkins Pipeline Projects
+
+#### 12.1: Create Build Pipeline
+
+1. Create new pipeline
+
+    Dashboard → New Item
+
+2. Configure pipeline
+
+    - **Name**: `my-django-app-build`
+    - **Type**: Pipeline
+    - Click: OK
+
+3. Configure pipeline settings
+
+    - **Description**: Build and push Docker image to Harbor
+    - **GitHub project**: (check and add your repo URL)
+    - **Build Triggers**: GitHub hook trigger for GITScm polling
+
+4. Configure Pipeline definition
+
+    - **Definition**: Pipeline script from SCM
+    - **SCM**: Git
+    - **Repository URL**: `https://github.com/arpansahu/my-django-app.git`
+    - **Credentials**: `github-auth`
+    - **Branch**: `*/build`
+    - **Script Path**: `Jenkinsfile-build`
+
+5. Save pipeline
+
+    Click: Save
+
+#### 12.2: Create Deploy Pipeline
+
+1. Create new pipeline
+
+    Dashboard → New Item
+
+2. Configure pipeline
+
+    - **Name**: `my-django-app-deploy`
+    - **Type**: Pipeline
+    - Click: OK
+
+3. Configure pipeline settings
+
+    - **Description**: Deploy Docker container from Harbor
+    - **Build Triggers**: None (triggered by build pipeline)
+
+4. Configure Pipeline definition
+
+    - **Definition**: Pipeline script from SCM
+    - **SCM**: Git
+    - **Repository URL**: `https://github.com/arpansahu/my-django-app.git`
+    - **Credentials**: `github-auth`
+    - **Branch**: `*/main`
+    - **Script Path**: `Jenkinsfile-deploy`
+
+5. Save pipeline
+
+    Click: Save
+
+### Part 13: Configure Environment Files
+
+Store sensitive environment variables outside the repository.
+
+1. Create environment file directory
+
+    ```bash
+    sudo mkdir -p /var/lib/jenkins/.env
+    sudo chown jenkins:jenkins /var/lib/jenkins/.env
+    ```
+
+2. Create project environment file
+
+    ```bash
+    sudo nano /var/lib/jenkins/.env/my-django-app
+    ```
+
+3. Add environment variables
+
+    ```bash
+    # Django settings
+    SECRET_KEY=your-secret-key-here
+    DEBUG=False
+    ALLOWED_HOSTS=myapp.arpansahu.space
+
+    # Database
+    DATABASE_URL=postgresql://user:pass@db:5432/myapp
+
+    # Redis
+    REDIS_URL=redis://redis:6379/0
+
+    # Email
+    EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+    EMAIL_HOST=smtp.mailjet.com
+    EMAIL_PORT=587
+    EMAIL_USE_TLS=True
+    EMAIL_HOST_USER=your-mailjet-api-key
+    EMAIL_HOST_PASSWORD=your-mailjet-secret
+
+    # Sentry
+    SENTRY_DSN=https://xxx@sentry.io/xxx
+    ```
+
+4. Set proper permissions
+
+    ```bash
+    sudo chown jenkins:jenkins /var/lib/jenkins/.env/my-django-app
+    sudo chmod 600 /var/lib/jenkins/.env/my-django-app
+    ```
+
+### Part 14: Configure Email Notifications
+
+1. Install Email Extension Plugin
+
+    Dashboard → Manage Jenkins → Plugins → Available plugins
+    
+    Search: `Email Extension Plugin`
+    
+    Click: Install
+
+2. Configure SMTP settings
+
+    Dashboard → Manage Jenkins → System → Extended E-mail Notification
+
+    Configure:
+    - **SMTP server**: `in-v3.mailjet.com`
+    - **SMTP port**: `587`
+    - **Use SMTP Authentication**: ✓ Checked
+    - **User Name**: `${MAIL_JET_API_KEY}`
+    - **Password**: `${MAIL_JET_API_SECRET}`
+    - **Use TLS**: ✓ Checked
+    - **Default user e-mail suffix**: `@arpansahu.space`
+
+3. Test email configuration
+
+    Click: Test configuration by sending test e-mail
+
+    Enter: `${MY_EMAIL_ADDRESS}`
+
+    Expected: Email received
+
+4. Save configuration
+
+    Click: Save
+
+### Managing Jenkins Service
+
+1. Check Jenkins status
+
+    ```bash
+    sudo systemctl status jenkins
+    ```
+
+2. Stop Jenkins
+
+    ```bash
+    sudo systemctl stop jenkins
+    ```
+
+3. Start Jenkins
+
+    ```bash
+    sudo systemctl start jenkins
+    ```
+
+4. Restart Jenkins
+
+    ```bash
+    sudo systemctl restart jenkins
+    ```
+
+5. View Jenkins logs
+
+    ```bash
+    sudo journalctl -u jenkins -f
+    ```
+
+6. View Jenkins application logs
+
+    ```bash
+    sudo tail -f /var/log/jenkins/jenkins.log
+    ```
+
+### Backup and Restore
+
+1. Backup Jenkins home directory
+
+    ```bash
+    # Stop Jenkins
+    sudo systemctl stop jenkins
+
+    # Backup Jenkins home
+    sudo tar -czf jenkins-backup-$(date +%Y%m%d).tar.gz /var/lib/jenkins
+
+    # Start Jenkins
+    sudo systemctl start jenkins
+    ```
+
+2. Backup only critical data
+
+    ```bash
+    sudo tar -czf jenkins-config-backup-$(date +%Y%m%d).tar.gz \
+      /var/lib/jenkins/config.xml \
+      /var/lib/jenkins/jobs/ \
+      /var/lib/jenkins/users/ \
+      /var/lib/jenkins/credentials.xml \
+      /var/lib/jenkins/secrets/
+    ```
+
+3. Restore Jenkins backup
+
+    ```bash
+    # Stop Jenkins
+    sudo systemctl stop jenkins
+
+    # Restore backup
+    sudo tar -xzf jenkins-backup-YYYYMMDD.tar.gz -C /
+
+    # Set ownership
+    sudo chown -R jenkins:jenkins /var/lib/jenkins
+
+    # Start Jenkins
+    sudo systemctl start jenkins
+    ```
+
+### Common Issues and Fixes
+
+1. Jenkins not starting
+
+    Cause: Java not found or port conflict
+
+    Fix:
+
+    ```bash
+    # Check Java installation
+    java -version
+
+    # Check if port 8080 is in use
+    sudo ss -tulnp | grep 8080
+
+    # Check Jenkins logs
+    sudo journalctl -u jenkins -n 50
+    ```
+
+2. Cannot push to Harbor from Jenkins
+
+    Cause: Docker credentials or network issue
+
+    Fix:
+
+    ```bash
+    # Test Docker login as Jenkins user
+    sudo -u jenkins docker login harbor.arpansahu.space
+
+    # Check Jenkins can reach Harbor
+    sudo -u jenkins curl -I https://harbor.arpansahu.space
+    ```
+
+3. Pipeline fails with permission denied
+
+    Cause: Jenkins doesn't have Docker access
+
+    Fix:
+
+    ```bash
+    # Add Jenkins to Docker group
+    sudo usermod -aG docker jenkins
+
+    # Restart Jenkins
+    sudo systemctl restart jenkins
+
+    # Verify
+    sudo -u jenkins docker ps
+    ```
+
+4. Email notifications not working
+
+    Cause: SMTP configuration incorrect
+
+    Fix:
+
+    - Verify Mailjet API credentials in global variables
+    - Check SMTP settings in Email Extension configuration
+    - Send test email from Jenkins
+    - Check Mailjet dashboard for send logs
+
+5. GitHub webhook not triggering builds
+
+    Cause: Webhook not configured or firewall blocking
+
+    Fix:
+
+    ```bash
+    # Verify Jenkins is accessible from internet
+    curl -I https://jenkins.arpansahu.space
+
+    # Configure GitHub webhook
+    # Repository → Settings → Webhooks → Add webhook
+    # Payload URL: https://jenkins.arpansahu.space/github-webhook/
+    # Content type: application/json
+    # Events: Just the push event
+    ```
+
+### Security Best Practices
+
+1. Use HTTPS only
+
+    - Never access Jenkins over HTTP
+    - Always use Nginx reverse proxy with TLS
+
+2. Strong authentication
+
+    ```bash
+    # Enable security realm
+    Dashboard → Manage Jenkins → Security → Security Realm
+    Select: Jenkins' own user database
+    ```
+
+3. Enable CSRF protection
+
+    Dashboard → Manage Jenkins → Security → CSRF Protection
+    Check: Enable CSRF Protection
+
+4. Limit build agent connections
+
+    Dashboard → Manage Jenkins → Security → Agents
+    Set: Fixed port (50000) or disable
+
+5. Use credentials store
+
+    - Never hardcode credentials in Jenkinsfile
+    - Always use Jenkins credentials store
+    - Rotate credentials regularly
+
+6. Regular updates
+
+    ```bash
+    # Check for Jenkins updates
+    Dashboard → Manage Jenkins → System Information
+
+    # Update Jenkins
+    sudo apt update
+    sudo apt upgrade jenkins
+    ```
+
+7. Backup regularly
+
+    ```bash
+    # Automate with cron
+    sudo crontab -e
+    ```
+
+    Add:
+    ```bash
+    0 2 * * * /usr/local/bin/backup-jenkins.sh
+    ```
+
+### Performance Optimization
+
+1. Increase Java heap size
+
+    ```bash
+    sudo nano /etc/default/jenkins
+    ```
+
+    Add/modify:
+    ```bash
+    JAVA_ARGS="-Xmx2048m -Xms1024m"
+    ```
+
+    Restart Jenkins:
+    ```bash
+    sudo systemctl restart jenkins
+    ```
+
+2. Clean old builds
+
+    Configure in project:
+    - Discard old builds
+    - Keep max 10 builds
+    - Keep builds for 7 days
+
+3. Use build agents
+
+    Distribute builds across multiple machines instead of building everything on controller.
+
+### Monitoring Jenkins
+
+1. Check Jenkins system info
+
+    Dashboard → Manage Jenkins → System Information
+
+2. Monitor disk usage
+
+    ```bash
+    du -sh /var/lib/jenkins/*
+    ```
+
+3. Monitor build queue
+
+    Dashboard → Build Queue (left sidebar)
+
+4. View build history
+
+    Dashboard → Build History (left sidebar)
+
+### Final Verification Checklist
+
+Run these commands to verify Jenkins is working:
+
+```bash
+# Check Jenkins service
+sudo systemctl status jenkins
+
+# Check Java version
+java -version
+
+# Check port binding
+sudo ss -tulnp | grep 8080
+
+# Check Nginx config
+sudo nginx -t
+
+# Test HTTPS access
+curl -I https://jenkins.arpansahu.space
+
+# Verify Docker access
+sudo -u jenkins docker ps
+```
+
+Then test in browser:
+- Access: https://jenkins.arpansahu.space
+- Login with admin credentials
+- Verify all 4 credentials exist
+- Create test pipeline
+- Run manual build
+- Check email notification received
+
+### What This Setup Provides
+
+After following this guide, you will have:
+
+1. Jenkins LTS with Java 21
+2. HTTPS access via Nginx reverse proxy
+3. 4 configured credentials (GitHub, Harbor, Jenkins API, Sentry)
+4. Global environment variables for emails
+5. Docker integration for builds
+6. Email notifications via Mailjet
+7. Build and deploy pipeline examples
+8. Production-ready configuration
+9. Automatic startup with systemd
+10. Comprehensive monitoring and logging
+
+### Example Configuration Summary
+
+| Component | Value |
+| --------- | ----- |
+| Jenkins URL | https://jenkins.arpansahu.space |
+| Jenkins Port | 8080 (localhost only) |
+| Jenkins Home | /var/lib/jenkins |
+| Java Version | OpenJDK 21 |
+| Admin User | admin |
+| Nginx Config | /etc/nginx/sites-available/services |
+
+### Architecture Summary
+
+```
+Internet (HTTPS)
+   │
+   └─ Nginx (TLS Termination)
+        │ [Wildcard Certificate: *.arpansahu.space]
+        │
+        └─ jenkins.arpansahu.space (Port 443 → 8080)
+             │
+             └─ Jenkins Controller
+                  │
+                  ├─ Credentials Store
+                  │   ├─ github-auth
+                  │   ├─ harbor-credentials
+                  │   ├─ jenkins-admin-credentials
+                  │   └─ sentry-auth-token
+                  │
+                  ├─ Build Pipelines
+                  │   ├─ Jenkinsfile-build (Docker build + push)
+                  │   └─ Jenkinsfile-deploy (Docker deploy)
+                  │
+                  └─ Integration
+                      ├─ GitHub (webhooks)
+                      ├─ Harbor (registry)
+                      ├─ Docker (builds)
+                      ├─ Mailjet (notifications)
+                      └─ Sentry (error tracking)
+```
+
+### Key Rules to Remember
+
+1. Jenkins port 8080 never exposed externally
+2. Always use credentials store, never hardcode
+3. Use Jenkinsfile for pipeline as code
+4. Separate build and deploy pipelines
+5. Store .env files outside repository
+6. Enable email notifications for failures
+7. Regular backups of /var/lib/jenkins
+8. Keep Jenkins and plugins updated
+9. Use Harbor for private registry
+10. Monitor build queue and disk usage
+
+### Next Steps
+
+After setting up Jenkins:
+
+1. Configure GitHub webhooks for automatic builds
+2. Create pipelines for each project
+3. Set up build agents for distributed builds
+4. Configure Slack/Teams notifications
+5. Implement automated testing in pipelines
+6. Set up deployment approvals
+7. Configure Jenkins metrics monitoring
+
+My Jenkins instance: https://jenkins.arpansahu.space
+
+For Harbor integration, see harbor.md documentation.
+
+
+## Harbor (Self-Hosted Private Docker Registry)
+
+Harbor is an open-source container image registry that secures images with role-based access control, scans images for vulnerabilities, and signs images as trusted. It extends Docker Distribution by adding enterprise features like security, identity management, and image replication. This guide provides a complete, production-ready setup with Nginx reverse proxy.
+
+### Prerequisites
+
+Before installing Harbor, ensure you have:
+
+1. Ubuntu Server 22.04 LTS
+2. Docker Engine installed (see docker_installation.md)
+3. Nginx with SSL certificates configured
+4. Domain name (example: harbor.arpansahu.space)
+5. Wildcard SSL certificate already issued (via acme.sh)
+6. Minimum 4GB RAM, 40GB disk space
+7. Root or sudo access
+
+### Architecture Overview
+
+```
+Internet (HTTPS)
+   │
+   └─ Nginx (Port 443) - TLS Termination
+        │
+        └─ harbor.arpansahu.space
+             │
+             └─ Harbor Internal Nginx (localhost:8080)
+                  │
+                  ├─ Harbor Core
+                  ├─ Harbor Registry
+                  ├─ Harbor Portal (Web UI)
+                  ├─ Trivy (Vulnerability Scanner)
+                  ├─ Notary (Image Signing)
+                  └─ ChartMuseum (Helm Charts)
+```
+
+Key Principles:
+- Harbor runs on localhost only
+- System Nginx handles all external TLS
+- Harbor has its own internal Nginx
+- All data persisted in Docker volumes
+- Automatic restart via systemd
+
+### Why Harbor
+
+**Advantages:**
+- Role-based access control (RBAC)
+- Vulnerability scanning with Trivy
+- Image signing and trust (Notary)
+- Helm chart repository
+- Image replication
+- Garbage collection
+- Web UI for management
+- Docker Hub proxy cache
+
+**Use Cases:**
+- Private Docker registry for organization
+- Secure image storage
+- Vulnerability assessment
+- Compliance and auditing
+- Multi-project isolation
+- Image lifecycle management
+
+### Part 1: Download and Extract Harbor
+
+1. Download latest Harbor release
+
+    ```bash
+    cd /opt
+    sudo wget https://github.com/goharbor/harbor/releases/download/v2.11.0/harbor-offline-installer-v2.11.0.tgz
+    ```
+
+    Check for latest version at: https://github.com/goharbor/harbor/releases
+
+2. Extract Harbor installer
+
+    ```bash
+    sudo tar -xzvf harbor-offline-installer-v2.11.0.tgz
+    cd harbor
+    ```
+
+3. Verify extracted files
+
+    ```bash
+    ls -la
+    ```
+
+    Expected files:
+    - harbor.yml.tmpl
+    - install.sh
+    - prepare
+    - common.sh
+    - harbor.*.tar.gz (images)
+
+### Part 2: Configure Harbor
+
+1. Copy template configuration
+
+    ```bash
+    sudo cp harbor.yml.tmpl harbor.yml
+    ```
+
+2. Edit Harbor configuration
+
+    ```bash
+    sudo nano harbor.yml
+    ```
+
+3. Configure essential settings
+
+    Find and modify these lines:
+
+    ```yaml
+    # Hostname for Harbor
+    hostname: harbor.arpansahu.space
+
+    # HTTP settings (used for internal communication)
+    http:
+      port: 8080
+
+    # HTTPS settings (disabled - Nginx handles this)
+    # Comment out or remove the https section completely
+    # https:
+    #   port: 443
+    #   certificate: /path/to/cert
+    #   private_key: /path/to/key
+
+    # Harbor admin password
+    harbor_admin_password: YourStrongPasswordHere
+
+    # Database settings (PostgreSQL)
+    database:
+      password: ChangeDatabasePassword
+      max_idle_conns: 100
+      max_open_conns: 900
+
+    # Data volume location
+    data_volume: /data
+
+    # Trivy (vulnerability scanner)
+    trivy:
+      ignore_unfixed: false
+      skip_update: false
+      offline_scan: false
+      insecure: false
+
+    # Job service
+    jobservice:
+      max_job_workers: 10
+
+    # Notification webhook job
+    notification:
+      webhook_job_max_retry: 3
+
+    # Log settings
+    log:
+      level: info
+      local:
+        rotate_count: 50
+        rotate_size: 200M
+        location: /var/log/harbor
+    ```
+
+    Important changes:
+    - Set `hostname` to your domain
+    - Set `http.port` to 8080 (internal)
+    - Comment out entire `https` section
+    - Change `harbor_admin_password`
+    - Change `database.password`
+    - Keep `data_volume: /data` for persistence
+
+4. Save and exit
+
+    In nano: `Ctrl + O`, `Enter`, `Ctrl + X`
+
+### Part 3: Install Harbor
+
+1. Run Harbor installer with all components
+
+    ```bash
+    sudo ./install.sh --with-notary --with-trivy --with-chartmuseum
+    ```
+
+    This will:
+    - Load Harbor Docker images
+    - Generate docker-compose.yml
+    - Create necessary directories
+    - Start all Harbor services
+
+    Installation takes 5-10 minutes depending on system.
+
+2. Verify installation
+
+    ```bash
+    sudo docker compose ps
+    ```
+
+    Expected services (all should be "Up"):
+    - harbor-core
+    - harbor-db (PostgreSQL)
+    - harbor-jobservice
+    - harbor-log
+    - harbor-portal (Web UI)
+    - nginx (Harbor's internal)
+    - redis
+    - registry
+    - registryctl
+    - trivy-adapter
+    - notary-server
+    - notary-signer
+    - chartmuseum
+
+3. Check Harbor logs
+
+    ```bash
+    sudo docker compose logs -f
+    ```
+
+    Press `Ctrl + C` to exit logs.
+
+### Part 4: Configure System Nginx
+
+1. Edit Nginx configuration
+
+    ```bash
+    sudo nano /etc/nginx/sites-available/services
+    ```
+
+2. Add Harbor server block
+
+    ```nginx
+    # Harbor Registry - HTTP → HTTPS
+    server {
+        listen 80;
+        listen [::]:80;
+        server_name harbor.arpansahu.space;
+        return 301 https://$host$request_uri;
+    }
+
+    # Harbor Registry - HTTPS
+    server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+        server_name harbor.arpansahu.space;
+
+        ssl_certificate     /etc/nginx/ssl/arpansahu.space/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/arpansahu.space/privkey.pem;
+
+        ssl_protocols TLSv1.2 TLSv1.3;
+
+        location / {
+            # Allow large image uploads (2GB recommended, 0 for unlimited)
+            # Note: Set to at least 2G for typical Docker images
+            client_max_body_size 2G;
+            
+            proxy_pass http://127.0.0.1:8080;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+
+            # WebSocket support
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+
+            # Timeouts for large image pushes
+            proxy_connect_timeout 300;
+            proxy_send_timeout 300;
+            proxy_read_timeout 300;
+        }
+    }
+    ```
+
+3. Test Nginx configuration
+
+    ```bash
+    sudo nginx -t
+    ```
+
+4. Reload Nginx
+
+    ```bash
+    sudo systemctl reload nginx
+    ```
+
+### Part 5: Configure Auto-Start with Systemd
+
+Harbor needs to start automatically after reboot. Docker Compose alone doesn't provide this.
+
+1. Create systemd service file
+
+    ```bash
+    sudo nano /etc/systemd/system/harbor.service
+    ```
+
+2. Add service configuration
+
+    ```bash
+    [Unit]
+    Description=Harbor Container Registry
+    After=docker.service
+    Requires=docker.service
+
+    [Service]
+    Type=oneshot
+    RemainAfterExit=yes
+    WorkingDirectory=/opt/harbor
+    ExecStart=/usr/bin/docker compose up -d
+    ExecStop=/usr/bin/docker compose down
+    Restart=on-failure
+    RestartSec=10
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+
+3. Reload systemd daemon
+
+    ```bash
+    sudo systemctl daemon-reload
+    ```
+
+4. Enable Harbor service
+
+    ```bash
+    sudo systemctl enable harbor
+    ```
+
+5. Verify service status
+
+    ```bash
+    sudo systemctl status harbor
+    ```
+
+    Expected: Loaded and active
+
+### Part 6: Configure Firewall and Port Forwarding
+
+1. Configure UFW firewall
+
+    ```bash
+    # Allow HTTP/HTTPS (if not already allowed)
+    sudo ufw allow 80/tcp
+    sudo ufw allow 443/tcp
+
+    # Block direct access to Harbor port
+    sudo ufw deny 8080/tcp
+
+    # Reload firewall
+    sudo ufw reload
+    ```
+
+2. Configure router port forwarding
+
+    Access router admin: https://airtel.arpansahu.space (or http://192.168.1.1:81)
+
+    Add port forwarding rules:
+
+    | Service | External Port | Internal IP | Internal Port | Protocol |
+    | ------- | ------------- | ----------- | ------------- | -------- |
+    | Harbor HTTP | 80 | 192.168.1.200 | 80 | TCP |
+    | Harbor HTTPS | 443 | 192.168.1.200 | 443 | TCP |
+
+    Note: Do NOT forward port 8080 (Harbor internal port).
+
+### Part 7: Test Harbor Installation
+
+1. Check all containers are running
+
+    ```bash
+    sudo docker compose ps
+    ```
+
+    All should show "Up" status.
+
+2. Test local access
+
+    ```bash
+    curl -I http://127.0.0.1:8080
+    ```
+
+    Expected: HTTP 200 or 301
+
+3. Test external HTTPS access
+
+    ```bash
+    curl -I https://harbor.arpansahu.space
+    ```
+
+    Expected: HTTP 200
+
+4. Access Harbor Web UI
+
+    Go to: https://harbor.arpansahu.space
+
+5. Login with admin credentials
+
+    - Username: `admin`
+    - Password: (from harbor.yml harbor_admin_password)
+
+### Part 8: Initial Harbor Configuration
+
+1. Change admin password
+
+    - Click admin (top right) → Change Password
+    - Set strong password
+    - Save
+
+2. Create project
+
+    - Go to: Projects → New Project
+    - Project Name: `library` (default) or custom name
+    - Access Level: Private (recommended)
+    - Click: OK
+
+3. Create robot account for CI/CD
+
+    - Go to: Projects → library → Robot Accounts
+    - Click: New Robot Account
+    - Name: `ci-bot`
+    - Expiration: Never (or set expiry)
+    - Permissions: Push Artifact, Pull Artifact
+    - Click: Add
+    - Save token securely (shown only once)
+
+### Part 9: Using Harbor as Docker Registry
+
+#### Login to Harbor
+
+1. Login from Docker client
+
+    ```bash
+    docker login harbor.arpansahu.space
+    ```
+
+    Enter:
+    - Username: `admin` (or your username)
+    - Password: (your Harbor password)
+
+    Expected: Login Succeeded
+
+2. Login with robot account (for CI/CD)
+
+    ```bash
+    docker login harbor.arpansahu.space -u robot$ci-bot -p YOUR_ROBOT_TOKEN
+    ```
+
+#### Push Images to Harbor
+
+1. Tag existing image
+
+    ```bash
+    docker tag nginx:latest harbor.arpansahu.space/library/nginx:latest
+    ```
+
+    Format: `harbor.domain.com/project/image:tag`
+
+2. Push image to Harbor
+
+    ```bash
+    docker push harbor.arpansahu.space/library/nginx:latest
+    ```
+
+3. Verify in Harbor UI
+
+    - Go to: Projects → library → Repositories
+    - You should see: nginx repository
+
+#### Pull Images from Harbor
+
+1. Pull image from Harbor
+
+    ```bash
+    docker pull harbor.arpansahu.space/library/nginx:latest
+    ```
+
+2. Use in docker-compose.yml
+
+    ```yaml
+    services:
+      web:
+        image: harbor.arpansahu.space/library/nginx:latest
+    ```
+
+### Part 10: Configure Image Retention Policy
+
+Retention policies automatically delete old images to save space.
+
+1. Navigate to project
+
+    - Projects → library → Policy
+
+2. Add retention rule
+
+    Click: Add Rule
+
+    Configure:
+    - **Repositories**: matching `**` (all repositories)
+    - **By artifact count**: Retain the most recently pulled `3` artifacts
+    - **Tags**: matching `**` (all tags)
+    - **Untagged artifacts**: ✓ Checked (delete untagged)
+
+    This keeps last 3 pulled images and deletes others.
+
+    ![Add Retention Rule](https://github.com/arpansahu/common_readme/blob/main/AWS%20Deployment/harbor/retention_rule_add.png)
+
+3. Schedule retention policy
+
+    Click: Add Retention Rule → Schedule
+
+    Configure schedule:
+    - **Type**: Daily / Weekly / Monthly
+    - **Time**: 02:00 AM (off-peak)
+    - **Cron**: `0 2 * * *` (2 AM daily)
+
+    Click: Save
+
+    ![Retention Rule Schedule](https://github.com/arpansahu/common_readme/blob/main/AWS%20Deployment/harbor/retention_rule_schedule.png)
+
+4. Test retention policy
+
+    Click: Dry Run
+
+    This shows what would be deleted without actually deleting.
+
+### Part 11: Enable Vulnerability Scanning
+
+Harbor uses Trivy to scan images for vulnerabilities.
+
+1. Configure automatic scanning
+
+    - Go to: Projects → library → Configuration
+    - Enable: Automatically scan images on push
+    - Click: Save
+
+2. Manual scan existing image
+
+    - Go to: Projects → library → Repositories → nginx
+    - Select tag: latest
+    - Click: Scan
+
+3. View scan results
+
+    - Click on tag
+    - View: Vulnerabilities tab
+    - See: Critical, High, Medium, Low vulnerabilities
+
+4. Set CVE allowlist (optional)
+
+    - Go to: Projects → library → Configuration
+    - Add CVE IDs to allow despite vulnerabilities
+    - Use for false positives or accepted risks
+
+### Managing Harbor Service
+
+1. Check Harbor status
+
+    ```bash
+    sudo systemctl status harbor
+    ```
+
+2. Stop Harbor
+
+    ```bash
+    sudo systemctl stop harbor
+    ```
+
+    or
+
+    ```bash
+    cd /opt/harbor
+    sudo docker compose down
+    ```
+
+3. Start Harbor
+
+    ```bash
+    sudo systemctl start harbor
+    ```
+
+    or
+
+    ```bash
+    cd /opt/harbor
+    sudo docker compose up -d
+    ```
+
+4. Restart Harbor
+
+    ```bash
+    sudo systemctl restart harbor
+    ```
+
+5. View Harbor logs
+
+    ```bash
+    cd /opt/harbor
+    sudo docker compose logs -f
+    ```
+
+6. View specific service logs
+
+    ```bash
+    sudo docker compose logs -f harbor-core
+    ```
+
+### Backup and Restore
+
+1. Backup Harbor data
+
+    ```bash
+    # Stop Harbor
+    sudo systemctl stop harbor
+
+    # Backup data directory
+    sudo tar -czf harbor-data-backup-$(date +%Y%m%d).tar.gz /data
+
+    # Backup configuration
+    sudo cp /opt/harbor/harbor.yml /backup/harbor-config-$(date +%Y%m%d).yml
+
+    # Backup database
+    sudo docker exec harbor-db pg_dumpall -U postgres > harbor-db-backup-$(date +%Y%m%d).sql
+
+    # Start Harbor
+    sudo systemctl start harbor
+    ```
+
+2. Restore Harbor data
+
+    ```bash
+    # Stop Harbor
+    sudo systemctl stop harbor
+
+    # Restore data directory
+    sudo tar -xzf harbor-data-backup-YYYYMMDD.tar.gz -C /
+
+    # Restore configuration
+    sudo cp /backup/harbor-config-YYYYMMDD.yml /opt/harbor/harbor.yml
+
+    # Restore database
+    sudo docker exec -i harbor-db psql -U postgres < harbor-db-backup-YYYYMMDD.sql
+
+    # Start Harbor
+    sudo systemctl start harbor
+    ```
+
+### Common Issues and Fixes
+
+1. Harbor containers not starting
+
+    Cause: Port conflict or insufficient resources
+
+    Fix:
+
+    ```bash
+    # Check if port 8080 is in use
+    sudo ss -tulnp | grep 8080
+
+    # Check Docker logs
+    cd /opt/harbor
+    sudo docker compose logs
+
+    # Check system resources
+    free -h
+    df -h
+    ```
+
+2. Cannot login to Harbor
+
+    Cause: Wrong credentials or database issue
+
+    Fix:
+
+    - Verify admin password in harbor.yml
+    - Reset admin password:
+      ```bash
+      cd /opt/harbor
+      sudo docker compose exec harbor-core harbor-core password-reset
+      ```
+
+3. Image push fails
+
+    Cause: Storage full or permission issues
+
+    Fix:
+
+    ```bash
+    # Check disk space
+    df -h /data
+
+    # Check Harbor logs
+    sudo docker compose logs -f registry
+
+    # Check data directory permissions
+    sudo ls -la /data
+    ```
+
+4. SSL certificate errors
+
+    Cause: Nginx certificate misconfigured
+
+    Fix:
+
+    ```bash
+    # Verify certificate
+    openssl x509 -in /etc/nginx/ssl/arpansahu.space/fullchain.pem -noout -dates
+
+    # Check Nginx configuration
+    sudo nginx -t
+
+    # Reload Nginx
+    sudo systemctl reload nginx
+    ```
+
+5. Vulnerability scanning not working
+
+    Cause: Trivy adapter not running or internet connectivity
+
+    Fix:
+
+    ```bash
+    # Check Trivy adapter
+    sudo docker compose ps trivy-adapter
+
+    # Check Trivy logs
+    sudo docker compose logs trivy-adapter
+
+    # Update Trivy database manually
+    sudo docker compose exec trivy-adapter /home/scanner/trivy --download-db-only
+    ```
+
+### Security Best Practices
+
+1. Use strong passwords
+
+    - Admin password: minimum 16 characters
+    - Database password: minimum 16 characters
+    - Robot account tokens: treat as secrets
+
+2. Enable HTTPS only
+
+    - Never use HTTP for Harbor
+    - Always proxy through Nginx with TLS
+
+3. Implement RBAC
+
+    - Create projects with limited access
+    - Use robot accounts for automation
+    - Assign minimal required permissions
+
+4. Enable vulnerability scanning
+
+    - Automatically scan on push
+    - Set CVE severity thresholds
+    - Block deployment of vulnerable images
+
+5. Configure image retention
+
+    - Automatically delete old images
+    - Keep only necessary image versions
+    - Schedule during off-peak hours
+
+6. Regular backups
+
+    ```bash
+    # Automate with cron
+    sudo crontab -e
+    ```
+
+    Add:
+    ```bash
+    0 2 * * * /usr/local/bin/backup-harbor.sh
+    ```
+
+7. Monitor logs
+
+    ```bash
+    # Regular log review
+    sudo docker compose logs --since 24h | grep ERROR
+    ```
+
+### Performance Optimization
+
+1. Configure garbage collection
+
+    - Go to: Administration → Garbage Collection
+    - Schedule: Weekly at 2 AM
+    - This removes unreferenced image layers
+
+2. Optimize database
+
+    ```bash
+    # Run vacuum on PostgreSQL
+    sudo docker compose exec harbor-db vacuumdb -U postgres -d registry
+    ```
+
+3. Configure resource limits
+
+    Edit docker-compose.yml (auto-generated):
+
+    ```yaml
+    services:
+      registry:
+        deploy:
+          resources:
+            limits:
+              memory: 2G
+            reservations:
+              memory: 512M
+    ```
+
+4. Enable Redis cache
+
+    Harbor uses Redis by default for caching.
+    Increase Redis memory if needed.
+
+### Monitoring Harbor
+
+1. Check Harbor health
+
+    ```bash
+    curl -k https://harbor.arpansahu.space/api/v2.0/health
+    ```
+
+2. Monitor Docker resources
+
+    ```bash
+    sudo docker stats
+    ```
+
+3. Check disk usage
+
+    ```bash
+    du -sh /data/*
+    ```
+
+4. View system logs
+
+    ```bash
+    sudo journalctl -u harbor -f
+    ```
+
+### Updating Harbor
+
+1. Backup current installation
+
+    Follow backup procedure above.
+
+2. Download new Harbor version
+
+    ```bash
+    cd /opt
+    sudo wget https://github.com/goharbor/harbor/releases/download/vX.Y.Z/harbor-offline-installer-vX.Y.Z.tgz
+    ```
+
+3. Stop current Harbor
+
+    ```bash
+    sudo systemctl stop harbor
+    ```
+
+4. Extract new version
+
+    ```bash
+    sudo tar -xzvf harbor-offline-installer-vX.Y.Z.tgz
+    sudo mv harbor harbor-old
+    sudo mv harbor-new harbor
+    ```
+
+5. Copy configuration
+
+    ```bash
+    sudo cp harbor-old/harbor.yml harbor/harbor.yml
+    ```
+
+6. Run migration
+
+    ```bash
+    cd /opt/harbor
+    sudo ./install.sh --with-notary --with-trivy --with-chartmuseum
+    ```
+
+7. Start Harbor
+
+    ```bash
+    sudo systemctl start harbor
+    ```
+
+### Final Verification Checklist
+
+Run these commands to verify Harbor is working:
+
+```bash
+# Check all containers
+sudo docker compose ps
+
+# Check systemd service
+sudo systemctl status harbor
+
+# Check local access
+curl -I http://127.0.0.1:8080
+
+# Check HTTPS access
+curl -I https://harbor.arpansahu.space
+
+# Check Nginx config
+sudo nginx -t
+
+# Check firewall
+sudo ufw status | grep -E '(80|443)'
+
+# Test Docker login
+docker login harbor.arpansahu.space
+```
+
+Then test in browser:
+- Access: https://harbor.arpansahu.space
+- Login with admin credentials
+- Create test project
+- Push test image
+- Scan image for vulnerabilities
+- Verify retention policy configured
+
+### What This Setup Provides
+
+After following this guide, you will have:
+
+1. Self-hosted private Docker registry
+2. HTTPS access via Nginx reverse proxy
+3. Automatic startup with systemd
+4. Vulnerability scanning with Trivy
+5. Image signing with Notary
+6. Helm chart repository
+7. Automatic image retention
+8. Web UI for management
+9. Robot accounts for CI/CD
+10. Production-ready configuration
+
+### Example Configuration Summary
+
+| Component | Value |
+| --------- | ----- |
+| Harbor URL | https://harbor.arpansahu.space |
+| Internal Port | 8080 (localhost only) |
+| Admin User | admin |
+| Default Project | library |
+| Data Directory | /data |
+| Config File | /opt/harbor/harbor.yml |
+| Service File | /etc/systemd/system/harbor.service |
+
+### Architecture Summary
+
+```
+Internet (HTTPS)
+   │
+   └─ Nginx (TLS Termination)
+        │ [Wildcard Certificate: *.arpansahu.space]
+        │
+        └─ harbor.arpansahu.space (Port 443 → 8080)
+             │
+             └─ Harbor Stack (Docker Compose)
+                  ├─ Harbor Core (API + Logic)
+                  ├─ Harbor Portal (Web UI)
+                  ├─ Registry (Image Storage)
+                  ├─ PostgreSQL (Metadata)
+                  ├─ Redis (Cache)
+                  ├─ Trivy (Vulnerability Scanner)
+                  ├─ Notary (Image Signing)
+                  └─ ChartMuseum (Helm Charts)
+```
+
+### Key Rules to Remember
+
+1. Harbor internal port (8080) never exposed externally
+2. System Nginx handles all TLS termination
+3. Use systemd for automatic startup
+4. Robot accounts for CI/CD pipelines
+5. Configure retention to manage storage
+6. Enable vulnerability scanning on push
+7. Regular backups of /data directory
+8. Monitor disk usage in /data
+9. Use RBAC for multi-tenant access
+10. Keep Harbor updated
+
+### Troubleshooting
+
+#### 1. 413 Request Entity Too Large Error
+
+**Symptom:** Docker push fails with `413 Request Entity Too Large` when pushing large images.
+
+**Cause:** Nginx `client_max_body_size` limit is too small (default is 1MB).
+
+**Solution:**
+
+1. Edit system nginx configuration:
+   ```bash
+   sudo nano /etc/nginx/sites-available/services
+   ```
+
+2. Find the Harbor location block and add/update:
+   ```nginx
+   location / {
+       client_max_body_size 2G;  # Adjust as needed
+       proxy_pass http://127.0.0.1:8080;
+       # ... rest of config
+   }
+   ```
+
+3. Test and reload nginx:
+   ```bash
+   sudo nginx -t
+   sudo systemctl reload nginx
+   ```
+
+**Note:** Harbor's internal nginx is already set to `client_max_body_size 0;` (unlimited) in its `/etc/nginx/nginx.conf`, so you only need to fix the external/system nginx configuration at `/etc/nginx/sites-available/services`.
+
+**Verify Harbor's internal nginx (optional):**
+```bash
+docker exec nginx cat /etc/nginx/nginx.conf | grep client_max_body_size
+# Should show: client_max_body_size 0;
+```
+
+#### 2. Cannot Connect to Harbor
+
+**Check these:**
+```bash
+# 1. Is Harbor running?
+sudo systemctl status harbor
+docker ps | grep harbor
+
+# 2. Is nginx running?
+sudo systemctl status nginx
+
+# 3. Check logs
+sudo journalctl -u harbor -n 50
+docker logs nginx
+```
+
+#### 3. Login Issues
+
+```bash
+# Reset admin password
+cd /opt/harbor
+sudo docker-compose stop
+sudo ./prepare
+sudo docker-compose up -d
+```
+
+#### 4. Disk Space Full
+
+```bash
+# Check disk usage
+df -h /data
+
+# Run garbage collection
+docker exec harbor-core harbor-gc
+
+# Or via UI: Administration → Garbage Collection → Run Now
+```
+
+#### 5. Slow Image Pushes
+
+Check nginx configuration for these settings:
+```nginx
+proxy_buffering off;
+proxy_request_buffering off;
+proxy_connect_timeout 300;
+proxy_send_timeout 300;
+proxy_read_timeout 300;
+```
+
+### Next Steps
+
+After setting up Harbor:
+
+1. Create projects for different teams
+2. Configure robot accounts for CI/CD
+3. Set up vulnerability scan policies
+4. Configure image retention rules
+5. Enable garbage collection
+6. Set up replication (if multi-site)
+7. Integrate with CI/CD pipelines
+
+My Harbor instance: https://harbor.arpansahu.space
+
+For CI/CD integration, see Jenkins documentation.
 
 
 
