@@ -1,5 +1,5 @@
 Available at: https://[DOMAIN_NAME]
 
 admin login details:--
-username: arpansahu
+email: admin@arpansahu.space
 password: showmecode

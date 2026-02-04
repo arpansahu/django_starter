@@ -1,1 +1,1 @@
-django-starter.arpansahu.me
+django-starter.arpansahu.space

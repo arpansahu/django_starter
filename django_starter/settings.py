@@ -175,11 +175,23 @@ else:
 
     AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
     AWS_DEFAULT_ACL = None  # Ensure files are not public by default
+    
+
 
     # Switch between MinIO and AWS S3
     if BUCKET_TYPE == 'MINIO':
-        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'
-        AWS_S3_CUSTOM_DOMAIN = f'minio.arpansahu.me/{AWS_STORAGE_BUCKET_NAME}'
+        # MinIO/S3 Configuration
+        AWS_QUERYSTRING_AUTH = False  # Don't add query parameters to URLs (use bucket policy instead)
+        AWS_S3_SIGNATURE_VERSION = 's3v4'
+        AWS_S3_USE_SSL = True
+        AWS_S3_VERIFY = True
+        AWS_S3_ADDRESSING_STYLE = 'path'  # Use path-style addressing for MinIO
+        
+        # MinIO API endpoint through nginx proxy (for upload/management operations)
+        AWS_S3_ENDPOINT_URL = 'https://minioapi.arpansahu.space'
+        
+        # Custom domain for serving files (use API endpoint, not console)
+        AWS_S3_CUSTOM_DOMAIN = f'minioapi.arpansahu.space/{AWS_STORAGE_BUCKET_NAME}'
     elif BUCKET_TYPE == 'AWS':
         AWS_S3_ENDPOINT_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
         AWS_S3_CUSTOM_DOMAIN = AWS_S3_ENDPOINT_URL
@@ -261,6 +273,15 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
+# Redis SSL Configuration for TLS connections
+import ssl
+CELERY_REDIS_BACKEND_USE_SSL = {
+    'ssl_cert_reqs': ssl.CERT_REQUIRED  # Verify SSL certificates
+}
+CELERY_BROKER_USE_SSL = {
+    'ssl_cert_reqs': ssl.CERT_REQUIRED
+}
+
 #Caching
 if not DEBUG:
     CACHES = {
@@ -269,6 +290,9 @@ if not DEBUG:
             'LOCATION': REDIS_CLOUD_URL,
             'OPTIONS': {
                 'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'CONNECTION_POOL_KWARGS': {
+                    'ssl_cert_reqs': ssl.CERT_REQUIRED  # Verify SSL certificates
+                }
             },
             'KEY_PREFIX': PROJECT_NAME
         }
@@ -362,4 +386,4 @@ LOGGING = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://django-starter.arpansahu.me']
+CSRF_TRUSTED_ORIGINS = [f'{PROTOCOL}{DOMAIN}', f'{PROTOCOL}*.{DOMAIN}']
