@@ -94,8 +94,8 @@ pipeline {
                     if (configExists == 'not exists') {
                         echo "Nginx configuration file does not exist. Creating it now..."
 
-                        // Create or overwrite the NGINX_CONF file with the content of nginx.conf using sudo tee
-                        sh "sudo cat nginx.conf | sudo tee ${NGINX_CONF_FLOWER} > /dev/null"
+                        // Create or overwrite the NGINX_CONF_FLOWER file with the content of nginx-flower.conf using sudo tee
+                        sh "sudo cat nginx-flower.conf | sudo tee ${NGINX_CONF_FLOWER} > /dev/null"
 
                         // Replace placeholders in the configuration file
                         sh "sudo sed -i 's|SERVER_NAME|${FLOWER_SERVER_NAME}|g' ${NGINX_CONF_FLOWER}"
