@@ -11,12 +11,12 @@ server {
 
 # HTTPS reverse proxy
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
 
     server_name [DOMAIN_NAME];
 
-    # 🔐 Wildcard SSL (acme.sh)
+    # 🔐 Wildcard SSL (acme.sh + Namecheap DNS-01)
     ssl_certificate     /etc/nginx/ssl/arpansahu.space/fullchain.pem;
     ssl_certificate_key /etc/nginx/ssl/arpansahu.space/privkey.pem;
 
