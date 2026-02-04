@@ -23,7 +23,7 @@
         <li class="nav-item d-flex align-items-center">
           {% comment %} <a href="admin/" style="margin-right: 13px;">Admin Panel</a> {% endcomment %}
           <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
-            <a style="margin-right: 10px;" href="{% url 'account' %}"><i class="fa fa-user me-sm-1"></i></a>
+            <a style="margin-right: 10px;" href="{% url 'account' %}"><i class="fa-solid fa-user me-sm-1"></i></a>
 
               {% if request.user.is_authenticated %}
                   <a href="{% url 'logout' %}">
