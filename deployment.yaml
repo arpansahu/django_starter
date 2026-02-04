@@ -16,6 +16,13 @@ spec:
     spec:
       imagePullSecrets:
         - name: harbor-registry-secret
+      initContainers:
+        - name: migrate-db
+          image: harbor.arpansahu.space/library/django_starter:latest
+          command: ['python', 'manage.py', 'migrate', '--noinput']
+          envFrom:
+            - secretRef:
+                name: django-starter-secret
       containers:
         - image: harbor.arpansahu.space/library/django_starter:latest
           name: django-starter
