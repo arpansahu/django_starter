@@ -213,7 +213,7 @@ if not DEBUG:
 
     elif BUCKET_TYPE == 'MINIO':
         AWS_S3_REGION_NAME = 'us-east-1'  # MinIO doesn't require this, but boto3 does
-        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.space'
+        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'
         AWS_DEFAULT_ACL = 'public-read'
         AWS_S3_OBJECT_PARAMETERS = {
             'CacheControl': 'max-age=86400',
@@ -417,7 +417,7 @@ This project and all related services have evolved through multiple deployment s
 - Limited control over infrastructure
 
 **Phase 2: EC2 + Home Server Hybrid (2022-2023)**
-- EC2 for portfolio (arpansahu.space) with Nginx
+- EC2 for portfolio (arpansahu.me) with Nginx
 - Home Server for all other projects
 - Nginx on EC2 forwarded traffic to Home Server
 - Cost-effective but faced reliability challenges
@@ -682,7 +682,7 @@ As of January 2026, I'm running a home server setup with:
 - All services accessible via arpansahu.space
 - Automated backups to cloud storage
 
-Live projects: https://arpansahu.space/projects
+Live projects: https://arpansahu.me/projects
 
 ### Next Steps
 
@@ -10288,7 +10288,7 @@ pipeline {
 
 Note: agent {label 'local'} is used to specify which node will execute the jenkins job deployment. So local linux server is labelled with 'local' are the project with this label will be executed in local machine node.
 
-* Configure a Jenkins project from jenkins ui located at https://jenkins.arpansahu.space
+* Configure a Jenkins project from jenkins ui located at https://jenkins.arpansahu.me
 
 Make sure to use Pipeline project and name it whatever you want I have named it as per great_chat
 
