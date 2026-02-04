@@ -124,8 +124,12 @@ pipeline {
                         def flowerUsername = sh(script: "grep FLOWER_ADMIN_USERNAME .env | cut -d '=' -f2", returnStdout: true).trim()
                         def flowerPassword = sh(script: "grep FLOWER_ADMIN_PASS .env | cut -d '=' -f2", returnStdout: true).trim()
                         
-                        // Create htpasswd file
-                        sh "sudo htpasswd -cb /etc/nginx/.htpasswd_flower ${flowerUsername} ${flowerPassword}"
+                        // Create htpasswd file (htpasswd doesn't need sudo if writing to /tmp first)
+                        sh """
+                            htpasswd -cb /tmp/.htpasswd_flower ${flowerUsername} ${flowerPassword}
+                            sudo mv /tmp/.htpasswd_flower /etc/nginx/.htpasswd_flower
+                            sudo chmod 644 /etc/nginx/.htpasswd_flower
+                        """
                         
                         // Add basic auth to flower nginx config
                         sh """
