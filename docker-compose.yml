@@ -3,7 +3,7 @@ services:
     build:  # This section will be used when running locally
       context: .
       dockerfile: Dockerfile
-    image: harbor.arpansahu.me/library/django_starter:latest
+    image: harbor.arpansahu.space/library/django_starter:latest
     env_file: ./.env
     container_name: django_starter
     # volumes:

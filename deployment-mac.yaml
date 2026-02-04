@@ -17,7 +17,7 @@ spec:
       imagePullSecrets:
         - name: harbor-registry-secret
       containers:
-        - image: harbor.arpansahu.me/library/django_starter_mac:latest
+        - image: harbor.arpansahu.space/library/django_starter_mac:latest
           name: django-starter-mac
           name: django-starter-mac
           envFrom:

@@ -13,7 +13,7 @@ We provide security patches for the latest release of our project. Users are enc
 
 ## Reporting a Vulnerability
 
-If you find a security vulnerability, please send an email to [admin@arpansahu.me](mailto:admin@arpansahu.me). Please include the following details with your report:
+If you find a security vulnerability, please send an email to [admin@arpansahu.space](mailto:admin@arpansahu.space). Please include the following details with your report:
 
 - A description of the vulnerability
 - Steps to reproduce the issue
@@ -44,7 +44,7 @@ We encourage our users to follow these best practices to secure their deployment
 
 ## Contact
 
-For any security-related questions, please contact us at [admin@arpansahu.me](mailto:admin@arpansahu.me).
+For any security-related questions, please contact us at [admin@arpansahu.space](mailto:admin@arpansahu.space).
 
 ## Credits
 
