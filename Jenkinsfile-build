@@ -22,6 +22,27 @@ pipeline {
                 }
             }
         }
+        stage('Run Tests') {
+            steps {
+                script {
+                    echo 'Running Django tests...'
+                    
+                    // Run tests in Docker container
+                    sh """
+                    docker run --rm \
+                        -v \$(pwd):/app \
+                        -w /app \
+                        --env-file .env \
+                        python:3.10.7 \
+                        bash -c 'pip install -q -r requirements.txt && \
+                                 pip install -q pytest pytest-django pytest-cov && \
+                                 python manage.py test --verbosity=2 --failfast'
+                    """
+                    
+                    echo '✅ All tests passed successfully!'
+                }
+            }
+        }
         stage('Build Image') {
             steps {
                 script {

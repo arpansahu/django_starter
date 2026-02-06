@@ -23,6 +23,7 @@ from .views import (
 
 from file_manager.views import (
      upload_public_file,
+     upload_protected_file,
      upload_private_file,
 )
 
@@ -41,7 +42,14 @@ urlpatterns = [
 
     # file manager views
     path('upload-public/', upload_public_file, name='upload_public_file'),
+    path('upload-protected/', upload_protected_file, name='upload_protected_file'),
     path('upload-private/', upload_private_file, name='upload_private_file'),
+    
+    # RabbitMQ messaging system
+    path('messaging/', include('messaging_system.urls')),
+    
+    # Kafka event streaming
+    path('events/', include('event_streaming.urls')),
 
     # Django Progress Bar View
     path('start-task/', start_task, name='start-task'),

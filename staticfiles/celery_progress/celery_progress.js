@@ -43,7 +43,22 @@ class CeleryProgressBar {
             progressBarElement.style.backgroundColor = this.barColors.success;
         }
         if (progressBarMessageElement) {
-            progressBarMessageElement.textContent = "Success! " + result;
+            // Handle result as object or string
+            let message = "Success!";
+            if (typeof result === 'object' && result !== null) {
+                if (result.message) {
+                    message += " " + result.message;
+                } else if (result.status) {
+                    message += " " + result.status;
+                } else {
+                    message += " Task completed successfully!";
+                }
+            } else if (result) {
+                message += " " + result;
+            } else {
+                message += " Task completed successfully!";
+            }
+            progressBarMessageElement.textContent = message;
         }
     }
 

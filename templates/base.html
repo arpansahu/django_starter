@@ -45,14 +45,14 @@
           flex-grow: 1; /* Expands to take available space, pushing footer down */
       } 
       footer {
-          /* Optional: add styling if needed */
+          margin-top: auto; /* Push footer to bottom */
       }
     </style>
   {% endblock stylesheets %}
 </head>
 <body class="d-flex flex-column min-vh-100 g-sidenav-show bg-gray-100">
   <!-- Main content with flex-grow to take available space -->
-  <main class="main-content flex-grow-1 position-relative max-height-vh-100 h-100 border-radius-lg">
+  <main class="main-content flex-grow-1 position-relative border-radius-lg">
       {% include 'snippets/header.html' %}
       {% block content %}{% endblock %}
   </main>

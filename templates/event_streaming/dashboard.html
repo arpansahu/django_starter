@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Event Dashboard - Kafka{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4"><i class="fa-solid fa-table"></i> Event Dashboard</h2>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ stats.total_events }}</h3>
+                    <p class="mb-0">Total Events</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{ stats.unique_sessions }}</h3>
+                    <p class="mb-0">Unique Sessions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <a href="{% url 'publish_event' %}" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-plus"></i> New Event
+                    </a>
+                    <a href="{% url 'event_analytics' %}" class="btn btn-danger btn-sm">
+                        <i class="fa-solid fa-chart-pie"></i> Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events by Type -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Events by Type</h5>
+                </div>
+                <div class="card-body">
+                    {% if events_by_type %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Event Type</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in events_by_type %}
+                                <tr>
+                                    <td><span class="badge bg-primary">{{ event.event_type }}</span></td>
+                                    <td>{{ event.count }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" style="width: {% widthratio event.count stats.total_events 100 %}%">
+                                                {% widthratio event.count stats.total_events 100 %}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No event data available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Events Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Events</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_events %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Event ID</th>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Source</th>
+                                    <th>Topic</th>
+                                    <th>Partition</th>
+                                    <th>Session</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in recent_events %}
+                                <tr>
+                                    <td><small>{{ event.event_id|truncatechars:12 }}</small></td>
+                                    <td><span class="badge bg-primary">{{ event.get_event_type_display }}</span></td>
+                                    <td>{{ event.event_name }}</td>
+                                    <td>{{ event.source }}</td>
+                                    <td><small>{{ event.kafka_topic }}</small></td>
+                                    <td>{{ event.kafka_partition|default:"-" }}</td>
+                                    <td><small>{{ event.session_id|truncatechars:12 }}</small></td>
+                                    <td>{{ event.event_timestamp|date:"Y-m-d H:i:s" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No events found. <a href="{% url 'publish_event' %}">Publish one now</a>!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

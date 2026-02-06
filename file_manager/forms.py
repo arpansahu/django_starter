@@ -1,10 +1,15 @@
 # file_manager/forms.py
 from django import forms
-from .models import PublicFile, PrivateFile
+from .models import PublicFile, ProtectedFile, PrivateFile
 
 class PublicFileForm(forms.ModelForm):
     class Meta:
         model = PublicFile
+        fields = ['title', 'file']
+
+class ProtectedFileForm(forms.ModelForm):
+    class Meta:
+        model = ProtectedFile
         fields = ['title', 'file']
 
 class PrivateFileForm(forms.ModelForm):

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Event Analytics - Kafka{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4"><i class="fa-solid fa-chart-pie"></i> Event Analytics</h2>
+            <a href="{% url 'event_dashboard' %}" class="btn btn-secondary mb-3">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Hourly Aggregates -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Hourly Statistics</h5>
+                </div>
+                <div class="card-body">
+                    {% if hourly_aggregates %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time Bucket</th>
+                                    <th>Event Type</th>
+                                    <th>Event Count</th>
+                                    <th>Unique Users</th>
+                                    <th>Avg Duration (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for agg in hourly_aggregates %}
+                                <tr>
+                                    <td>{{ agg.time_bucket|date:"Y-m-d H:00" }}</td>
+                                    <td><span class="badge bg-primary">{{ agg.event_type }}</span></td>
+                                    <td>{{ agg.event_count }}</td>
+                                    <td>{{ agg.unique_users }}</td>
+                                    <td>{{ agg.avg_duration_ms|default:"-"|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hourly data available yet. Events are aggregated periodically.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Aggregates -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Daily Statistics</h5>
+                </div>
+                <div class="card-body">
+                    {% if daily_aggregates %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Event Type</th>
+                                    <th>Event Count</th>
+                                    <th>Unique Users</th>
+                                    <th>Avg Duration (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for agg in daily_aggregates %}
+                                <tr>
+                                    <td>{{ agg.time_bucket|date:"Y-m-d" }}</td>
+                                    <td><span class="badge bg-primary">{{ agg.event_type }}</span></td>
+                                    <td>{{ agg.event_count }}</td>
+                                    <td>{{ agg.unique_users }}</td>
+                                    <td>{{ agg.avg_duration_ms|default:"-"|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No daily data available yet. Events are aggregated periodically.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

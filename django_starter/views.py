@@ -13,7 +13,7 @@ from django.views.generic import View
 class HomeView(View):
     def get(self, request, *args, **kwargs):
         context ={}
-        return render(self.request, template_name='bar.html', context=context)
+        return render(self.request, template_name='Home.html', context=context)
 
 def start_task(request):
     task = long_running_task.delay()

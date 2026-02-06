@@ -29,7 +29,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ============================ENV VARIABLES=====================================
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', cast=bool, default=False)
+DEBUG = 1
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(' ')
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
@@ -47,6 +47,23 @@ PROTOCOL = config('PROTOCOL')
 
 SENTRY_ENVIRONMENT = config('SENTRY_ENVIRONMENT')  # production Or "staging", "development", etc.
 SENTRY_DSH_URL = config('SENTRY_DSH_URL')
+
+# RabbitMQ Configuration
+RABBITMQ_HOST = config('RABBITMQ_HOST')
+RABBITMQ_PORT = config('RABBITMQ_PORT', cast=int, default=5672)
+RABBITMQ_USER = config('RABBITMQ_USER')
+RABBITMQ_PASSWORD = config('RABBITMQ_PASSWORD')
+RABBITMQ_VHOST = config('RABBITMQ_VHOST', default='/')
+RABBITMQ_MANAGEMENT_PORT = config('RABBITMQ_MANAGEMENT_PORT', cast=int, default=15672)
+
+# Kafka Configuration
+KAFKA_BOOTSTRAP_SERVERS = config('KAFKA_BOOTSTRAP_SERVERS')
+KAFKA_SECURITY_PROTOCOL = config('KAFKA_SECURITY_PROTOCOL', default='SASL_SSL')
+KAFKA_SASL_MECHANISM = config('KAFKA_SASL_MECHANISM', default='PLAIN')
+KAFKA_SASL_USERNAME = config('KAFKA_SASL_USERNAME')
+KAFKA_SASL_PASSWORD = config('KAFKA_SASL_PASSWORD')
+KAFKA_SSL_TRUSTSTORE_PASSWORD = config('KAFKA_SSL_TRUSTSTORE_PASSWORD', default='')
+KAFKA_SSL_KEYSTORE_PASSWORD = config('KAFKA_SSL_KEYSTORE_PASSWORD', default='')
 
 PROJECT_NAME = 'django_starter'
 USE_S3 = True
@@ -75,7 +92,11 @@ INSTALLED_APPS = [
     # progress bar apps
     'channels',
     'django_celery_results',  # To store Celery task results
-    'celery_progress_custom_app'
+    'celery_progress_custom_app',
+    
+    # Messaging and Event Streaming
+    'messaging_system',
+    'event_streaming',
 ]
 
 MIDDLEWARE = [
@@ -202,6 +223,8 @@ else:
     
     AWS_PUBLIC_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/media'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
+    
+    AWS_PROTECTED_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/protected'
     
     AWS_PRIVATE_MEDIA_LOCATION = f'portfolio/{PROJECT_NAME}/private'
 

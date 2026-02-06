@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Notification Dashboard - RabbitMQ{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4"><i class="fa-solid fa-chart-line"></i> Notification Dashboard</h2>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ stats.total }}</h3>
+                    <p class="mb-0">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ stats.pending }}</h3>
+                    <p class="mb-0">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-info">{{ stats.sent }}</h3>
+                    <p class="mb-0">Sent</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{ stats.delivered }}</h3>
+                    <p class="mb-0">Delivered</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-danger">{{ stats.failed }}</h3>
+                    <p class="mb-0">Failed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center">
+                <div class="card-body">
+                    <a href="{% url 'send_notification' %}" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i> New
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Notifications Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Notifications</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_notifications %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Priority</th>
+                                    <th>Title</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                    <th>Queue</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for notif in recent_notifications %}
+                                <tr>
+                                    <td>{{ notif.id }}</td>
+                                    <td><span class="badge bg-{{ notif.notification_type }}">{{ notif.get_notification_type_display }}</span></td>
+                                    <td><span class="badge bg-secondary">{{ notif.get_priority_display }}</span></td>
+                                    <td>{{ notif.title }}</td>
+                                    <td>{{ notif.message|truncatewords:10 }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if notif.status == 'sent' %}success{% elif notif.status == 'delivered' %}info{% elif notif.status == 'failed' %}danger{% else %}warning{% endif %}">
+                                            {{ notif.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td><small>{{ notif.queue_name|default:"-" }}</small></td>
+                                    <td>{{ notif.created_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No notifications found. <a href="{% url 'send_notification' %}">Send one now</a>!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -4,20 +4,217 @@
 {% load custom_tags %}
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-
+<style>
+    .feature-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    .section-title {
+        border-bottom: 3px solid #5e72e4;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+    }
+</style>
 {% endblock stylesheets %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <h1>Task Progress</h1>
-    <button id="start-task" class="btn btn-primary">Start Task</button>
-    <div id="progress-bar-div">
-        <div class="progress-wrapper">  
-            <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 0%;">
-                &nbsp;
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-3 font-weight-bold">Django Starter Project</h1>
+            <p class="lead">A comprehensive Django starter template with authentication, file management, and async task processing</p>
+        </div>
+    </div>
+
+    <!-- File Manager Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title"><i class="fa-solid fa-folder-open"></i> File Manager</h2>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'upload_public_file' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-primary">
+                        <i class="fa-solid fa-upload"></i>
+                    </div>
+                    <h3 class="card-title">Public File Upload</h3>
+                    <p class="card-text">Upload and manage public files accessible to all users</p>
+                    <a href="{% url 'upload_public_file' %}" class="btn btn-primary">Go to Public Upload</a>
+                </div>
             </div>
         </div>
-        '<div id="progress-bar-message">Waiting for progress to start...</div>
+        <div class="col-md-6 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'upload_private_file' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-success">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h3 class="card-title">Private File Upload</h3>
+                    <p class="card-text">Upload and manage private files with secure access</p>
+                    <a href="{% url 'upload_private_file' %}" class="btn btn-success">Go to Private Upload</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Celery Progress Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title"><i class="fa-solid fa-gears"></i> Async Task Processing</h2>
+        </div>
+        <div class="col-12">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="feature-icon text-info">
+                            <i class="fa-solid fa-spinner"></i>
+                        </div>
+                        <h3 class="card-title">Celery Progress Tracking</h3>
+                        <p class="card-text">Real-time WebSocket progress updates for long-running tasks</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 offset-md-3">
+                            <button id="start-task" class="btn btn-info btn-lg btn-block mb-3">
+                                <i class="fa-solid fa-play"></i> Start Long Running Task
+                            </button>
+                            <div id="progress-bar-div">
+                                <div class="progress-wrapper">  
+                                    <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 0%;">
+                                        &nbsp;
+                                    </div>
+                                </div>
+                                <div id="progress-bar-message" class="text-center mt-2">Waiting for progress to start...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Management Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title"><i class="fa-solid fa-user"></i> Account Management</h2>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="col-md-6 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'account' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-warning">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <h3 class="card-title">My Account</h3>
+                    <p class="card-text">Manage your profile and account settings</p>
+                    <a href="{% url 'account' %}" class="btn btn-warning">View Profile</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'logout' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </div>
+                    <h3 class="card-title">Logout</h3>
+                    <p class="card-text">Sign out from your account</p>
+                    <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-md-6 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'login' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-success">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                    </div>
+                    <h3 class="card-title">Login</h3>
+                    <p class="card-text">Sign in to your account</p>
+                    <a href="{% url 'login' %}" class="btn btn-success">Login</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'register' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-primary">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h3 class="card-title">Register</h3>
+                    <p class="card-text">Create a new account with email verification</p>
+                    <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Features List -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="section-title"><i class="fa-solid fa-list-check"></i> Included Features</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4><i class="fa-solid fa-envelope text-primary"></i> Email Verification</h4>
+                    <ul class="list-unstyled">
+                        <li><i class="fa-solid fa-check text-success"></i> Mailjet integration</li>
+                        <li><i class="fa-solid fa-check text-success"></i> Secure token generation</li>
+                        <li><i class="fa-solid fa-check text-success"></i> Email activation flow</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4><i class="fa-solid fa-database text-info"></i> Celery + Redis</h4>
+                    <ul class="list-unstyled">
+                        <li><i class="fa-solid fa-check text-success"></i> Async task processing</li>
+                        <li><i class="fa-solid fa-check text-success"></i> WebSocket progress tracking</li>
+                        <li><i class="fa-solid fa-check text-success"></i> Real-time updates</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4><i class="fa-solid fa-flask text-warning"></i> Testing Suite</h4>
+                    <ul class="list-unstyled">
+                        <li><i class="fa-solid fa-check text-success"></i> pytest + pytest-django</li>
+                        <li><i class="fa-solid fa-check text-success"></i> 111 comprehensive tests</li>
+                        <li><i class="fa-solid fa-check text-success"></i> CI/CD + health checks</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Getting Started -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body text-center p-5">
+                    <h2><i class="fa-brands fa-github"></i> Start Your Own Project</h2>
+                    <p class="lead">This is a comprehensive Django starter template ready for production deployment</p>
+                    <a href="https://github.com/arpansahu/django_starter" target="_blank" class="btn btn-light btn-lg">
+                        <i class="fa-brands fa-github"></i> View on GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock content %}
