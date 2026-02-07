@@ -6,6 +6,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path
 
+# DRF Spectacular for Swagger/OpenAPI
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
+
 from account.views import (
     CustomPasswordResetView,
     LogoutView,
@@ -50,6 +57,20 @@ urlpatterns = [
     
     # Kafka event streaming
     path('events/', include('event_streaming.urls')),
+    
+    # Notes App - Django Generic Views Demo
+    path('notes/', include('notes_app.urls', namespace='notes_app')),
+    
+    # Commands App - Management Commands Demo
+    path('commands/', include('commands_app.urls', namespace='commands_app')),
+    
+    # API App - Django REST Framework Demo
+    path('api/v1/', include('api_app.urls', namespace='api_app')),
+    
+    # API Documentation (Swagger/OpenAPI)
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # Django Progress Bar View
     path('start-task/', start_task, name='start-task'),

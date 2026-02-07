@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}About Notes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ page_title }}</h1>
+    <p class="lead">This notes application demonstrates Django Generic Class-Based Views.</p>
+    
+    <h3>Features</h3>
+    <ul>
+        {% for feature in features %}
+        <li>{{ feature }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

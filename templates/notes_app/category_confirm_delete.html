@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Category{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Delete Category</h4>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete <strong>{{ category.name }}</strong>?</p>
+                    <p class="text-warning">Notes in this category will have their category set to null.</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        <a href="{% url 'notes_app:category_list' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

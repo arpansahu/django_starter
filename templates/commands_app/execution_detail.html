@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Execution Details{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'commands_app:dashboard' %}">Commands</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'commands_app:execution_list' %}">Executions</a></li>
+            <li class="breadcrumb-item active">{{ execution.task.name }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4">Execution: {{ execution.task.name }}</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> Execution Details
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Task</dt>
+                        <dd class="col-sm-8">
+                            <a href="{% url 'commands_app:task_detail' execution.task.pk %}">
+                                {{ execution.task.name }}
+                            </a>
+                        </dd>
+                        
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            {% if execution.status == 'completed' %}
+                            <span class="badge bg-success">{{ execution.status }}</span>
+                            {% elif execution.status == 'failed' %}
+                            <span class="badge bg-danger">{{ execution.status }}</span>
+                            {% elif execution.status == 'running' %}
+                            <span class="badge bg-primary">{{ execution.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ execution.status }}</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Started</dt>
+                        <dd class="col-sm-8">{{ execution.started_at }}</dd>
+                        
+                        <dt class="col-sm-4">Completed</dt>
+                        <dd class="col-sm-8">{{ execution.completed_at|default:"-" }}</dd>
+                        
+                        <dt class="col-sm-4">Duration</dt>
+                        <dd class="col-sm-8">{% if execution.duration_seconds %}{{ execution.duration_seconds|floatformat:2 }} seconds{% else %}-{% endif %}</dd>
+                        
+                        <dt class="col-sm-4">Exit Code</dt>
+                        <dd class="col-sm-8">{{ execution.exit_code|default:"-" }}</dd>
+                        
+                        <dt class="col-sm-4">Triggered By</dt>
+                        <dd class="col-sm-8">{{ execution.triggered_by }}</dd>
+                        
+                        <dt class="col-sm-4">Executed By</dt>
+                        <dd class="col-sm-8">{{ execution.executed_by|default:"-" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            {% if execution.output %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-terminal"></i> Output
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0 bg-light p-3" style="max-height: 400px; overflow: auto;">{{ execution.output }}</pre>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if execution.error_message %}
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <i class="bi bi-exclamation-triangle"></i> Error
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0 text-danger">{{ execution.error_message }}</pre>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

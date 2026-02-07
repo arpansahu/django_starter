@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Command Log Details{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'commands_app:dashboard' %}">Commands</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'commands_app:log_list' %}">Logs</a></li>
+            <li class="breadcrumb-item active">{{ log.command_name }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4"><code>{{ log.command_name }}</code></h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> Log Details
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Command</dt>
+                        <dd class="col-sm-8"><code>{{ log.command_name }}</code></dd>
+                        
+                        <dt class="col-sm-4">Arguments</dt>
+                        <dd class="col-sm-8"><pre class="mb-0">{{ log.arguments|default:"{}" }}</pre></dd>
+                        
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            {% if log.status == 'completed' %}
+                            <span class="badge bg-success">{{ log.status }}</span>
+                            {% elif log.status == 'failed' %}
+                            <span class="badge bg-danger">{{ log.status }}</span>
+                            {% elif log.status == 'running' %}
+                            <span class="badge bg-primary">{{ log.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ log.status }}</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Started</dt>
+                        <dd class="col-sm-8">{{ log.started_at }}</dd>
+                        
+                        <dt class="col-sm-4">Completed</dt>
+                        <dd class="col-sm-8">{{ log.completed_at|default:"-" }}</dd>
+                        
+                        <dt class="col-sm-4">Duration</dt>
+                        <dd class="col-sm-8">{% if log.duration_seconds %}{{ log.duration_seconds|floatformat:2 }} seconds{% else %}-{% endif %}</dd>
+                        
+                        <dt class="col-sm-4">Exit Code</dt>
+                        <dd class="col-sm-8">{{ log.exit_code|default:"-" }}</dd>
+                        
+                        <dt class="col-sm-4">Executed By</dt>
+                        <dd class="col-sm-8">{{ log.executed_by|default:"-" }}</dd>
+                        
+                        <dt class="col-sm-4">Hostname</dt>
+                        <dd class="col-sm-8">{{ log.hostname|default:"-" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            {% if log.output %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-terminal"></i> Output
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0 bg-light p-3" style="max-height: 400px; overflow: auto;">{{ log.output }}</pre>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if log.error_output %}
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <i class="bi bi-exclamation-triangle"></i> Error Output
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0 text-danger">{{ log.error_output }}</pre>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

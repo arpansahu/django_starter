@@ -245,6 +245,243 @@
         {% endif %}
     </div>
 
+    <!-- Notes App Section - Django Generic Views -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title"><i class="fa-solid fa-note-sticky"></i> Notes App (Django Generic Views)</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'notes_app:home' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-primary">
+                        <i class="fa-solid fa-house"></i>
+                    </div>
+                    <h3 class="card-title">Notes Home</h3>
+                    <p class="card-text">TemplateView with statistics and overview</p>
+                    <a href="{% url 'notes_app:home' %}" class="btn btn-primary">Go to Notes</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'notes_app:note_list' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-info">
+                        <i class="fa-solid fa-list"></i>
+                    </div>
+                    <h3 class="card-title">All Notes</h3>
+                    <p class="card-text">ListView with filtering and pagination</p>
+                    <a href="{% url 'notes_app:note_list' %}" class="btn btn-info">Browse Notes</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'notes_app:note_create' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-success">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <h3 class="card-title">Create Note</h3>
+                    <p class="card-text">CreateView with form handling</p>
+                    <a href="{% url 'notes_app:note_create' %}" class="btn btn-success">New Note</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'notes_app:category_list' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-warning">
+                        <i class="fa-solid fa-folder"></i>
+                    </div>
+                    <h3 class="card-title">Categories</h3>
+                    <p class="card-text">ListView & DetailView for categories</p>
+                    <a href="{% url 'notes_app:category_list' %}" class="btn btn-warning">View Categories</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'notes_app:tag_list' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-secondary">
+                        <i class="fa-solid fa-tags"></i>
+                    </div>
+                    <h3 class="card-title">Tags</h3>
+                    <p class="card-text">ListView with aggregation</p>
+                    <a href="{% url 'notes_app:tag_list' %}" class="btn btn-secondary">View Tags</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'notes_app:random_note' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-danger">
+                        <i class="fa-solid fa-random"></i>
+                    </div>
+                    <h3 class="card-title">Random Note</h3>
+                    <p class="card-text">RedirectView to random content</p>
+                    <a href="{% url 'notes_app:random_note' %}" class="btn btn-danger">Random Note</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REST API Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title"><i class="fa-solid fa-code"></i> REST API (Django REST Framework)</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='/api/docs/'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-primary">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <h3 class="card-title">Swagger Docs</h3>
+                    <p class="card-text">Interactive API documentation</p>
+                    <a href="/api/docs/" class="btn btn-primary">Open Swagger</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='/api/redoc/'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-info">
+                        <i class="fa-solid fa-file-code"></i>
+                    </div>
+                    <h3 class="card-title">ReDoc</h3>
+                    <p class="card-text">Alternative API documentation</p>
+                    <a href="/api/redoc/" class="btn btn-info">Open ReDoc</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='/api/v1/'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-success">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <h3 class="card-title">API Root</h3>
+                    <p class="card-text">Browse the REST API endpoints</p>
+                    <a href="/api/v1/" class="btn btn-success">Browse API</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='/api/v1/products/'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-warning">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+                    <h3 class="card-title">Products API</h3>
+                    <p class="card-text">ModelViewSet with full CRUD</p>
+                    <a href="/api/v1/products/" class="btn btn-warning">Products</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='/api/v1/health/'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-secondary">
+                        <i class="fa-solid fa-heartbeat"></i>
+                    </div>
+                    <h3 class="card-title">Health Check</h3>
+                    <p class="card-text">APIView for health status</p>
+                    <a href="/api/v1/health/" class="btn btn-secondary">Health</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='/api/v1/search/?q=test'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-danger">
+                        <i class="fa-solid fa-search"></i>
+                    </div>
+                    <h3 class="card-title">Global Search</h3>
+                    <p class="card-text">Custom APIView for search</p>
+                    <a href="/api/v1/search/?q=test" class="btn btn-danger">Search API</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commands App Section - Management Commands -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title"><i class="fa-solid fa-terminal"></i> Commands App (Management Commands Demo)</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'commands_app:dashboard' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-primary">
+                        <i class="fa-solid fa-dashboard"></i>
+                    </div>
+                    <h3 class="card-title">Dashboard</h3>
+                    <p class="card-text">TemplateView with stats</p>
+                    <a href="{% url 'commands_app:dashboard' %}" class="btn btn-primary">View Dashboard</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'commands_app:task_list' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-success">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <h3 class="card-title">Scheduled Tasks</h3>
+                    <p class="card-text">ListView, CreateView, UpdateView, DeleteView</p>
+                    <a href="{% url 'commands_app:task_list' %}" class="btn btn-success">View Tasks</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'commands_app:run_command' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-warning">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                    <h3 class="card-title">Run Command</h3>
+                    <p class="card-text">FormView to execute commands</p>
+                    <a href="{% url 'commands_app:run_command' %}" class="btn btn-warning">Run Command</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'commands_app:log_list' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-info">
+                        <i class="fa-solid fa-file-text"></i>
+                    </div>
+                    <h3 class="card-title">Command Logs</h3>
+                    <p class="card-text">ListView with DetailView</p>
+                    <a href="{% url 'commands_app:log_list' %}" class="btn btn-info">View Logs</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'commands_app:metrics_dashboard' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-secondary">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="card-title">System Metrics</h3>
+                    <p class="card-text">TemplateView with charts</p>
+                    <a href="{% url 'commands_app:metrics_dashboard' %}" class="btn btn-secondary">View Metrics</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'commands_app:import_list' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-danger">
+                        <i class="fa-solid fa-download"></i>
+                    </div>
+                    <h3 class="card-title">Data Import/Export</h3>
+                    <p class="card-text">ListView for data operations</p>
+                    <a href="{% url 'commands_app:import_list' %}" class="btn btn-danger">View Imports</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Features List -->
     <div class="row">
         <div class="col-12">

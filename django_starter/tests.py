@@ -33,14 +33,14 @@ class HomeViewTest(TestCase):
         self.client.force_login(self.user)
         response = self.client.get(self.home_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'bar.html')
+        self.assertTemplateUsed(response, 'Home.html')
     
     def test_home_view_uses_correct_template(self):
         """Test that correct template is used"""
         # Force login using the force_login method
         self.client.force_login(self.user)
         response = self.client.get(self.home_url)
-        self.assertTemplateUsed(response, 'bar.html')
+        self.assertTemplateUsed(response, 'Home.html')
 
 
 class CeleryTaskViewsTest(TestCase):

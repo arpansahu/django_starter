@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}API Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-code-slash"></i> API Dashboard</h1>
+        <div>
+            <a href="/api/docs/" class="btn btn-primary" target="_blank">
+                <i class="bi bi-book"></i> Swagger Docs
+            </a>
+            <a href="/api/redoc/" class="btn btn-info" target="_blank">
+                <i class="bi bi-file-code"></i> ReDoc
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Products</h5>
+                    <p class="card-text display-6">{{ product_count }}</p>
+                    <a href="{% url 'api_app:product_list_ui' %}" class="text-white">View All →</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Reviews</h5>
+                    <p class="card-text display-6">{{ review_count }}</p>
+                    <small>Avg Rating: {{ avg_rating|floatformat:1 }}/5</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Orders</h5>
+                    <p class="card-text display-6">{{ order_count }}</p>
+                    <a href="{% url 'api_app:order_list_ui' %}" class="text-dark">View All →</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">API Keys</h5>
+                    <p class="card-text display-6">{{ api_key_count }}</p>
+                    <small>{{ active_key_count }} active</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Links -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-lightning"></i> API Endpoints
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="/api/v1/" class="list-group-item list-group-item-action" target="_blank">
+                        <i class="bi bi-globe"></i> API Root
+                    </a>
+                    <a href="/api/v1/products/" class="list-group-item list-group-item-action" target="_blank">
+                        <i class="bi bi-box"></i> Products API
+                    </a>
+                    <a href="/api/v1/reviews/" class="list-group-item list-group-item-action" target="_blank">
+                        <i class="bi bi-star"></i> Reviews API
+                    </a>
+                    <a href="/api/v1/orders/" class="list-group-item list-group-item-action" target="_blank">
+                        <i class="bi bi-cart"></i> Orders API
+                    </a>
+                    <a href="/api/v1/health/" class="list-group-item list-group-item-action" target="_blank">
+                        <i class="bi bi-heart-pulse"></i> Health Check
+                    </a>
+                    <a href="/api/v1/search/?q=" class="list-group-item list-group-item-action" target="_blank">
+                        <i class="bi bi-search"></i> Global Search
+                    </a>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-link-45deg"></i> Web Interface
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'api_app:product_list_ui' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-grid"></i> Products Gallery
+                    </a>
+                    <a href="{% url 'api_app:order_list_ui' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-list-ul"></i> Orders List
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Products -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-box"></i> Recent Products</span>
+                    <a href="{% url 'api_app:product_list_ui' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in recent_products %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'api_app:product_detail_ui' product.slug %}">
+                                        {{ product.name }}
+                                    </a>
+                                </td>
+                                <td><span class="badge bg-secondary">{{ product.category }}</span></td>
+                                <td>${{ product.price }}</td>
+                                <td>{{ product.stock }}</td>
+                                <td>
+                                    {% if product.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No products yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-cart"></i> Recent Orders</span>
+                    <a href="{% url 'api_app:order_list_ui' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'api_app:order_detail_ui' order.pk %}">
+                                        #{{ order.order_number }}
+                                    </a>
+                                </td>
+                                <td>{{ order.user.username }}</td>
+                                <td>${{ order.total_amount }}</td>
+                                <td>
+                                    {% if order.status == 'delivered' %}
+                                    <span class="badge bg-success">{{ order.status }}</span>
+                                    {% elif order.status == 'cancelled' %}
+                                    <span class="badge bg-danger">{{ order.status }}</span>
+                                    {% elif order.status == 'shipped' %}
+                                    <span class="badge bg-info">{{ order.status }}</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">{{ order.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.created_at|timesince }} ago</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No orders yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

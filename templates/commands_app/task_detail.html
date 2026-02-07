@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}{{ task.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'commands_app:dashboard' %}">Commands</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'commands_app:task_list' %}">Tasks</a></li>
+            <li class="breadcrumb-item active">{{ task.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ task.name }}</h1>
+        <div class="btn-group">
+            <button type="button" class="btn btn-success" id="runTaskBtn">
+                <i class="bi bi-play-fill"></i> Run Now
+            </button>
+            <a href="{% url 'commands_app:task_edit' task.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+            <a href="{% url 'commands_app:task_delete' task.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Task Details -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> Task Details
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Command</dt>
+                        <dd class="col-sm-8"><code>{{ task.command }}</code></dd>
+                        
+                        <dt class="col-sm-4">Schedule</dt>
+                        <dd class="col-sm-8"><code>{{ task.schedule }}</code></dd>
+                        
+                        <dt class="col-sm-4">Arguments</dt>
+                        <dd class="col-sm-8"><pre class="mb-0">{{ task.arguments|default:"{}" }}</pre></dd>
+                        
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            {% if task.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Priority</dt>
+                        <dd class="col-sm-8">
+                            {% if task.priority == 'critical' %}
+                            <span class="badge bg-danger">{{ task.priority }}</span>
+                            {% elif task.priority == 'high' %}
+                            <span class="badge bg-warning">{{ task.priority }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ task.priority }}</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Description</dt>
+                        <dd class="col-sm-8">{{ task.description|default:"-" }}</dd>
+                        
+                        <dt class="col-sm-4">Created By</dt>
+                        <dd class="col-sm-8">{{ task.created_by|default:"-" }}</dd>
+                        
+                        <dt class="col-sm-4">Created</dt>
+                        <dd class="col-sm-8">{{ task.created_at }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Execution Statistics -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-graph-up"></i> Execution Statistics
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 col-md-3">
+                            <h3>{{ execution_stats.total }}</h3>
+                            <small class="text-muted">Total</small>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h3 class="text-success">{{ execution_stats.completed }}</h3>
+                            <small class="text-muted">Completed</small>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h3 class="text-danger">{{ execution_stats.failed }}</h3>
+                            <small class="text-muted">Failed</small>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h3>{% if execution_stats.avg_duration %}{{ execution_stats.avg_duration|floatformat:2 }}s{% else %}-{% endif %}</h3>
+                            <small class="text-muted">Avg Duration</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Last Run</dt>
+                        <dd class="col-sm-8">{% if task.last_run %}{{ task.last_run }} ({{ task.last_run|timesince }} ago){% else %}-{% endif %}</dd>
+                        
+                        <dt class="col-sm-4">Next Run</dt>
+                        <dd class="col-sm-8">{% if task.next_run %}{{ task.next_run }}{% else %}-{% endif %}</dd>
+                        
+                        <dt class="col-sm-4">Total Runs</dt>
+                        <dd class="col-sm-8">{{ task.run_count }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Executions -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-clock-history"></i> Recent Executions
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Started</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Triggered By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for execution in executions %}
+                    <tr>
+                        <td>{{ execution.started_at }}</td>
+                        <td>
+                            {% if execution.status == 'completed' %}
+                            <span class="badge bg-success">{{ execution.status }}</span>
+                            {% elif execution.status == 'failed' %}
+                            <span class="badge bg-danger">{{ execution.status }}</span>
+                            {% elif execution.status == 'running' %}
+                            <span class="badge bg-primary">{{ execution.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ execution.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{% if execution.duration_seconds %}{{ execution.duration_seconds|floatformat:2 }}s{% else %}-{% endif %}</td>
+                        <td>{{ execution.triggered_by }}</td>
+                        <td>
+                            <a href="{% url 'commands_app:execution_detail' execution.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No executions yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('runTaskBtn').addEventListener('click', async function() {
+    if (confirm('Run this task now?')) {
+        try {
+            const response = await fetch(`/commands/api/tasks/{{ task.pk }}/run/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('Task executed successfully!');
+                location.reload();
+            } else {
+                alert('Task failed: ' + data.error);
+            }
+        } catch (e) {
+            alert('Error: ' + e);
+        }
+    }
+});
+</script>
+{% endblock %}

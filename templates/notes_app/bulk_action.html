@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Bulk Actions{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Bulk Actions</h1>
+    <p>Select notes and apply bulk actions.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <select name="action" class="form-select w-auto d-inline-block">
+                <option value="">Select Action</option>
+                <option value="publish">Publish</option>
+                <option value="archive">Archive</option>
+                <option value="delete">Delete</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Apply</button>
+        </div>
+        
+        <div class="list-group">
+            {% for note in notes %}
+            <label class="list-group-item">
+                <input type="checkbox" name="note_ids" value="{{ note.id }}" class="form-check-input me-2">
+                {{ note.title }} <small class="text-muted">({{ note.get_status_display }})</small>
+            </label>
+            {% endfor %}
+        </div>
+    </form>
+</div>
+{% endblock %}

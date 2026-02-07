@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Comment{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4>Delete Comment</h4>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete this comment?</p>
+                    <blockquote class="blockquote">
+                        <p>{{ object.content|truncatewords:30 }}</p>
+                        <footer class="blockquote-footer">{{ object.author.username }}</footer>
+                    </blockquote>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        <a href="{{ object.note.get_absolute_url }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}System Metrics{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="bi bi-graph-up"></i> System Metrics Dashboard</h1>
+
+    <!-- Latest Metrics -->
+    <div class="row mb-4">
+        {% for name, metric in latest_metrics.items %}
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">{{ name }}</h6>
+                    <h3 class="card-title">{{ metric.value|floatformat:2 }} {{ metric.unit }}</h3>
+                    <small class="text-muted">{{ metric.timestamp|timesince }} ago</small>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No metrics collected yet. Run <code>python manage.py collect_metrics</code> to collect metrics.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Metrics by Category -->
+    {% for category, metrics in metrics_by_category.items %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-folder"></i> {{ category|title }}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Value</th>
+                        <th>Unit</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for metric in metrics|slice:":10" %}
+                    <tr>
+                        <td>{{ metric.name }}</td>
+                        <td>{{ metric.value|floatformat:2 }}</td>
+                        <td>{{ metric.unit }}</td>
+                        <td>{{ metric.timestamp }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+
+    <a href="{% url 'commands_app:metrics_list' %}" class="btn btn-outline-primary">
+        <i class="bi bi-list"></i> View All Metrics
+    </a>
+</div>
+{% endblock %}

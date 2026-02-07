@@ -85,6 +85,21 @@ INSTALLED_APPS = [
     'check_service_health',
     'storages',  # Ensure django-storages is installed and added to apps
     'file_manager',
+    
+    # Notes app - Django Generic Views demo
+    'notes_app',
+    
+    # API app - Django REST Framework demo
+    'api_app',
+    'rest_framework',
+    'django_filters',
+    'drf_spectacular',
+    
+    # Commands app - Management Commands demo
+    'commands_app',
+    
+    # Test Coverage Enforcement
+    'django_test_enforcer',
 
     # cleans up unused media, always in the end
     'django_cleanup.apps.CleanupConfig',
@@ -98,6 +113,52 @@ INSTALLED_APPS = [
     'messaging_system',
     'event_streaming',
 ]
+
+# Django REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+    },
+}
+
+# DRF Spectacular (Swagger/OpenAPI) Configuration
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Django Starter API',
+    'DESCRIPTION': 'REST API for Django Starter project with comprehensive endpoints for products, orders, reviews, and user management.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'TAGS': [
+        {'name': 'Products', 'description': 'Product management endpoints'},
+        {'name': 'Reviews', 'description': 'Product review endpoints'},
+        {'name': 'Orders', 'description': 'Order management endpoints'},
+        {'name': 'Users', 'description': 'User management endpoints'},
+        {'name': 'API Keys', 'description': 'API key management'},
+        {'name': 'Dashboard', 'description': 'User dashboard endpoints'},
+        {'name': 'Search', 'description': 'Search endpoints'},
+        {'name': 'System', 'description': 'System health and stats'},
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

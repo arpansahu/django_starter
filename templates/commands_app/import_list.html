@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Data Imports{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="bi bi-download"></i> Data Imports</h1>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Progress</th>
+                        <th>Records</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for import in imports %}
+                    <tr>
+                        <td>{{ import.name }}</td>
+                        <td><span class="badge bg-info">{{ import.source_type }}</span></td>
+                        <td>
+                            {% if import.status == 'completed' %}
+                            <span class="badge bg-success">{{ import.status }}</span>
+                            {% elif import.status == 'failed' %}
+                            <span class="badge bg-danger">{{ import.status }}</span>
+                            {% elif import.status == 'running' %}
+                            <span class="badge bg-primary">{{ import.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ import.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="progress" style="width: 100px;">
+                                <div class="progress-bar" style="width: {{ import.progress_percentage }}%"></div>
+                            </div>
+                            <small>{{ import.progress_percentage|floatformat:0 }}%</small>
+                        </td>
+                        <td>{{ import.successful_records }}/{{ import.total_records }}</td>
+                        <td>{{ import.created_at }}</td>
+                        <td>
+                            <a href="{% url 'commands_app:import_detail' import.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No imports found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

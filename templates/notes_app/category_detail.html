@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 style="color: {{ category.color }}">
+                <i class="fas fa-{{ category.icon }}"></i> {{ category.name }}
+            </h2>
+            {% if user.is_staff %}
+            <div>
+                <a href="{% url 'notes_app:category_update' slug=category.slug %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{% url 'notes_app:category_delete' slug=category.slug %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <p>{{ category.description }}</p>
+            <span class="badge bg-primary">{{ category.note_count }} notes</span>
+        </div>
+    </div>
+    
+    <h4 class="mt-4">Notes in this category</h4>
+    <div class="row">
+        {% for note in notes %}
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5><a href="{{ note.get_absolute_url }}">{{ note.title }}</a></h5>
+                    <p class="text-muted">{{ note.summary|default:note.content|truncatewords:20 }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-muted">No notes in this category yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

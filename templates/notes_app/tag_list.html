@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Tags{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">🏷️ Tags</h1>
+    
+    <div class="d-flex flex-wrap gap-3">
+        {% for tag in tags %}
+        <a href="{% url 'notes_app:notes_by_tag' slug=tag.slug %}" class="badge bg-secondary text-decoration-none fs-6 p-2">
+            {{ tag.name }} <span class="badge bg-light text-dark">{{ tag.note_count }}</span>
+        </a>
+        {% empty %}
+        <p class="text-muted">No tags yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

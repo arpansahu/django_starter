@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Import Details{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Import: {{ import_record.name }}</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">{{ import_record.name }}</dd>
+                
+                <dt class="col-sm-3">Source Type</dt>
+                <dd class="col-sm-9">{{ import_record.source_type }}</dd>
+                
+                <dt class="col-sm-3">Source Path</dt>
+                <dd class="col-sm-9"><code>{{ import_record.source_path }}</code></dd>
+                
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    {% if import_record.status == 'completed' %}
+                    <span class="badge bg-success">{{ import_record.status }}</span>
+                    {% elif import_record.status == 'failed' %}
+                    <span class="badge bg-danger">{{ import_record.status }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ import_record.status }}</span>
+                    {% endif %}
+                </dd>
+                
+                <dt class="col-sm-3">Records</dt>
+                <dd class="col-sm-9">
+                    <span class="text-success">{{ import_record.successful_records }}</span> successful,
+                    <span class="text-danger">{{ import_record.failed_records }}</span> failed
+                    of {{ import_record.total_records }} total
+                </dd>
+            </dl>
+            
+            {% if import_record.error_log %}
+            <hr>
+            <h5>Error Log</h5>
+            <pre class="bg-light p-3">{{ import_record.error_log }}</pre>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

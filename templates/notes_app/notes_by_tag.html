@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Notes tagged: {{ tag.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">
+        🏷️ Notes tagged "{{ tag.name }}"
+    </h1>
+    
+    <div class="row">
+        {% for note in notes %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5><a href="{{ note.get_absolute_url }}">{{ note.title }}</a></h5>
+                    <p class="text-muted">{{ note.summary|default:note.content|truncatewords:25 }}</p>
+                    {% if note.category %}
+                    <span class="badge bg-secondary">{{ note.category.name }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-muted small">
+                    {{ note.author.username }} | {{ note.created_at|date:"M j, Y" }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-muted">No notes with this tag.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

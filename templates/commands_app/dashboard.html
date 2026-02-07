@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Commands Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-terminal"></i> Commands Dashboard</h1>
+        <a href="{% url 'commands_app:run_command' %}" class="btn btn-primary">
+            <i class="bi bi-play-circle"></i> Run Command
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Scheduled Tasks</h5>
+                    <p class="card-text display-6">{{ stats.scheduled_tasks }}</p>
+                    <small>{{ stats.active_tasks }} active</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Executions (24h)</h5>
+                    <p class="card-text display-6">{{ stats.executions_24h }}</p>
+                    <small>{{ stats.executions_7d }} in last 7 days</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">Failed (24h)</h5>
+                    <p class="card-text display-6">{{ stats.failed_24h }}</p>
+                    <small>Check logs for details</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Metrics (24h)</h5>
+                    <p class="card-text display-6">{{ stats.metrics_count }}</p>
+                    <small>System metrics collected</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-lightning"></i> Quick Actions
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'commands_app:task_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-calendar-check"></i> View Scheduled Tasks
+                    </a>
+                    <a href="{% url 'commands_app:task_create' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-plus-circle"></i> Create New Task
+                    </a>
+                    <a href="{% url 'commands_app:log_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-file-text"></i> View Command Logs
+                    </a>
+                    <a href="{% url 'commands_app:metrics_dashboard' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-graph-up"></i> System Metrics
+                    </a>
+                    <a href="{% url 'commands_app:import_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-download"></i> Data Imports
+                    </a>
+                    <a href="{% url 'commands_app:export_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-upload"></i> Data Exports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Executions -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-clock-history"></i> Recent Executions</span>
+                    <a href="{% url 'commands_app:execution_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Status</th>
+                                <th>Started</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for execution in recent_executions %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'commands_app:execution_detail' execution.pk %}">
+                                        {{ execution.task.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if execution.status == 'completed' %}
+                                    <span class="badge bg-success">{{ execution.status }}</span>
+                                    {% elif execution.status == 'failed' %}
+                                    <span class="badge bg-danger">{{ execution.status }}</span>
+                                    {% elif execution.status == 'running' %}
+                                    <span class="badge bg-primary">{{ execution.status }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ execution.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ execution.started_at|timesince }} ago</td>
+                                <td>{% if execution.duration_seconds %}{{ execution.duration_seconds|floatformat:2 }}s{% else %}-{% endif %}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No executions yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Command Logs -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-file-text"></i> Recent Command Logs</span>
+            <a href="{% url 'commands_app:log_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Status</th>
+                        <th>Started</th>
+                        <th>Duration</th>
+                        <th>Executed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_commands %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'commands_app:log_detail' log.pk %}">
+                                <code>{{ log.command_name }}</code>
+                            </a>
+                        </td>
+                        <td>
+                            {% if log.status == 'completed' %}
+                            <span class="badge bg-success">{{ log.status }}</span>
+                            {% elif log.status == 'failed' %}
+                            <span class="badge bg-danger">{{ log.status }}</span>
+                            {% elif log.status == 'running' %}
+                            <span class="badge bg-primary">{{ log.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ log.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.started_at|timesince }} ago</td>
+                        <td>{% if log.duration_seconds %}{{ log.duration_seconds|floatformat:2 }}s{% else %}-{% endif %}</td>
+                        <td>{{ log.executed_by|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No command logs yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

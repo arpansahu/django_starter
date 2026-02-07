@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Scheduled Tasks{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-calendar-check"></i> Scheduled Tasks</h1>
+        <a href="{% url 'commands_app:task_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create Task
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="priority" class="form-select">
+                        <option value="">All Priorities</option>
+                        <option value="critical" {% if request.GET.priority == 'critical' %}selected{% endif %}>Critical</option>
+                        <option value="high" {% if request.GET.priority == 'high' %}selected{% endif %}>High</option>
+                        <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Low</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task List -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Command</th>
+                        <th>Schedule</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Last Run</th>
+                        <th>Run Count</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'commands_app:task_detail' task.pk %}">{{ task.name }}</a>
+                        </td>
+                        <td><code>{{ task.command }}</code></td>
+                        <td><code>{{ task.schedule }}</code></td>
+                        <td>
+                            {% if task.priority == 'critical' %}
+                            <span class="badge bg-danger">{{ task.priority }}</span>
+                            {% elif task.priority == 'high' %}
+                            <span class="badge bg-warning">{{ task.priority }}</span>
+                            {% elif task.priority == 'medium' %}
+                            <span class="badge bg-info">{{ task.priority }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ task.priority }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if task.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{% if task.last_run %}{{ task.last_run|timesince }} ago{% else %}-{% endif %}</td>
+                        <td>{{ task.run_count }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'commands_app:task_edit' task.pk %}" class="btn btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-success run-task-btn" data-task-id="{{ task.pk }}" title="Run Now">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                                <a href="{% url 'commands_app:task_delete' task.pk %}" class="btn btn-outline-danger" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No scheduled tasks found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<script>
+document.querySelectorAll('.run-task-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const taskId = this.dataset.taskId;
+        if (confirm('Run this task now?')) {
+            try {
+                const response = await fetch(`/commands/api/tasks/${taskId}/run/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert('Task executed successfully!');
+                    location.reload();
+                } else {
+                    alert('Task failed: ' + data.error);
+                }
+            } catch (e) {
+                alert('Error: ' + e);
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

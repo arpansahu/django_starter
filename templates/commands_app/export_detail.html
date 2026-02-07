@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Export Details{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Export: {{ export_record.name }}</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">{{ export_record.name }}</dd>
+                
+                <dt class="col-sm-3">Format</dt>
+                <dd class="col-sm-9">{{ export_record.export_format }}</dd>
+                
+                <dt class="col-sm-3">Destination</dt>
+                <dd class="col-sm-9"><code>{{ export_record.destination_path }}</code></dd>
+                
+                <dt class="col-sm-3">Model</dt>
+                <dd class="col-sm-9"><code>{{ export_record.model_name }}</code></dd>
+                
+                <dt class="col-sm-3">Filters</dt>
+                <dd class="col-sm-9"><pre class="mb-0">{{ export_record.filters|default:"{}" }}</pre></dd>
+                
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    {% if export_record.status == 'completed' %}
+                    <span class="badge bg-success">{{ export_record.status }}</span>
+                    {% elif export_record.status == 'failed' %}
+                    <span class="badge bg-danger">{{ export_record.status }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ export_record.status }}</span>
+                    {% endif %}
+                </dd>
+                
+                <dt class="col-sm-3">Records</dt>
+                <dd class="col-sm-9">{{ export_record.total_records }}</dd>
+                
+                <dt class="col-sm-3">File Size</dt>
+                <dd class="col-sm-9">{% if export_record.file_size_bytes %}{{ export_record.file_size_bytes|filesizeformat }}{% else %}-{% endif %}</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}

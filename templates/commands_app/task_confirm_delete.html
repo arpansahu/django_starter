@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Task{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <i class="bi bi-exclamation-triangle"></i> Confirm Deletion
+        </div>
+        <div class="card-body">
+            <p>Are you sure you want to delete the task <strong>{{ object.name }}</strong>?</p>
+            <p class="text-muted">This will also delete all execution history for this task.</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                    <a href="{% url 'commands_app:task_detail' object.pk %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

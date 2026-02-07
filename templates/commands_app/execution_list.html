@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Task Executions{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="bi bi-clock-history"></i> Task Executions</h1>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Status</th>
+                        <th>Started</th>
+                        <th>Completed</th>
+                        <th>Duration</th>
+                        <th>Triggered By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for execution in executions %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'commands_app:task_detail' execution.task.pk %}">
+                                {{ execution.task.name }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if execution.status == 'completed' %}
+                            <span class="badge bg-success">{{ execution.status }}</span>
+                            {% elif execution.status == 'failed' %}
+                            <span class="badge bg-danger">{{ execution.status }}</span>
+                            {% elif execution.status == 'running' %}
+                            <span class="badge bg-primary">{{ execution.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ execution.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ execution.started_at }}</td>
+                        <td>{{ execution.completed_at|default:"-" }}</td>
+                        <td>{% if execution.duration_seconds %}{{ execution.duration_seconds|floatformat:2 }}s{% else %}-{% endif %}</td>
+                        <td>{{ execution.triggered_by }}</td>
+                        <td>
+                            <a href="{% url 'commands_app:execution_detail' execution.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No executions found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Data Exports{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="bi bi-upload"></i> Data Exports</h1>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Format</th>
+                        <th>Model</th>
+                        <th>Status</th>
+                        <th>Records</th>
+                        <th>Size</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for export in exports %}
+                    <tr>
+                        <td>{{ export.name }}</td>
+                        <td><span class="badge bg-info">{{ export.export_format }}</span></td>
+                        <td><code>{{ export.model_name }}</code></td>
+                        <td>
+                            {% if export.status == 'completed' %}
+                            <span class="badge bg-success">{{ export.status }}</span>
+                            {% elif export.status == 'failed' %}
+                            <span class="badge bg-danger">{{ export.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ export.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ export.total_records }}</td>
+                        <td>{% if export.file_size_bytes %}{{ export.file_size_bytes|filesizeformat }}{% else %}-{% endif %}</td>
+                        <td>{{ export.created_at }}</td>
+                        <td>
+                            <a href="{% url 'commands_app:export_detail' export.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No exports found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

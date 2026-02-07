@@ -185,4 +185,3 @@ class FileURLRoutingTest(TestCase):
         """Test that private upload URL resolves correctly"""
         url = reverse('upload_private_file')
         self.assertEqual(url, '/upload-private/')
-

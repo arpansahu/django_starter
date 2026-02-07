@@ -517,5 +517,3 @@ class EmailVerificationTest(TestCase):
         # Token should now be invalid (user state changed)
         is_valid = account_activation_token.check_token(user, token)
         self.assertFalse(is_valid)
-
-

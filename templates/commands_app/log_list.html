@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Command Logs{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="bi bi-file-text"></i> Command Logs</h1>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Status</th>
+                        <th>Started</th>
+                        <th>Duration</th>
+                        <th>Exit Code</th>
+                        <th>Executed By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td><code>{{ log.command_name }}</code></td>
+                        <td>
+                            {% if log.status == 'completed' %}
+                            <span class="badge bg-success">{{ log.status }}</span>
+                            {% elif log.status == 'failed' %}
+                            <span class="badge bg-danger">{{ log.status }}</span>
+                            {% elif log.status == 'running' %}
+                            <span class="badge bg-primary">{{ log.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ log.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.started_at }}</td>
+                        <td>{% if log.duration_seconds %}{{ log.duration_seconds|floatformat:2 }}s{% else %}-{% endif %}</td>
+                        <td>{{ log.exit_code|default:"-" }}</td>
+                        <td>{{ log.executed_by|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'commands_app:log_detail' log.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No command logs found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
