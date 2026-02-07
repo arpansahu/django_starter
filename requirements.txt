@@ -87,3 +87,4 @@ faker==33.1.0
 # Message Queue and Event Streaming
 pika==1.3.2
 kafka-python==2.0.2
+django-test-enforcer>=0.1.0

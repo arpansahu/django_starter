@@ -471,3 +471,29 @@ LOGGING = {
 }
 
 CSRF_TRUSTED_ORIGINS = [f'{PROTOCOL}{DOMAIN}', f'{PROTOCOL}*.{DOMAIN}']
+
+# Django Test Enforcer Configuration
+DJANGO_TEST_ENFORCER = {
+    'enabled': True,
+    'coverage_threshold': 80,
+    'fail_under': False,  # Set to True to fail CI if below threshold
+    'exclude_apps': [
+        'django.contrib.*',
+        'rest_framework.*',
+        'drf_spectacular.*',
+        'channels.*',
+        'celery_progress_custom_app.*',
+    ],
+    'exclude_patterns': [
+        'migrations/*',
+        'admin.py',
+    ],
+    'include_class_based_views': True,
+    'include_function_views': True,
+    'include_ui_elements': True,
+    'generate_ui_tests': True,
+    'test_output_location': 'app',  # 'app' (default), 'folder', or 'both'
+    'ui_test_output_location': 'app',
+    'ui_test_filename': 'test_ui.py',
+    'ui_framework': 'playwright',  # 'playwright', 'selenium', or 'django'
+}
