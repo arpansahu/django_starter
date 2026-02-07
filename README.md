@@ -99,59 +99,6 @@ Installing Pre requisites
   pip install -r requirements.txt
 ```
 
-## Running the Application
-
-⚠️ **IMPORTANT**: For full functionality (including Celery task tracking), you need to run **ALL services**, not just Django!
-
-### Quick Start (Development)
-
-```bash
-# Activate virtual environment
-source venv/bin/activate
-
-# Start all services (Django + Celery + Flower)
-./start_dev.sh
-```
-
-**Access:**
-- Django App: http://localhost:8001
-- Flower (Celery monitoring): http://localhost:8054
-
-### Why You Need All Services
-
-| Service | What it does | Required for |
-|---------|--------------|-------------|
-| Django Server | Web application | ✅ Always needed |
-| Celery Worker | Process async tasks | ⚠️ Progress tracking, background jobs |
-| Flower | Monitor Celery | 📊 Optional (monitoring) |
-| Redis | Cache + message broker | ✅ Celery tasks, caching |
-| PostgreSQL | Database | ✅ Data storage |
-
-**Without Celery workers**: Tasks get queued but never execute (progress bar will stay at 0%)!
-
-See [RUNNING_SERVICES.md](RUNNING_SERVICES.md) for detailed instructions on:
-- Different ways to run services
-- Manual startup (educational)
-- Production mode with Supervisor
-- Docker mode
-- Troubleshooting
-
-### Health Checks
-
-Verify all services are working:
-
-```bash
-# Check all services
-python manage.py test_all_services
-
-# Check individual services
-python manage.py test_celery
-python manage.py test_cache
-python manage.py test_db
-python manage.py test_storage
-python manage.py test_flower
-```
-
 Create .env File and don't forget to add .env to gitignore
 ```bash
   add variables mentioned in .env.example
