@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Analytics{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">📈 Search Analytics</h1>
+    
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ recent_queries|length }}</h3>
+                    <p class="mb-0">Recent Queries</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{ avg_response_time|floatformat:0|default:"N/A" }}ms</h3>
+                    <p class="mb-0">Avg Response Time</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-info">{{ top_queries|length }}</h3>
+                    <p class="mb-0">Unique Queries</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ zero_result_queries|length }}</h3>
+                    <p class="mb-0">Zero Results</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Top Queries -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">🔥 Top Search Queries</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_queries %}
+                        <div class="list-group list-group-flush">
+                            {% for item in top_queries %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{% url 'elasticsearch_app:search' %}?q={{ item.query|urlencode }}">
+                                    {{ item.query }}
+                                </a>
+                                <span class="badge bg-primary rounded-pill">{{ item.count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No search data yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Zero Result Queries -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">❌ Zero Result Queries</h5>
+                </div>
+                <div class="card-body">
+                    {% if zero_result_queries %}
+                        <p class="small text-muted mb-3">
+                            These queries returned no results. Consider adding content or synonyms.
+                        </p>
+                        <div class="list-group list-group-flush">
+                            {% for item in zero_result_queries %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ item.query }}</span>
+                                <span class="badge bg-danger rounded-pill">{{ item.count }} times</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-success">
+                            <i class="fas fa-check-circle"></i> No zero-result queries!
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Queries -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">🕐 Recent Search Queries</h5>
+        </div>
+        <div class="card-body">
+            {% if recent_queries %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Query</th>
+                                <th>Index</th>
+                                <th>Results</th>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>IP</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for query in recent_queries %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'elasticsearch_app:search' %}?q={{ query.query|urlencode }}">
+                                        <code>{{ query.query|truncatechars:50 }}</code>
+                                    </a>
+                                </td>
+                                <td><span class="badge bg-secondary">{{ query.index }}</span></td>
+                                <td>
+                                    {% if query.results_count > 0 %}
+                                        <span class="text-success">{{ query.results_count }}</span>
+                                    {% else %}
+                                        <span class="text-danger">0</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if query.response_time_ms < 100 %}
+                                        <span class="text-success">{{ query.response_time_ms }}ms</span>
+                                    {% elif query.response_time_ms < 500 %}
+                                        <span class="text-warning">{{ query.response_time_ms }}ms</span>
+                                    {% else %}
+                                        <span class="text-danger">{{ query.response_time_ms }}ms</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ query.user.username|default:"Anonymous" }}</td>
+                                <td><small>{{ query.ip_address|default:"-" }}</small></td>
+                                <td>{{ query.created_at|date:"M j, H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No search queries recorded yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

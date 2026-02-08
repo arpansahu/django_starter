@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block title %}Elasticsearch Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">🔍 Elasticsearch Dashboard</h1>
+    
+    <!-- Connection Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card {% if connection.connected %}border-success{% else %}border-danger{% endif %}">
+                <div class="card-header {% if connection.connected %}bg-success text-white{% else %}bg-danger text-white{% endif %}">
+                    <h5 class="mb-0">
+                        {% if connection.connected %}
+                            ✅ Connected to Elasticsearch
+                        {% else %}
+                            ❌ Not Connected
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if connection.connected %}
+                        <p><strong>Cluster:</strong> {{ connection.cluster_name }}</p>
+                        <p><strong>Version:</strong> {{ connection.version }}</p>
+                        <p class="mb-0"><em>{{ connection.tagline }}</em></p>
+                    {% else %}
+                        <p class="text-danger">{{ connection.error }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if connection.connected %}
+    <!-- Cluster Health -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Cluster Health</h5>
+                </div>
+                <div class="card-body">
+                    {% if health %}
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge {% if health.status == 'green' %}bg-success{% elif health.status == 'yellow' %}bg-warning{% else %}bg-danger{% endif %} fs-5 me-2">
+                                {{ health.status|upper }}
+                            </span>
+                            <span>{{ health.cluster_name }}</span>
+                        </div>
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Nodes</td>
+                                <td><strong>{{ health.number_of_nodes }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Data Nodes</td>
+                                <td><strong>{{ health.number_of_data_nodes }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Active Shards</td>
+                                <td><strong>{{ health.active_shards }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Primary Shards</td>
+                                <td><strong>{{ health.active_primary_shards }}</strong></td>
+                            </tr>
+                        </table>
+                    {% else %}
+                        <p class="text-muted">Unable to fetch cluster health</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚙️ Index Management</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'elasticsearch_app:manage' %}" class="mb-3" id="index-form">
+                        {% csrf_token %}
+                        <div class="btn-group" role="group">
+                            <button type="submit" name="action" value="create_indices" class="btn btn-success">
+                                Create Indices
+                            </button>
+                            <button type="submit" name="action" value="reindex" class="btn btn-primary">
+                                Reindex All
+                            </button>
+                            <button type="submit" name="action" value="delete_indices" class="btn btn-danger" 
+                                    onclick="return confirm('Are you sure? This will delete all indices!')">
+                                Delete Indices
+                            </button>
+                        </div>
+                    </form>
+                    <div id="management-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Indices -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📁 Indices</h5>
+                </div>
+                <div class="card-body">
+                    {% if indices %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Index</th>
+                                        <th>Health</th>
+                                        <th>Status</th>
+                                        <th>Docs Count</th>
+                                        <th>Size</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for index in indices %}
+                                    <tr>
+                                        <td><code>{{ index.index }}</code></td>
+                                        <td>
+                                            <span class="badge {% if index.health == 'green' %}bg-success{% elif index.health == 'yellow' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                {{ index.health }}
+                                            </span>
+                                        </td>
+                                        <td>{{ index.status }}</td>
+                                        <td>{{ index.docs.count|default:"0" }}</td>
+                                        <td>{{ index.store.size|default:"0" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No indices found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Quick Links -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🔗 Quick Links</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'elasticsearch_app:search' %}" class="btn btn-primary me-2">
+                        🔍 Search
+                    </a>
+                    <a href="{% url 'elasticsearch_app:analytics' %}" class="btn btn-info me-2">
+                        📈 Analytics
+                    </a>
+                    <a href="https://kibana.arpansahu.space" target="_blank" class="btn btn-secondary">
+                        📊 Kibana Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Searches -->
+    {% if recent_queries %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🕐 Recent Searches</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Query</th>
+                                    <th>Index</th>
+                                    <th>Results</th>
+                                    <th>Time</th>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for query in recent_queries %}
+                                <tr>
+                                    <td><code>{{ query.query }}</code></td>
+                                    <td>{{ query.index }}</td>
+                                    <td>{{ query.results_count }}</td>
+                                    <td>{{ query.response_time_ms }}ms</td>
+                                    <td>{{ query.user.username|default:"Anonymous" }}</td>
+                                    <td>{{ query.created_at|date:"M j, H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+const indexForm = document.getElementById('index-form');
+if (indexForm) {
+    indexForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const button = e.submitter;
+        formData.append('action', button.value);
+        
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        // Use getAttribute to get the URL, not this.action (which is shadowed by form elements named "action")
+        const formUrl = this.getAttribute('action');
+        
+        fetch(formUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Please login to perform this action');
+                }
+                throw new Error('Request failed with status ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const resultDiv = document.getElementById('management-result');
+            if (data.success) {
+                resultDiv.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+                // Reload page after 2 seconds to show updated indices
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                resultDiv.innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
+            }
+        })
+        .catch(error => {
+            document.getElementById('management-result').innerHTML = 
+                '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+        });
+    });
+}
+</script>
+{% endblock %}

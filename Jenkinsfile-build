@@ -25,9 +25,9 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    echo 'Running Django tests...'
+                    echo 'Running Django Unit Tests...'
                     
-                    // Run tests in Docker container
+                    // Run unit tests in Docker container
                     sh """
                     docker run --rm \
                         -v \$(pwd):/app \
@@ -35,11 +35,70 @@ pipeline {
                         --env-file .env \
                         python:3.10.7 \
                         bash -c 'pip install -q -r requirements.txt && \
-                                 pip install -q pytest pytest-django pytest-cov && \
+                                 pip install -q pytest pytest-django pytest-asyncio channels pytest-cov && \
                                  python manage.py test --verbosity=2 --failfast'
                     """
                     
-                    echo '✅ All tests passed successfully!'
+                    echo '✅ All unit tests passed successfully!'
+                }
+            }
+        }
+        stage('Run UI Tests') {
+            steps {
+                script {
+                    echo 'Running Playwright UI Tests with embedded Django server...'
+                    
+                    // Run UI tests with Playwright - starts Django server internally
+                    sh """
+                    docker run --rm \
+                        -v \$(pwd):/app \
+                        -w /app \
+                        --env-file .env \
+                        mcr.microsoft.com/playwright/python:v1.40.0-jammy \
+                        bash -c '
+                            set -e
+                            pip install -q -r requirements.txt
+                            pip install -q pytest pytest-django pytest-playwright pytest-asyncio
+                            playwright install chromium
+                            
+                            # Start Django server in background
+                            python manage.py runserver 0.0.0.0:8016 &
+                            SERVER_PID=\$!
+                            
+                            # Wait for server to be ready
+                            echo "Waiting for Django server to start..."
+                            for i in {1..30}; do
+                                if curl -s http://127.0.0.1:8016/ > /dev/null 2>&1; then
+                                    echo "Django server is ready!"
+                                    break
+                                fi
+                                sleep 1
+                            done
+                            
+                            # Create test user for authenticated tests
+                            python manage.py shell -c "
+from django.contrib.auth import get_user_model
+User = get_user_model()
+if not User.objects.filter(email=\"testuser@example.com\").exists():
+    user = User.objects.create_user(email=\"testuser@example.com\", username=\"testuser\", password=\"TestPass123!\")
+    user.is_active = True
+    user.save()
+    print(\"Test user created\")
+else:
+    print(\"Test user already exists\")
+"
+                            
+                            # Run UI tests
+                            pytest */test_ui.py -v --tb=short -x || TEST_EXIT_CODE=\$?
+                            
+                            # Stop Django server
+                            kill \$SERVER_PID 2>/dev/null || true
+                            
+                            exit \${TEST_EXIT_CODE:-0}
+                        '
+                    """
+                    
+                    echo '✅ All UI tests passed successfully!'
                 }
             }
         }

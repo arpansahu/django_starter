@@ -187,6 +187,49 @@
         </div>
     </div>
 
+    <!-- Elasticsearch Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title"><i class="fa-solid fa-magnifying-glass"></i> Elasticsearch Search</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'elasticsearch_app:dashboard' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-primary">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <h3 class="card-title">Dashboard</h3>
+                    <p class="card-text">Monitor cluster health, indices, and manage documents</p>
+                    <a href="{% url 'elasticsearch_app:dashboard' %}" class="btn btn-primary">View Dashboard</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'elasticsearch_app:search' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-success">
+                        <i class="fa-solid fa-search"></i>
+                    </div>
+                    <h3 class="card-title">Search</h3>
+                    <p class="card-text">Full-text search with autocomplete and filters</p>
+                    <a href="{% url 'elasticsearch_app:search' %}" class="btn btn-success">Search Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card" onclick="window.location.href='{% url 'elasticsearch_app:analytics' %}'">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-warning">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="card-title">Analytics</h3>
+                    <p class="card-text">View search query analytics and insights</p>
+                    <a href="{% url 'elasticsearch_app:analytics' %}" class="btn btn-warning">View Analytics</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Account Management Section -->
     <div class="row mb-5">
         <div class="col-12">

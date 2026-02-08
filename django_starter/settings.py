@@ -65,6 +65,12 @@ KAFKA_SASL_PASSWORD = config('KAFKA_SASL_PASSWORD')
 KAFKA_SSL_TRUSTSTORE_PASSWORD = config('KAFKA_SSL_TRUSTSTORE_PASSWORD', default='')
 KAFKA_SSL_KEYSTORE_PASSWORD = config('KAFKA_SSL_KEYSTORE_PASSWORD', default='')
 
+# Elasticsearch Configuration
+ELASTICSEARCH_HOST = config('ELASTICSEARCH_HOST', default='https://elasticsearch.arpansahu.space')
+ELASTICSEARCH_USER = config('ELASTICSEARCH_USER', default='elastic')
+ELASTICSEARCH_PASSWORD = config('ELASTICSEARCH_PASSWORD', default='')
+ELASTICSEARCH_INDEX_PREFIX = config('ELASTICSEARCH_INDEX_PREFIX', default='django_starter')
+
 PROJECT_NAME = 'django_starter'
 USE_S3 = True
 # ===============================================================================
@@ -100,6 +106,9 @@ INSTALLED_APPS = [
     
     # Test Coverage Enforcement
     'django_test_enforcer',
+    
+    # Elasticsearch app
+    'elasticsearch_app',
 
     # cleans up unused media, always in the end
     'django_cleanup.apps.CleanupConfig',
@@ -210,6 +219,20 @@ ASGI_APPLICATION = "django_starter.asgi.application"
 # Parse database configuration from $DATABASE_URL
 
 DATABASES = {'default': dj_database_url.config(default=DATABASE_URL)}
+
+# Use SQLite for testing (faster and no external dependencies)
+import sys
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',  # In-memory database for speed
+        }
+    }
+    # Disable password hashing for faster tests
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

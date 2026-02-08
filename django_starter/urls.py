@@ -64,6 +64,9 @@ urlpatterns = [
     # Commands App - Management Commands Demo
     path('commands/', include('commands_app.urls', namespace='commands_app')),
     
+    # Elasticsearch App - Search Demo
+    path('elasticsearch/', include('elasticsearch_app.urls', namespace='elasticsearch_app')),
+    
     # API App - Django REST Framework Demo
     path('api/v1/', include('api_app.urls', namespace='api_app')),
     

@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">🔍 Search</h1>
+    
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'elasticsearch_app:search' %}">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group input-group-lg">
+                            <input type="text" name="q" class="form-control" 
+                                   placeholder="Enter your search query..." 
+                                   value="{{ query }}" 
+                                   id="search-input"
+                                   autocomplete="off">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        <div id="suggestions" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="index" class="form-select form-select-lg">
+                            <option value="" {% if not index_filter %}selected{% endif %}>All Indices</option>
+                            <option value="notes" {% if index_filter == 'notes' %}selected{% endif %}>Notes</option>
+                            <option value="users" {% if index_filter == 'users' %}selected{% endif %}>Users</option>
+                            <option value="logs" {% if index_filter == 'logs' %}selected{% endif %}>Logs</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if error %}
+    <div class="alert alert-danger">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+    
+    {% if query %}
+    <!-- Search Results -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                Results for "{{ query }}"
+            </h5>
+            {% if results %}
+            <span class="badge bg-primary">{{ results.total }} results</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if results and results.hits %}
+                <div class="list-group">
+                    {% for hit in results.hits %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">
+                                {% if hit.highlights.title %}
+                                    {{ hit.highlights.title.0|safe }}
+                                {% elif hit.title %}
+                                    {{ hit.title }}
+                                {% elif hit.username %}
+                                    {{ hit.username }}
+                                {% elif hit.message %}
+                                    {{ hit.message|truncatewords:10 }}
+                                {% else %}
+                                    Document {{ hit.id }}
+                                {% endif %}
+                            </h5>
+                            <small class="text-muted">
+                                <span class="badge bg-secondary">{{ hit.index }}</span>
+                                Score: {{ hit.score|floatformat:2 }}
+                            </small>
+                        </div>
+                        
+                        {% if hit.highlights.content %}
+                            <p class="mb-1">...{{ hit.highlights.content.0|safe }}...</p>
+                        {% elif hit.content %}
+                            <p class="mb-1">{{ hit.content|truncatewords:30 }}</p>
+                        {% elif hit.highlights.message %}
+                            <p class="mb-1">...{{ hit.highlights.message.0|safe }}...</p>
+                        {% endif %}
+                        
+                        <small class="text-muted">
+                            {% if hit.author %}Author: {{ hit.author }}{% endif %}
+                            {% if hit.email %}Email: {{ hit.email }}{% endif %}
+                            {% if hit.created_at %}Created: {{ hit.created_at }}{% endif %}
+                            {% if hit.category %}<span class="badge bg-info">{{ hit.category }}</span>{% endif %}
+                            {% if hit.tags %}
+                                {% for tag in hit.tags %}
+                                    <span class="badge bg-secondary">{{ tag }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if results.pages > 1 %}
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if results.page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&index={{ index_filter }}&page={{ results.page|add:'-1' }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">Page {{ results.page }} of {{ results.pages }}</span>
+                        </li>
+                        
+                        {% if results.page < results.pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&index={{ index_filter }}&page={{ results.page|add:'1' }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No results found for "{{ query }}"</p>
+                    <p class="text-muted small">Try different keywords or check your spelling</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <!-- Search Tips -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">💡 Search Tips</h5>
+            <ul>
+                <li>Use specific keywords for better results</li>
+                <li>Select an index to narrow down your search</li>
+                <li>Use quotes for exact phrase matching: "exact phrase"</li>
+                <li>Use AND/OR for complex queries</li>
+            </ul>
+            
+            <h6 class="mt-4">Popular Searches</h6>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="?q=django" class="btn btn-outline-secondary btn-sm">django</a>
+                <a href="?q=python" class="btn btn-outline-secondary btn-sm">python</a>
+                <a href="?q=api" class="btn btn-outline-secondary btn-sm">api</a>
+                <a href="?q=test" class="btn btn-outline-secondary btn-sm">test</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Autocomplete suggestions
+const searchInput = document.getElementById('search-input');
+const suggestionsDiv = document.getElementById('suggestions');
+let debounceTimer;
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    const query = this.value;
+    
+    if (query.length < 2) {
+        suggestionsDiv.style.display = 'none';
+        return;
+    }
+    
+    debounceTimer = setTimeout(() => {
+        fetch(`{% url 'elasticsearch_app:api_suggest' %}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.suggestions && data.suggestions.length > 0) {
+                    suggestionsDiv.innerHTML = data.suggestions.map(s => 
+                        `<a href="?q=${encodeURIComponent(s)}" class="list-group-item list-group-item-action">${s}</a>`
+                    ).join('');
+                    suggestionsDiv.style.display = 'block';
+                } else {
+                    suggestionsDiv.style.display = 'none';
+                }
+            })
+            .catch(() => {
+                suggestionsDiv.style.display = 'none';
+            });
+    }, 300);
+});
+
+document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+        suggestionsDiv.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}
