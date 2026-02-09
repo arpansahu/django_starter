@@ -15,8 +15,8 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'django_starter_env_file', variable: 'ENV_CONTENT')]) {
-                        writeFile file: '.env', text: env.ENV_CONTENT
+                    withCredentials([file(credentialsId: 'django_starter_env_file', variable: 'ENV_FILE')]) {
+                        sh "cp \$ENV_FILE .env"
                         echo '.env file created successfully from credentials'
                     }
                 }

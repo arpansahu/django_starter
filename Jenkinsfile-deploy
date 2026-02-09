@@ -39,8 +39,8 @@ pipeline {
             steps {
                 script {
                     echo "Loading environment variables from Jenkins credentials..."
-                    withCredentials([string(credentialsId: 'django_starter_env_file', variable: 'ENV_CONTENT')]) {
-                        writeFile file: '.env', text: env.ENV_CONTENT
+                    withCredentials([file(credentialsId: 'django_starter_env_file', variable: 'ENV_FILE')]) {
+                        sh "cp \$ENV_FILE .env"
                         echo "✅ Environment file created successfully"
                     }
                 }
