@@ -1,21 +1,35 @@
-# Django Starter | Django Base project clone, save the hustle
+# Django Starter | Production-Ready Django Boilerplate
 
-This is a simple django CRUD project
+A comprehensive Django starter project featuring modern best practices, multiple integrations, and enterprise-ready architecture. Clone it, configure it, and start building your application immediately.
 
 ## Project Features
 
-1. **Account Functionality:** Complete account management.
-2. **PostgreSql Integration:** Utilized as a database.
-3. **AWS S3/MinIO Integration:** For file storage.
-4. **Redis Integration:** Utilized for caching and message pub/sub.
-5. **MailJet Integration:** Used for email services.
-6. **Dockerized Project:** Fully containerized for easy deployment.
-7. **Kubernetes-native** Kubernetes support also available.
-8. **CI/CD Pipeline:** Continuous integration and deployment included using Jenkins.
+1. **Account Management:** Complete authentication with email verification, password reset, and profile management.
+2. **PostgreSQL Database:** Production-grade relational database with migrations and connection pooling.
+3. **AWS S3/MinIO Storage:** Flexible file storage supporting both AWS S3 and self-hosted MinIO.
+4. **Redis Integration:** High-performance caching, session storage, and Celery message broker.
+5. **MailJet Email Service:** Transactional emails with templates and delivery tracking.
+6. **Docker Containerization:** Fully containerized with Docker Compose for local development.
+7. **Kubernetes Deployment:** Production-ready K8s manifests with ConfigMaps and Secrets.
+8. **CI/CD Pipeline:** Automated build, test, and deployment with Jenkins.
+9. **Notes Application:** Full-featured CRUD app with categories, tags, comments, and version history.
+10. **Elasticsearch Search:** Full-text search with analytics dashboard and Kibana integration.
+11. **Kafka Event Streaming:** Real-time event publishing and consumption with Apache Kafka.
+12. **RabbitMQ Messaging:** Message queue system for async notifications and task distribution.
+13. **Commands Dashboard:** Management command execution, scheduling, and metrics tracking.
+14. **REST API:** Complete Django REST Framework API with JWT authentication and Swagger docs.
+15. **Celery Task Queue:** Background task processing with real-time WebSocket progress tracking.
+16. **Comprehensive Testing:** Automated test generation with django-test-enforcer and Playwright UI tests.
 
-# Starter Project 
+## Why Use This Starter?
 
-Can be cloned and used as a base project for any django project
+- 🚀 **Production-Ready:** Battle-tested configurations for real-world deployments
+- 🔧 **Fully Configured:** All integrations pre-wired and working out of the box
+- 📦 **Modular Design:** Enable/disable features based on your needs
+- 🧪 **Test Coverage:** Built-in testing infrastructure with 100% view coverage
+- 📖 **Well Documented:** Comprehensive documentation and code comments
+
+Can be cloned and used as a base project for any Django application.
 
 -Deployed on AWS / Now in My Own Home Ubuntu Server LTS 22.0 / Hostinger VPS Server
 
@@ -62,6 +76,9 @@ The most common Redis use cases are session cache, full-page cache, queues, lead
 [![Javascript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](https://www.javascript.com/)
 [![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/docs/)
 [![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/docs/)
+[![Elasticsearch](https://img.shields.io/badge/Elasticsearch-005571?style=for-the-badge&logo=elasticsearch&logoColor=white)](https://www.elastic.co/)
+[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
 [![Github](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://www.github.com/)
 [![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Harbor](https://img.shields.io/badge/HARBOR-TEXT?style=for-the-badge&logo=harbor&logoColor=white&color=blue)](https://goharbor.io/)
@@ -77,6 +94,10 @@ The most common Redis use cases are session cache, full-page cache, queues, lead
 [![Celery](https://img.shields.io/badge/CELERY-37814A?style=for-the-badge&logo=celery&logoColor=white)](https://docs.celeryq.dev/en/stable/)
 [![Rancher](https://img.shields.io/badge/Rancher-0075A8?style=for-the-badge&logo=rancher&logoColor=white)](https://rancher.com/)
 [![Flower](https://img.shields.io/badge/Flower-FF8C00?style=for-the-badge&logo=flower&logoColor=white)](https://flower.readthedocs.io/en/latest/)
+[![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
+[![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![DRF](https://img.shields.io/badge/Django%20REST-ff1709?style=for-the-badge&logo=django&logoColor=white)](https://www.django-rest-framework.org/)
+
 
 
 ## Demo
@@ -7918,6 +7939,12 @@ All deployment files are in: `AWS Deployment/Minio/`
 ---
 
 
+[README of Elasticsearch Setup]
+
+[README of Apache Kafka Setup]
+
+[README of RabbitMQ Setup]
+
 ## Jenkins (CI/CD Automation Server)
 
 Jenkins is an open-source automation server that enables developers to build, test, and deploy applications through continuous integration and continuous delivery (CI/CD). This guide provides a complete, production-ready setup with Java 21, Jenkins LTS, Nginx reverse proxy, and comprehensive credential management.
@@ -10566,6 +10593,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 [![Javascript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](https://www.javascript.com/)
 [![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/docs/)
 [![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/docs/)
+[![Elasticsearch](https://img.shields.io/badge/Elasticsearch-005571?style=for-the-badge&logo=elasticsearch&logoColor=white)](https://www.elastic.co/)
+[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
 [![Github](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://www.github.com/)
 [![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Harbor](https://img.shields.io/badge/HARBOR-TEXT?style=for-the-badge&logo=harbor&logoColor=white&color=blue)](https://goharbor.io/)
@@ -10581,6 +10611,10 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 [![Celery](https://img.shields.io/badge/CELERY-37814A?style=for-the-badge&logo=celery&logoColor=white)](https://docs.celeryq.dev/en/stable/)
 [![Rancher](https://img.shields.io/badge/Rancher-0075A8?style=for-the-badge&logo=rancher&logoColor=white)](https://rancher.com/)
 [![Flower](https://img.shields.io/badge/Flower-FF8C00?style=for-the-badge&logo=flower&logoColor=white)](https://flower.readthedocs.io/en/latest/)
+[![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
+[![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![DRF](https://img.shields.io/badge/Django%20REST-ff1709?style=for-the-badge&logo=django&logoColor=white)](https://www.django-rest-framework.org/)
+
 
 
 ## Environment Variables
@@ -10619,9 +10653,40 @@ SENTRY_ENVIRONMENT=
 SENTRY_DSH_URL=
 
 # deploy_kube.sh requirements
-
 HARBOR_USERNAME=
 
 HARBOR_PASSWORD=
+
+HARBOR_URL=https://harbor.example.com
+
+MY_EMAIL_ADDRESS=
+
+# Flower Basic Auth
+FLOWER_ADMIN_USERNAME=
+FLOWER_ADMIN_PASS=
+
+# RabbitMQ Configuration
+RABBITMQ_HOST=
+RABBITMQ_PORT=5672
+RABBITMQ_USER=
+RABBITMQ_PASSWORD=
+RABBITMQ_VHOST=/
+RABBITMQ_MANAGEMENT_PORT=15672
+
+# Kafka Configuration
+KAFKA_BOOTSTRAP_SERVERS=
+KAFKA_SECURITY_PROTOCOL=SASL_SSL
+KAFKA_SASL_MECHANISM=PLAIN
+KAFKA_SASL_USERNAME=
+KAFKA_SASL_PASSWORD=
+KAFKA_SSL_TRUSTSTORE_PASSWORD=
+KAFKA_SSL_KEYSTORE_PASSWORD=
+
+# Elasticsearch Configuration
+ELASTICSEARCH_HOST=
+ELASTICSEARCH_USER=
+ELASTICSEARCH_PASSWORD=
+ELASTICSEARCH_INDEX_PREFIX=django_starter
+
 
 
