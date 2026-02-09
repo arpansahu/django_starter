@@ -502,28 +502,29 @@ class ElasticsearchClientExtendedTests(TestCase):
     def setUp(self):
         reset_elasticsearch_client()
     
-    @patch('elasticsearch_app.client.Elasticsearch')
-    def test_get_cluster_health_success(self, mock_es_class):
+    @patch('elasticsearch_app.client.get_elasticsearch_client')
+    def test_get_cluster_health_success(self, mock_get_client):
         """Test get_cluster_health success"""
         mock_es = MagicMock()
         mock_es.cluster.health.return_value = {
             'status': 'green',
             'cluster_name': 'test-cluster',
-            'number_of_nodes': 3
+            'number_of_nodes': 3,
+            'number_of_data_nodes': 2,
+            'active_shards': 10,
+            'active_primary_shards': 5,
         }
-        mock_es_class.return_value = mock_es
+        mock_get_client.return_value = mock_es
         
         result = get_cluster_health()
         
         self.assertEqual(result['status'], 'green')
         self.assertEqual(result['number_of_nodes'], 3)
     
-    @patch('elasticsearch_app.client.Elasticsearch')
-    def test_get_cluster_health_failure(self, mock_es_class):
+    @patch('elasticsearch_app.client.get_elasticsearch_client')
+    def test_get_cluster_health_failure(self, mock_get_client):
         """Test get_cluster_health failure"""
-        mock_es = MagicMock()
-        mock_es.cluster.health.side_effect = Exception('Connection error')
-        mock_es_class.return_value = mock_es
+        mock_get_client.side_effect = Exception('Connection error')
         
         result = get_cluster_health()
         

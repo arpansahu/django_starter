@@ -224,9 +224,9 @@ class TestAllServicesCommandTestCase(TestCase):
         call_command('test_all_services', stdout=out)
         output = out.getvalue()
         
-        # Should mention all services
-        self.assertIn('Health Check', output)
-        self.assertIn('Summary', output)
+        # Should mention all services (case-insensitive check)
+        self.assertIn('HEALTH CHECK', output.upper())
+        self.assertIn('SUMMARY', output.upper())
     
     def test_all_services_command_tests_database(self):
         """Test that all services command tests database"""

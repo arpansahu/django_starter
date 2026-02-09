@@ -1,10 +1,9 @@
 # check_service_health/management/commands/test_all_services.py
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 from django.conf import settings
 from io import StringIO
-import sys
 
 
 class Command(BaseCommand):
@@ -144,17 +143,17 @@ class Command(BaseCommand):
         
         if failed_count == 0 and warning_count == 0:
             self.stdout.write(self.style.SUCCESS('🎉 All services are healthy!\n'))
-            sys.exit(0)
+            return
         elif failed_count == 0:
             self.stdout.write(self.style.WARNING(
                 f'⚠️  All critical services are up, {warning_count} warning(s)\n'
             ))
-            sys.exit(0)
+            return
         else:
             self.stdout.write(self.style.ERROR(
                 f'❌ {failed_count} service(s) failed health check!\n'
             ))
-            sys.exit(1)
+            raise CommandError(f'{failed_count} service(s) failed health check')
     
     def _is_elasticsearch_configured(self):
         """Check if Elasticsearch is configured"""
