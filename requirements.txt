@@ -90,3 +90,4 @@ kafka-python==2.0.2
 django-test-enforcer>=0.1.0
 elasticsearch==7.17.13
 elasticsearch-dsl==7.4.1
+djangorestframework==3.15.2
