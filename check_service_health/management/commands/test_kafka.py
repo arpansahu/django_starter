@@ -45,18 +45,47 @@ class Command(BaseCommand):
         else:
             bootstrap_servers = kafka_host
         
+        # Get SASL/SSL settings
+        security_protocol = getattr(settings, 'KAFKA_SECURITY_PROTOCOL', None)
+        sasl_mechanism = getattr(settings, 'KAFKA_SASL_MECHANISM', None)
+        sasl_username = getattr(settings, 'KAFKA_SASL_USERNAME', None)
+        sasl_password = getattr(settings, 'KAFKA_SASL_PASSWORD', None)
+        
+        # Build connection kwargs
+        connection_kwargs = {
+            'bootstrap_servers': bootstrap_servers,
+            'client_id': 'health_check_admin',
+            'request_timeout_ms': timeout * 1000,
+            'api_version': (3, 9, 0),  # Explicit API version for newer Kafka
+        }
+        
+        # Add SASL/SSL if configured
+        if security_protocol:
+            connection_kwargs['security_protocol'] = security_protocol
+        if sasl_mechanism:
+            connection_kwargs['sasl_mechanism'] = sasl_mechanism
+        if sasl_username:
+            connection_kwargs['sasl_plain_username'] = sasl_username
+        if sasl_password:
+            connection_kwargs['sasl_plain_password'] = sasl_password
+        
         test_topic = f'django_health_check_test_{uuid.uuid4().hex[:8]}'
         test_message = f'health_check_{time.time()}'
+        
+        # Producer/consumer kwargs (similar but without client_id)
+        producer_kwargs = {k: v for k, v in connection_kwargs.items() if k != 'client_id'}
+        producer_kwargs['value_serializer'] = lambda v: v.encode('utf-8')
+        
+        consumer_kwargs = {k: v for k, v in connection_kwargs.items() if k != 'client_id'}
+        consumer_kwargs['auto_offset_reset'] = 'earliest'
+        consumer_kwargs['consumer_timeout_ms'] = timeout * 1000
+        consumer_kwargs['value_deserializer'] = lambda v: v.decode('utf-8')
         
         try:
             # 1. Test Admin Client (broker connectivity)
             self.stdout.write('Checking broker connectivity...')
             try:
-                admin_client = KafkaAdminClient(
-                    bootstrap_servers=bootstrap_servers,
-                    client_id='health_check_admin',
-                    request_timeout_ms=timeout * 1000
-                )
+                admin_client = KafkaAdminClient(**connection_kwargs)
                 
                 # Get cluster metadata
                 cluster_metadata = admin_client._client.cluster
@@ -66,6 +95,8 @@ class Command(BaseCommand):
                 
                 if verbose:
                     self.stdout.write(f'     Bootstrap servers: {", ".join(bootstrap_servers)}')
+                    if security_protocol:
+                        self.stdout.write(f'     Security: {security_protocol} / {sasl_mechanism}')
                     for broker in brokers:
                         self.stdout.write(f'     Broker: {broker.host}:{broker.port} (id: {broker.nodeId})')
                 
@@ -96,11 +127,7 @@ class Command(BaseCommand):
             
             # 4. Test Producer
             self.stdout.write('Testing producer...')
-            producer = KafkaProducer(
-                bootstrap_servers=bootstrap_servers,
-                value_serializer=lambda v: v.encode('utf-8'),
-                request_timeout_ms=timeout * 1000
-            )
+            producer = KafkaProducer(**producer_kwargs)
             
             future = producer.send(test_topic, test_message)
             record_metadata = future.get(timeout=timeout)
@@ -115,10 +142,7 @@ class Command(BaseCommand):
             self.stdout.write('Testing consumer...')
             consumer = KafkaConsumer(
                 test_topic,
-                bootstrap_servers=bootstrap_servers,
-                auto_offset_reset='earliest',
-                consumer_timeout_ms=timeout * 1000,
-                value_deserializer=lambda v: v.decode('utf-8')
+                **consumer_kwargs
             )
             
             received = False

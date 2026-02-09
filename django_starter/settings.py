@@ -71,6 +71,11 @@ ELASTICSEARCH_USER = config('ELASTICSEARCH_USER', default='elastic')
 ELASTICSEARCH_PASSWORD = config('ELASTICSEARCH_PASSWORD', default='')
 ELASTICSEARCH_INDEX_PREFIX = config('ELASTICSEARCH_INDEX_PREFIX', default='django_starter')
 
+# Harbor Configuration
+HARBOR_URL = config('HARBOR_URL', default='https://harbor.arpansahu.space')
+HARBOR_USERNAME = config('HARBOR_USERNAME', default='admin')
+HARBOR_PASSWORD = config('HARBOR_PASSWORD', default='')
+
 PROJECT_NAME = 'django_starter'
 USE_S3 = True
 # ===============================================================================

@@ -53,6 +53,7 @@ class Command(BaseCommand):
             ('kafka', 'test_kafka', 'Apache Kafka', self._is_kafka_configured()),
             ('rabbitmq', 'test_rabbitmq', 'RabbitMQ', self._is_rabbitmq_configured()),
             ('email', 'test_email', 'Email Service (MailJet)', self._is_email_configured()),
+            ('harbor', 'test_harbor', 'Harbor Registry', self._is_harbor_configured()),
         ]
         
         # Filter services based on arguments
@@ -169,4 +170,8 @@ class Command(BaseCommand):
     
     def _is_email_configured(self):
         """Check if Email is configured"""
-        return bool(getattr(settings, 'EMAIL_HOST', None))
+        return bool(getattr(settings, 'MAIL_JET_API_KEY', None))
+    
+    def _is_harbor_configured(self):
+        """Check if Harbor is configured"""
+        return bool(getattr(settings, 'HARBOR_URL', None))

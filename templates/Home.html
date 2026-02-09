@@ -95,14 +95,14 @@
                         <p class="card-text">Real-time WebSocket progress updates for long-running tasks</p>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 offset-md-3">
-                            <button id="start-task" class="btn btn-info btn-lg btn-block mb-3">
+                        <div class="col-md-6 offset-md-3 text-center">
+                            <button id="start-task" class="btn btn-info btn-lg mb-3">
                                 <i class="fa-solid fa-play"></i> Start Long Running Task
                             </button>
                             <div id="progress-bar-container" style="display: none;">
-                                <div class="progress" style="height: 30px;">
+                                <div class="progress" style="height: 30px; background-color: #e9ecef; border-radius: 5px;">
                                     <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                                         role="progressbar" style="width: 0%">0%</div>
+                                         role="progressbar" style="width: 0%; height: 100%; line-height: 30px; font-size: 14px; font-weight: bold;">0%</div>
                                 </div>
                                 <p id="progress-description" class="text-center mt-2"></p>
                             </div>
@@ -588,6 +588,7 @@
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
+    <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
     <script src="{% static 'celery_progress/celery_websocket.js' %}"></script>
     <script>
         document.getElementById('start-task').addEventListener('click', function() {
@@ -611,26 +612,32 @@
                 // Initialize WebSocket progress bar
                 const progressUrl = '/ws/progress/' + taskId + '/';
                 CeleryWebSocketProgressBar.initProgressBar(progressUrl, {
-                    onProgress: function(progressData) {
-                        const progressBar = document.getElementById('progress-bar');
-                        const progressDescription = document.getElementById('progress-description');
-                        
-                        if (progressData.percent !== undefined) {
-                            progressBar.style.width = progressData.percent + '%';
-                            progressBar.textContent = progressData.percent + '%';
-                            progressDescription.textContent = progressData.description || 'Processing...';
+                    progressBarId: 'progress-bar',
+                    progressBarMessageId: 'progress-description',
+                    onProgress: function(progressBarElement, progressBarMessageElement, progress) {
+                        if (progress.percent !== undefined) {
+                            progressBarElement.style.width = progress.percent + '%';
+                            progressBarElement.textContent = Math.round(progress.percent) + '%';
                         }
-                        
-                        if (progressData.complete) {
-                            button.disabled = false;
-                            button.innerHTML = '<i class="fa-solid fa-play"></i> Start Long Running Task';
-                            progressBar.classList.remove('progress-bar-animated');
-                            progressBar.classList.add('bg-success');
-                            progressDescription.textContent = 'Task completed successfully!';
+                        if (progress.description) {
+                            progressBarMessageElement.textContent = progress.description;
+                        } else {
+                            progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' processed';
                         }
                     },
-                    onError: function(error) {
+                    onSuccess: function(progressBarElement, progressBarMessageElement, result) {
+                        progressBarElement.style.width = '100%';
+                        progressBarElement.textContent = '100%';
+                        progressBarElement.classList.remove('progress-bar-animated');
+                        progressBarElement.classList.add('bg-success');
+                        progressBarMessageElement.textContent = 'Task completed successfully!';
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fa-solid fa-play"></i> Start Long Running Task';
+                    },
+                    onError: function(progressBarElement, progressBarMessageElement, error) {
                         console.error('Progress error:', error);
+                        progressBarElement.classList.add('bg-danger');
+                        progressBarMessageElement.textContent = 'Error: ' + error;
                         button.disabled = false;
                         button.innerHTML = '<i class="fa-solid fa-play"></i> Start Long Running Task';
                     }
