@@ -1,5 +1,14 @@
 pipeline {
     agent any
+    
+    parameters {
+        booleanParam(
+            name: 'RUN_TESTS',
+            defaultValue: false,
+            description: 'Run unit and UI tests before building the image. Set to false to skip tests and build faster.'
+        )
+    }
+    
     environment {
         REGISTRY = "harbor.arpansahu.space"
         REPOSITORY = "library/django_starter"
@@ -23,6 +32,9 @@ pipeline {
             }
         }
         stage('Run Tests') {
+            when {
+                expression { params.RUN_TESTS == true }
+            }
             steps {
                 script {
                     echo 'Running Django Unit Tests...'
@@ -44,6 +56,9 @@ pipeline {
             }
         }
         stage('Run UI Tests') {
+            when {
+                expression { params.RUN_TESTS == true }
+            }
             steps {
                 script {
                     echo 'Running Playwright UI Tests with embedded Django server...'
@@ -109,6 +124,18 @@ else:
                         // Don't fail the build for network issues pulling the Playwright image
                     } else {
                         error "UI tests failed with exit code: ${uiTestResult}"
+                    }
+                }
+            }
+        }
+        stage('Tests Status') {
+            steps {
+                script {
+                    if (params.RUN_TESTS) {
+                        echo '✅ Tests were executed in previous stages'
+                    } else {
+                        echo '⚠️  Tests skipped - RUN_TESTS parameter is set to false'
+                        echo '💡 To run tests, set RUN_TESTS=true when triggering the build'
                     }
                 }
             }
