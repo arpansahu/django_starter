@@ -77,7 +77,7 @@ HARBOR_USERNAME = config('HARBOR_USERNAME', default='admin')
 HARBOR_PASSWORD = config('HARBOR_PASSWORD', default='')
 
 PROJECT_NAME = 'django_starter'
-USE_S3 = True
+USE_S3 = config('USE_S3', default=True, cast=bool)
 # ===============================================================================
 
 # Application definition

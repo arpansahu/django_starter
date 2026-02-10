@@ -23,4 +23,8 @@ EXPOSE 8016 8054
 # Start supervisord to manage the processes
 # Note: For Kubernetes deployments, migrations are handled by Jenkins (see Jenkinsfile-deploy)
 #       For Docker Compose deployments, migrations run here on container startup
-CMD python manage.py migrate --noinput && python manage.py collectstatic --noinput && supervisord -c /etc/supervisor/conf.d/supervisord.conf
+CMD python manage.py migrate --noinput && \
+    echo "Running collectstatic..." && \
+    python manage.py collectstatic --noinput --verbosity 2 && \
+    echo "✅ Collectstatic completed successfully" && \
+    supervisord -c /etc/supervisor/conf.d/supervisord.conf
