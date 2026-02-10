@@ -10623,7 +10623,8 @@ To run this project, you will need to add the following environment variables to
 
 SECRET_KEY=
 
-DEBUG=
+# Set to False for production, True for local development
+DEBUG=False
 
 ALLOWED_HOSTS=
 
