@@ -45,6 +45,9 @@ urlpatterns = [
     # Admin URL
      path('django-admin/', admin.site.urls, name='admin'),
 
+    # Social Authentication (django-allauth)
+    path('accounts/', include('allauth.urls')),
+
     path('', HomeView.as_view(), name='home'),
 
     # file manager views

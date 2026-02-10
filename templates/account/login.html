@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %} 
+{% load socialaccount %}
 {% block title %} Sign IN {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
@@ -15,6 +16,83 @@
     height: 100%;
     z-index: 0;
     margin-left: -6rem; /* ms-n6 */
+  }
+  .social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+  }
+  .social-login-divider::before,
+  .social-login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #dee2e6;
+  }
+  .social-login-divider span {
+    padding: 0 1rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+  }
+  .social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+  }
+  .social-btn i {
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+  }
+  .btn-google {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    color: #333;
+  }
+  .btn-google:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+  }
+  .btn-github {
+    background-color: #24292e;
+    border: 1px solid #24292e;
+    color: #fff;
+  }
+  .btn-github:hover {
+    background-color: #2f363d;
+    border-color: #2f363d;
+  }
+  .btn-facebook {
+    background-color: #1877f2;
+    border: 1px solid #1877f2;
+    color: #fff;
+  }
+  .btn-facebook:hover {
+    background-color: #166fe5;
+    border-color: #166fe5;
+  }
+  .btn-twitter {
+    background-color: #000;
+    border: 1px solid #000;
+    color: #fff;
+  }
+  .btn-twitter:hover {
+    background-color: #333;
+    border-color: #333;
+  }
+  .btn-linkedin {
+    background-color: #0a66c2;
+    border: 1px solid #0a66c2;
+    color: #fff;
+  }
+  .btn-linkedin:hover {
+    background-color: #004182;
+    border-color: #004182;
   }
 </style>
 {% endblock stylesheets %}
@@ -55,6 +133,39 @@
                     <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Sign in</button>
                   </div>
                 </form>
+                
+                <!-- Social Login Section -->
+                {% get_providers as socialaccount_providers %}
+                {% if socialaccount_providers %}
+                <div class="social-login-divider">
+                  <span>Or continue with</span>
+                </div>
+                <div class="social-login-buttons">
+                  {% for provider in socialaccount_providers %}
+                    {% if provider.id == 'google' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-google w-100">
+                        <i class="fab fa-google"></i> Continue with Google
+                      </a>
+                    {% elif provider.id == 'github' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-github w-100">
+                        <i class="fab fa-github"></i> Continue with GitHub
+                      </a>
+                    {% elif provider.id == 'facebook' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-facebook w-100">
+                        <i class="fab fa-facebook-f"></i> Continue with Facebook
+                      </a>
+                    {% elif provider.id == 'twitter' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-twitter w-100">
+                        <i class="fab fa-x-twitter"></i> Continue with X
+                      </a>
+                    {% elif provider.id == 'linkedin_oauth2' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-linkedin w-100">
+                        <i class="fab fa-linkedin-in"></i> Continue with LinkedIn
+                      </a>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                {% endif %}
               </div>
               <div class="card-footer text-center pt-0 px-lg-2 px-1">
                 <p class="mb-4 text-sm mx-auto">

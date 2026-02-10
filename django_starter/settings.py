@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Required for allauth
 
     'account',
     'custom_tag_app',
@@ -126,6 +127,15 @@ INSTALLED_APPS = [
     # Messaging and Event Streaming
     'messaging_system',
     'event_streaming',
+    
+    # Social Authentication (django-allauth) - socialaccount only to avoid conflict with our 'account' app
+    'allauth',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.twitter',
+    'allauth.socialaccount.providers.linkedin_oauth2',
 ]
 
 # Django REST Framework Configuration
@@ -183,6 +193,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # Required for django-allauth
 ]
 
 ROOT_URLCONF = 'django_starter.urls'
@@ -369,11 +380,127 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "account.Account"
 
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default Django authentication
+    'allauth.account.auth_backends.AuthenticationBackend',  # allauth authentication
+]
+
+# Django Sites Framework
+SITE_ID = 1
+
 # Login_required Decorator
-LOGIN_URL = 'login'
-LOGOUT_URL = 'logout'
+LOGIN_URL = 'account_login'
+LOGOUT_URL = 'account_logout'
 
 LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+# ==================== Django-Allauth Configuration ====================
+# Account settings
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'  # 'mandatory', 'optional', or 'none'
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_PRESERVE_USERNAME_CASING = False
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
+ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
+
+# Social Account settings
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_STORE_TOKENS = True
+
+# Social Account Providers Configuration
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': config('GOOGLE_CLIENT_ID', default=''),
+            'secret': config('GOOGLE_CLIENT_SECRET', default=''),
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+    'github': {
+        'APP': {
+            'client_id': config('GITHUB_CLIENT_ID', default=''),
+            'secret': config('GITHUB_CLIENT_SECRET', default=''),
+            'key': ''
+        },
+        'SCOPE': [
+            'user',
+            'read:user',
+            'user:email',
+        ],
+    },
+    'facebook': {
+        'APP': {
+            'client_id': config('FACEBOOK_APP_ID', default=''),
+            'secret': config('FACEBOOK_APP_SECRET', default=''),
+            'key': ''
+        },
+        'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'first_name',
+            'last_name',
+            'name',
+            'email',
+        ],
+        'EXCHANGE_TOKEN': True,
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v18.0',
+    },
+    'twitter': {
+        'APP': {
+            'client_id': config('TWITTER_API_KEY', default=''),
+            'secret': config('TWITTER_API_SECRET', default=''),
+            'key': ''
+        },
+    },
+    'linkedin_oauth2': {
+        'APP': {
+            'client_id': config('LINKEDIN_CLIENT_ID', default=''),
+            'secret': config('LINKEDIN_CLIENT_SECRET', default=''),
+            'key': ''
+        },
+        'SCOPE': [
+            'openid',
+            'profile',
+            'email',
+        ],
+        'PROFILE_FIELDS': [
+            'id',
+            'first-name',
+            'last-name',
+            'email-address',
+            'picture-url',
+            'public-profile-url',
+        ],
+    },
+}
+
+# Custom Allauth Adapters
+ACCOUNT_ADAPTER = 'account.adapter.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'account.adapter.CustomSocialAccountAdapter'
 
 
 MAIL_JET_API_KEY = MAIL_JET_API_KEY
