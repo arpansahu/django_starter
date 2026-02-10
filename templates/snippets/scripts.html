@@ -14,7 +14,8 @@
   <script async defer src="{% static 'libs/github-buttons/buttons.js' %}"></script>
 
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-  <script src="{% static 'assets/js/soft-ui-dashboard.min.js' %}"></script>
+  <script src="{% static 'assets/js/soft-ui-dashboard.min.js' %}" onerror="console.warn('Dashboard JS failed to load')">
+  </script>
 
   <script src="{% static 'libs/autocomplete/autocomplete.js' %}"></script>
   <script src="{% static 'libs/flatpickr/flatpickr.min.js' %}"></script>
