@@ -86,21 +86,36 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         # Extract additional data from social profile if available
         extra_data = sociallogin.account.extra_data
         
-        # For Google
-        if 'given_name' in extra_data:
-            user.first_name = extra_data.get('given_name', '')
-        if 'family_name' in extra_data:
-            user.last_name = extra_data.get('family_name', '')
-        
-        # For GitHub
-        if 'login' in extra_data and not user.username:
-            user.username = extra_data.get('login', '')
-        
-        # For Facebook
-        if 'first_name' in extra_data:
-            user.first_name = extra_data.get('first_name', '')
-        if 'last_name' in extra_data:
-            user.last_name = extra_data.get('last_name', '')
+        # Generate username if not provided
+        if not user.username:
+            # Try different sources for username
+            username = None
+            
+            # For GitHub
+            if 'login' in extra_data:
+                username = extra_data.get('login', '')
+            # For Google/Facebook - use part of email
+            elif user.email:
+                username = user.email.split('@')[0]
+            # For Twitter
+            elif 'screen_name' in extra_data:
+                username = extra_data.get('screen_name', '')
+            # For LinkedIn
+            elif 'localizedFirstName' in extra_data and 'localizedLastName' in extra_data:
+                username = f"{extra_data.get('localizedFirstName', '')}_{extra_data.get('localizedLastName', '')}".lower()
+            
+            # Ensure username is unique
+            if username:
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                base_username = username[:30]  # Account model has max_length=30
+                username = base_username
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username[:27]}_{counter}"  # Leave room for counter
+                    counter += 1
+                
+                user.username = username
         
         return user
     

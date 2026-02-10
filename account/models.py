@@ -7,18 +7,23 @@ from django_starter.models import AbstractBaseModel
 
 
 class MyAccountManager(BaseUserManager):
-    def create_user(self, email, username, password):
+    def create_user(self, email, username, password=None):
         if not email:
             raise ValueError("User must have a valid email ")
         if not username:
             raise ValueError("User must have a valid username")
-        if not password:
-            raise ValueError("Enter a correct password")
+        
         user = self.model(
             email=self.normalize_email(email),
             username=username,
         )
-        user.set_password(password)
+        
+        if password:
+            user.set_password(password)
+        else:
+            # For OAuth users without password, set an unusable password
+            user.set_unusable_password()
+        
         user.save(using=self.db)
         return user
 
@@ -43,12 +48,12 @@ class Account(AbstractBaseUser):
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
     is_admin = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)  # Changed to True for OAuth users
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'password']
+    REQUIRED_FIELDS = ['username']  # Removed 'password' - it's automatically required
 
     objects = MyAccountManager()
 

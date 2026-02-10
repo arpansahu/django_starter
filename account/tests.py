@@ -37,10 +37,10 @@ class RegistrationViewTest(TestCase):
         }
         response = self.client.post(self.register_url, data)
         
-        # Check user was created (but not active)
+        # Check user was created and is active (changed to support OAuth)
         user = User.objects.filter(email='newuser@example.com').first()
         self.assertIsNotNone(user)
-        self.assertFalse(user.is_active)
+        self.assertTrue(user.is_active)  # Changed from assertFalse to assertTrue
     
     def test_registration_view_post_invalid_data(self):
         """Test registration with invalid data"""
