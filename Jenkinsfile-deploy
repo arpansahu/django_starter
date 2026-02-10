@@ -281,6 +281,7 @@ pipeline {
                             // Delete existing secret if it exists
                             sh """
                             kubectl delete secret ${PROJECT_NAME_WITH_DASH}-secret || true
+                            kubectl delete secret harbor-registry-secret || true
                             """
 
                             // Delete the existing service and deployment
@@ -290,9 +291,24 @@ pipeline {
                             kubectl delete deployment ${PROJECT_NAME_WITH_DASH}-app || true
                             """
 
-                            // Deploy to Kubernetes
+                            // Create secrets for Django app and Harbor registry
                             sh """
                             kubectl create secret generic ${PROJECT_NAME_WITH_DASH}-secret --from-env-file=${WORKSPACE}/.env
+                            """
+                            
+                            // Create Harbor registry secret for pulling images
+                            withCredentials([usernamePassword(credentialsId: 'harbor-credentials', passwordVariable: 'HARBOR_PASSWORD', usernameVariable: 'HARBOR_USERNAME')]) {
+                                sh """
+                                kubectl create secret docker-registry harbor-registry-secret \
+                                  --docker-server=${REGISTRY} \
+                                  --docker-username=$HARBOR_USERNAME \
+                                  --docker-password=$HARBOR_PASSWORD \
+                                  --docker-email=admin@${REGISTRY}
+                                """
+                            }
+                            
+                            // Deploy to Kubernetes
+                            sh """
                             kubectl apply -f ${WORKSPACE}/service.yaml
                             kubectl apply -f ${WORKSPACE}/deployment.yaml
                             """
