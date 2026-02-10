@@ -29,7 +29,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ============================ENV VARIABLES=====================================
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = 1
+DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(' ')
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
@@ -626,6 +626,32 @@ LOGGING = {
 }
 
 CSRF_TRUSTED_ORIGINS = [f'{PROTOCOL}{DOMAIN}', f'{PROTOCOL}*.{DOMAIN}']
+
+# =============================================================================
+# HTTPS/SSL Security Settings for Production
+# =============================================================================
+# These settings are crucial for OAuth providers like Facebook that require HTTPS
+
+if not DEBUG or PROTOCOL.startswith('https'):
+    # Trust X-Forwarded-Proto header from proxy (nginx, load balancer, etc.)
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # Security settings for HTTPS
+    SESSION_COOKIE_SECURE = True  # Only send session cookie over HTTPS
+    CSRF_COOKIE_SECURE = True     # Only send CSRF cookie over HTTPS
+    
+    # Redirect all HTTP requests to HTTPS (optional - enable if you want forced redirect)
+    # SECURE_SSL_REDIRECT = True
+    
+    # HSTS (HTTP Strict Transport Security) settings
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Additional security headers
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Django Test Enforcer Configuration
 DJANGO_TEST_ENFORCER = {

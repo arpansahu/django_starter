@@ -2,6 +2,19 @@
 
 This project supports social authentication with Google, GitHub, Facebook, Twitter/X, and LinkedIn.
 
+## Important: HTTPS Requirement
+
+**All OAuth providers require HTTPS connections in production.** Facebook is particularly strict about this requirement. The application now includes automatic HTTPS security configuration that activates when:
+
+- `DEBUG=False` in your environment
+- Or `PROTOCOL` starts with `https`
+
+This ensures:
+- Session and CSRF cookies are marked as secure
+- X-Forwarded-Proto headers are trusted (for reverse proxy setups)
+- HSTS (HTTP Strict Transport Security) is enabled
+- Secure content type headers are set
+
 ## Automatic Domain Configuration
 
 The application automatically configures the OAuth callback URLs based on your environment variables (`DOMAIN` and `PROTOCOL`). You don't need to manually update the Site domain in the database.
@@ -12,17 +25,27 @@ The application automatically configures the OAuth callback URLs based on your e
 
 In your `.env` file, set:
 ```env
+DEBUG=True
 DOMAIN=localhost:8016
 PROTOCOL=http
 ```
+
+**Note:** With `DEBUG=True`, HTTPS security settings are relaxed for local development convenience.
 
 ### Production
 
 In your `.env` file, set:
 ```env
+DEBUG=False
 DOMAIN=yourdomain.com
 PROTOCOL=https://
 ```
+
+**Important:** With `DEBUG=False` and/or `PROTOCOL=https://`, the following security features are automatically enabled:
+- SECURE_PROXY_SSL_HEADER - trusts X-Forwarded-Proto from reverse proxy
+- SESSION_COOKIE_SECURE & CSRF_COOKIE_SECURE - cookies only sent over HTTPS  
+- HSTS (HTTP Strict Transport Security) headers
+- Additional security headers for XSS and content type protection
 
 ## Provider Configuration
 
@@ -142,6 +165,46 @@ This means the callback URL in your OAuth app settings doesn't match what Django
 2. Add these exact URLs to your OAuth provider's allowed callback URLs
 3. Make sure you added both `localhost` and `127.0.0.1` variants for local development
 4. Restart your Django server
+
+### Facebook: "Isn't using a secure connection"
+
+**Error message:** "Facebook has detected that [App Name] isn't using a secure connection to transfer information."
+
+**Cause:** Facebook requires HTTPS for OAuth in production. This error appears when:
+- Your `PROTOCOL` is set to `http` instead of `https://`
+- `DEBUG=True` in production (disables security features)
+- Missing HTTPS security headers
+- Reverse proxy not forwarding HTTPS correctly
+
+**Solution:**
+
+1. **Check your `.env` file** (production):
+   ```env
+   DEBUG=False
+   PROTOCOL=https://
+   DOMAIN=yourdomain.com
+   ```
+
+2. **Verify Facebook App Settings:**
+   - Go to Facebook Developer Console → Settings → Basic
+   - **App Domains:** Add your domain (e.g., `yourdomain.com`)
+   - **Valid OAuth Redirect URIs:** Must use `https://` 
+     ```
+     https://yourdomain.com/accounts/facebook/login/callback/
+     ```
+
+3. **Ensure your reverse proxy (nginx/load balancer) forwards HTTPS:**
+   ```nginx
+   proxy_set_header X-Forwarded-Proto $scheme;
+   proxy_set_header X-Forwarded-Host $host;
+   ```
+
+4. **Restart Django** to apply security settings
+
+5. **Test locally with ngrok** (optional):
+   - `ngrok http 8016`
+   - Update `.env`: `DOMAIN=your-ngrok-url.ngrok.io` and `PROTOCOL=https://`
+   - Add ngrok URL to Facebook app settings
 
 ### Site domain not updating automatically
 
