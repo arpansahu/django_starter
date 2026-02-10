@@ -210,29 +210,51 @@ pipeline {
                         sh 'docker compose pull'
                         sh 'docker compose up -d'
 
-                        // Wait for a few seconds to let the app start
-                        sleep 60
-
                         // Verify the container is running
                         def containerRunning = sh(script: "docker ps -q -f name=${ENV_PROJECT_NAME}", returnStdout: true).trim()
                         if (!containerRunning) {
                             error "Container ${ENV_PROJECT_NAME} is not running"
                         } else {
                             echo "Container ${ENV_PROJECT_NAME} is running"
-                            // Execute curl and scale down Kubernetes deployment if curl is successful
+                            // Health check with retry mechanism (migrations + collectstatic take time)
                             sh """
-                                # Fetch HTTP status code
-                                HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" -L http://localhost:${DOCKER_PORT})
-                                echo "HTTP Status: \$HTTP_STATUS"
+                                set +e  # Don't exit on error
+                                MAX_RETRIES=20
+                                RETRY_DELAY=30
+                                ATTEMPT=0
+                                HTTP_STATUS=000
+                                
+                                echo "⏳ Waiting for Django app to start (migrations + collectstatic running)..."
+                                
+                                while [ \$ATTEMPT -lt \$MAX_RETRIES ]; do
+                                    ATTEMPT=\$((ATTEMPT + 1))
+                                    echo "Health check attempt \$ATTEMPT/\$MAX_RETRIES..."
+                                    HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" -L http://localhost:${DOCKER_PORT} || echo "000")
+                                    echo "HTTP Status: \$HTTP_STATUS"
+                                    
+                                    if [ "\$HTTP_STATUS" = "200" ] || [ "\$HTTP_STATUS" = "302" ]; then
+                                        echo "✅ Service is responding! HTTP Status: \$HTTP_STATUS"
+                                        break
+                                    fi
+                                    
+                                    if [ \$ATTEMPT -lt \$MAX_RETRIES ]; then
+                                        echo "⏳ Service not ready yet. Waiting \${RETRY_DELAY}s before retry..."
+                                        sleep \$RETRY_DELAY
+                                    fi
+                                done
+                                
+                                set -e  # Re-enable exit on error
                                 
                                 # Update Nginx configuration if status code is 200 (OK) or 302 (Redirect)
-                                if [ "\$HTTP_STATUS" -eq 200 ] || [ "\$HTTP_STATUS" -eq 302 ]; then
+                                if [ "\$HTTP_STATUS" = "200" ] || [ "\$HTTP_STATUS" = "302" ]; then
                                     sudo sed -i 's|proxy_pass .*;|proxy_pass http://0.0.0.0:${DOCKER_PORT};|' ${NGINX_CONF}
                                     sudo sed -i 's|proxy_pass .*;|proxy_pass http://0.0.0.0:${FLOWER_PORT};|' ${NGINX_CONF_FLOWER}
                                     sudo nginx -s reload
-                                    echo 'Nginx configuration updated and reloaded successfully.'
+                                    echo '✅ Nginx configuration updated and reloaded successfully.'
                                 else
-                                    echo 'Service not available. Nginx configuration not updated.'
+                                    echo '❌ Service not available after \$MAX_RETRIES attempts. HTTP Status: \$HTTP_STATUS'
+                                    echo 'Check container logs with: docker logs ${ENV_PROJECT_NAME}'
+                                    error 'Docker deployment health check failed'
                                 fi
 
                                 # Scale down Kubernetes deployment if it exists and is running
