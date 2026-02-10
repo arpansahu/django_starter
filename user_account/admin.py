@@ -2,8 +2,8 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from account.models import Account
-from account.forms import CustomAccountUpdateForm, CustomAccountCreationForm
+from user_account.models import Account
+from user_account.forms import CustomAccountUpdateForm, CustomAccountCreationForm
 
 class AccountAdmin(UserAdmin):
     form = CustomAccountUpdateForm  # Form for updating accounts

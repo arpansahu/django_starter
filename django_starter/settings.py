@@ -92,7 +92,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',  # Required for allauth
 
-    'account',
+    'user_account',
     'custom_tag_app',
     'check_service_health',
     'storages',  # Ensure django-storages is installed and added to apps
@@ -128,8 +128,9 @@ INSTALLED_APPS = [
     'messaging_system',
     'event_streaming',
     
-    # Social Authentication (django-allauth) - socialaccount only to avoid conflict with our 'account' app
+    # Social Authentication (django-allauth)
     'allauth',
+    'allauth.account',  # Required for socialaccount to work (manages email addresses)
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
@@ -378,7 +379,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = "account.Account"
+AUTH_USER_MODEL = "user_account.Account"
 
 # Authentication Backends
 AUTHENTICATION_BACKENDS = [
@@ -398,7 +399,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 # ==================== Django-Allauth Configuration ====================
 # Account settings
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_LOGIN_METHODS = {'email'}  # Use email for login instead of username
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = True
@@ -499,8 +500,8 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # Custom Allauth Adapters
-ACCOUNT_ADAPTER = 'account.adapter.CustomAccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'account.adapter.CustomSocialAccountAdapter'
+ACCOUNT_ADAPTER = 'user_account.adapter.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'user_account.adapter.CustomSocialAccountAdapter'
 
 
 MAIL_JET_API_KEY = MAIL_JET_API_KEY

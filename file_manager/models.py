@@ -15,7 +15,7 @@ class ProtectedFile(models.Model):
     """Files accessible only to authenticated users"""
     title = models.CharField(max_length=255)
     file = models.FileField(storage=ProtectedMediaStorage, upload_to='documents/protected/')
-    uploaded_by = models.ForeignKey('account.Account', on_delete=models.CASCADE, null=True, blank=True)
+    uploaded_by = models.ForeignKey('user_account.Account', on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

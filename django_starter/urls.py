@@ -13,7 +13,7 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 
-from account.views import (
+from user_account.views import (
     CustomPasswordResetView,
     LogoutView,
     LoginView,
@@ -129,7 +129,7 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-handler404 = 'account.views.error_404'
-handler500 = 'account.views.error_500'
-handler403 = 'account.views.error_403'
-handler400 = 'account.views.error_400'
+handler404 = 'user_account.views.error_404'
+handler500 = 'user_account.views.error_500'
+handler403 = 'user_account.views.error_403'
+handler400 = 'user_account.views.error_400'

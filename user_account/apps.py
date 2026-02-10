@@ -3,6 +3,5 @@ from django.apps import AppConfig
 
 class AccountConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'account'
-    label = 'custom_account'  # Unique label to avoid conflict with allauth.account
+    name = 'user_account'
     verbose_name = 'User Account'

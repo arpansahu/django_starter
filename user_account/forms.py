@@ -6,7 +6,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from account.models import Account
+from user_account.models import Account
 from django.contrib.auth import authenticate, get_user_model, password_validation
 from django.utils.translation import gettext_lazy as _
 from django.template import loader

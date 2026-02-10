@@ -15,12 +15,12 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.generic import FormView, RedirectView
 from django.utils.translation import gettext_lazy as _
 
-from account.forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm, PasswordResetForm, LoginForm
+from user_account.forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm, PasswordResetForm, LoginForm
 from django.conf import settings
 from django.contrib.auth.views import PasswordContextMixin
 
-from account.models import Account
-from account.token import account_activation_token
+from user_account.models import Account
+from user_account.token import account_activation_token
 
 DOMAIN = settings.DOMAIN
 PROTOCOL = settings.PROTOCOL

@@ -177,7 +177,7 @@ class TestDjangoStarterFunctions(TestCase):
         """
         Test that activate function exists in urls
         """
-        from account.views import activate
+        from user_account.views import activate
         self.assertTrue(callable(activate))
 
     def test_large_resource_function(self):

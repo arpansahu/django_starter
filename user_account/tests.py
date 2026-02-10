@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 from unittest.mock import patch, MagicMock
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from account.token import account_activation_token
-from account.models import Account
+from user_account.token import account_activation_token
+from user_account.models import Account
 
 User = get_user_model()
 
@@ -469,7 +469,7 @@ class EmailVerificationTest(TestCase):
         self.assertIsNotNone(user)
         
         # Check token can be generated
-        from account.token import account_activation_token
+        from user_account.token import account_activation_token
         token = account_activation_token.make_token(user)
         self.assertIsNotNone(token)
         self.assertTrue(len(token) > 0)
@@ -489,7 +489,7 @@ class EmailVerificationTest(TestCase):
         user.save()
         
         # Generate token
-        from account.token import account_activation_token
+        from user_account.token import account_activation_token
         token = account_activation_token.make_token(user)
         
         # Validate token
@@ -513,7 +513,7 @@ class EmailVerificationTest(TestCase):
         # Generate activation link components
         from django.utils.encoding import force_bytes
         from django.utils.http import urlsafe_base64_encode
-        from account.token import account_activation_token
+        from user_account.token import account_activation_token
         
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = account_activation_token.make_token(user)
@@ -580,7 +580,7 @@ class EmailVerificationTest(TestCase):
         # Generate activation URL
         from django.utils.encoding import force_bytes
         from django.utils.http import urlsafe_base64_encode
-        from account.token import account_activation_token
+        from user_account.token import account_activation_token
         
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = account_activation_token.make_token(user)
@@ -646,7 +646,7 @@ class EmailVerificationTest(TestCase):
         user.save()
         
         # Generate token before activation
-        from account.token import account_activation_token
+        from user_account.token import account_activation_token
         token = account_activation_token.make_token(user)
         
         # Activate user
@@ -709,7 +709,7 @@ class TestAccountFunctionViews(TestCase):
         """
         Test activate view - tests account activation function exists
         """
-        from account.views import activate
+        from user_account.views import activate
         self.assertTrue(callable(activate))
 
     def test_authenticate(self):
@@ -727,28 +727,28 @@ class TestAccountFunctionViews(TestCase):
         """
         Test error_400 - tests 400 error page function exists
         """
-        from account.views import error_400
+        from user_account.views import error_400
         self.assertTrue(callable(error_400))
 
     def test_error_403(self):
         """
         Test error_403 - tests 403 error page function exists
         """
-        from account.views import error_403
+        from user_account.views import error_403
         self.assertTrue(callable(error_403))
 
     def test_error_404(self):
         """
         Test error_404 - tests 404 error page function exists
         """
-        from account.views import error_404
+        from user_account.views import error_404
         self.assertTrue(callable(error_404))
 
     def test_error_500(self):
         """
         Test error_500 - tests 500 error page function exists
         """
-        from account.views import error_500
+        from user_account.views import error_500
         self.assertTrue(callable(error_500))
 
     def test_render(self):
@@ -775,35 +775,35 @@ class TestAccountFunctions(TestCase):
         """
         Test account.views.activate function
         """
-        from account.views import activate
+        from user_account.views import activate
         self.assertIsNotNone(activate)
 
     def test_error_400_function(self):
         """
         Test account.views.error_400 function
         """
-        from account.views import error_400
+        from user_account.views import error_400
         self.assertIsNotNone(error_400)
 
     def test_error_403_function(self):
         """
         Test account.views.error_403 function
         """
-        from account.views import error_403
+        from user_account.views import error_403
         self.assertIsNotNone(error_403)
 
     def test_error_404_function(self):
         """
         Test account.views.error_404 function
         """
-        from account.views import error_404
+        from user_account.views import error_404
         self.assertIsNotNone(error_404)
 
     def test_error_500_function(self):
         """
         Test account.views.error_500 function
         """
-        from account.views import error_500
+        from user_account.views import error_500
         self.assertIsNotNone(error_500)
 
     @patch('account.views.mailjet')
@@ -813,7 +813,7 @@ class TestAccountFunctions(TestCase):
         """
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
         
-        from account.views import send_mail_account_activate
+        from user_account.views import send_mail_account_activate
         from django.test import RequestFactory
         
         factory = RequestFactory()
