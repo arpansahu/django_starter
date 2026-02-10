@@ -2050,7 +2050,9 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 8016 8054
 
 # Start supervisord to manage the processes
-CMD python manage.py migrate --noinput && python manage.py collectstatic --noinput && supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# Note: Migrations now run via Jenkins deployment pipeline (see Jenkinsfile-deploy)
+# Collectstatic runs on startup to handle any newly added static files
+CMD python manage.py collectstatic --noinput && supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
 ```
 
