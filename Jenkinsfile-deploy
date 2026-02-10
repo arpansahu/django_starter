@@ -286,14 +286,8 @@ pipeline {
                                 kubectl describe deployment/${PROJECT_NAME_WITH_DASH}-app
                             """
                             
-                            // Run database migrations
-                            echo "🔄 Running database migrations..."
-                            def podName = sh(script: "kubectl get pods -l app=${PROJECT_NAME_WITH_DASH} -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
-                            echo "Running migrations on pod: ${podName}"
-                            sh """
-                                kubectl exec ${podName} -- python manage.py migrate --noinput
-                            """
-                            echo "✅ Migrations completed successfully"
+                            // Note: Database migrations now run automatically in Dockerfile CMD
+                            // This ensures compatibility with both Kubernetes and Docker Compose deployments
                             
                             // Verify service and get NodePort
                             def nodePort = sh(script: "kubectl get service ${PROJECT_NAME_WITH_DASH}-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
