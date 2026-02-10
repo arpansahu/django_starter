@@ -26,6 +26,8 @@ from .views import (
      HomeView,
      start_task,
      trigger_demo_task,
+     PrivacyPolicyView,
+     TermsOfServiceView,
 )
 
 from file_manager.views import (
@@ -44,6 +46,10 @@ def large_resource(request):
 urlpatterns = [
     # Admin URL
      path('django-admin/', admin.site.urls, name='admin'),
+
+    # Legal Pages (publicly accessible)
+    path('privacy-policy/', PrivacyPolicyView.as_view(), name='privacy_policy'),
+    path('terms-of-service/', TermsOfServiceView.as_view(), name='terms_of_service'),
 
     # Social Authentication (django-allauth)
     path('accounts/', include('allauth.urls')),
