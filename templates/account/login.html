@@ -34,65 +34,75 @@
     color: #6c757d;
     font-size: 0.875rem;
   }
-  .social-btn {
+  /* Circular Social Buttons */
+  .social-buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .social-btn-circle {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.625rem 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
-  .social-btn i {
-    font-size: 1.25rem;
-    margin-right: 0.5rem;
+  .social-btn-circle:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   }
-  .btn-google {
+  .social-btn-circle i {
+    font-size: 1.5rem;
+  }
+  .btn-google-circle {
     background-color: #fff;
-    border: 1px solid #dee2e6;
-    color: #333;
+    border: 2px solid #ea4335;
+    color: #ea4335;
   }
-  .btn-google:hover {
-    background-color: #f8f9fa;
-    border-color: #adb5bd;
+  .btn-google-circle:hover {
+    background-color: #ea4335;
+    color: #fff;
   }
-  .btn-github {
+  .btn-github-circle {
     background-color: #24292e;
-    border: 1px solid #24292e;
+    border: 2px solid #24292e;
     color: #fff;
   }
-  .btn-github:hover {
-    background-color: #2f363d;
-    border-color: #2f363d;
+  .btn-github-circle:hover {
+    background-color: #fff;
+    color: #24292e;
   }
-  .btn-facebook {
+  .btn-facebook-circle {
     background-color: #1877f2;
-    border: 1px solid #1877f2;
+    border: 2px solid #1877f2;
     color: #fff;
   }
-  .btn-facebook:hover {
-    background-color: #166fe5;
-    border-color: #166fe5;
+  .btn-facebook-circle:hover {
+    background-color: #fff;
+    color: #1877f2;
   }
-  .btn-twitter {
+  .btn-twitter-circle {
     background-color: #000;
-    border: 1px solid #000;
+    border: 2px solid #000;
     color: #fff;
   }
-  .btn-twitter:hover {
-    background-color: #333;
-    border-color: #333;
+  .btn-twitter-circle:hover {
+    background-color: #fff;
+    color: #000;
   }
-  .btn-linkedin {
+  .btn-linkedin-circle {
     background-color: #0a66c2;
-    border: 1px solid #0a66c2;
+    border: 2px solid #0a66c2;
     color: #fff;
   }
-  .btn-linkedin:hover {
-    background-color: #004182;
-    border-color: #004182;
+  .btn-linkedin-circle:hover {
+    background-color: #fff;
+    color: #0a66c2;
   }
 </style>
 {% endblock stylesheets %}
@@ -140,27 +150,27 @@
                 <div class="social-login-divider">
                   <span>Or continue with</span>
                 </div>
-                <div class="social-login-buttons">
+                <div class="social-buttons-container">
                   {% for provider in socialaccount_providers %}
                     {% if provider.id == 'google' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-google w-100">
-                        <i class="fab fa-google"></i> Continue with Google
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-google-circle" title="Continue with Google">
+                        <i class="fab fa-google"></i>
                       </a>
                     {% elif provider.id == 'github' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-github w-100">
-                        <i class="fab fa-github"></i> Continue with GitHub
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-github-circle" title="Continue with GitHub">
+                        <i class="fab fa-github"></i>
                       </a>
                     {% elif provider.id == 'facebook' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-facebook w-100">
-                        <i class="fab fa-facebook-f"></i> Continue with Facebook
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-facebook-circle" title="Continue with Facebook">
+                        <i class="fab fa-facebook-f"></i>
                       </a>
                     {% elif provider.id == 'twitter' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-twitter w-100">
-                        <i class="fab fa-x-twitter"></i> Continue with X
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-twitter-circle" title="Continue with X">
+                        <i class="fab fa-x-twitter"></i>
                       </a>
                     {% elif provider.id == 'linkedin_oauth2' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="btn social-btn btn-linkedin w-100">
-                        <i class="fab fa-linkedin-in"></i> Continue with LinkedIn
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-linkedin-circle" title="Continue with LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
                       </a>
                     {% endif %}
                   {% endfor %}
