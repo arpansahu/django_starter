@@ -4,6 +4,22 @@
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
 <style>
+  body {
+    overflow: hidden;
+  }
+  .main-content {
+    height: calc(100vh - 80px);
+    overflow: hidden;
+  }
+  .page-header {
+    height: 100%;
+    min-height: auto !important;
+  }
+  .activation-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
   .oblique-bg {
     background-image: url("{% static 'assets/img/curved6.jpg' %}");
     background-size: cover;
@@ -13,18 +29,28 @@
     right: 0;
     height: 100%;
     z-index: 0;
-    margin-left: -6rem; /* ms-n6 */
+    margin-left: -6rem;
+  }
+  .card-plain {
+    margin: 0 !important;
+  }
+  .card-footer p {
+    margin-bottom: 0.5rem !important;
+    font-size: 0.8rem;
+  }
+  .btn.w-100 {
+    padding: 0.6rem 1rem;
   }
 </style>
 {% endblock stylesheets %}
 
 {% block content %}
 <section>
-  <div class="page-header section-height-75">
-    <div class="container">
-      <div class="row">
+  <div class="page-header">
+    <div class="container activation-container">
+      <div class="row w-100">
         <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
-          <div class="card card-plain mt-8">
+          <div class="card card-plain">
             <div class="card-header pb-0 text-left bg-transparent">
               <h3 class="font-weight-bolder text-danger text-gradient">
                 {{ message }}

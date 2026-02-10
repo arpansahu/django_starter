@@ -6,6 +6,23 @@
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
 <style>
+  /* Make the page fit without scrolling */
+  body {
+    overflow: hidden;
+  }
+  .main-content {
+    height: calc(100vh - 80px); /* Subtract footer height */
+    overflow: hidden;
+  }
+  .page-header {
+    height: 100%;
+    min-height: auto !important;
+  }
+  .login-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
   .oblique-bg {
     background-image: url("{% static 'assets/img/curved6.jpg' %}");
     background-size: cover;
@@ -15,13 +32,32 @@
     right: 0;
     height: 100%;
     z-index: 0;
-    margin-left: -6rem; /* ms-n6 */
+    margin-left: -6rem;
+  }
+  .card-plain {
+    margin: 0 !important;
+  }
+  .card-header {
+    padding-bottom: 0.5rem !important;
+  }
+  .card-body {
+    padding: 1rem !important;
+  }
+  .card-footer {
+    padding-top: 0.5rem !important;
+  }
+  .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+  label {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
   }
   .social-login-divider {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 1.5rem 0;
+    margin: 1rem 0 0.75rem 0;
   }
   .social-login-divider::before,
   .social-login-divider::after {
@@ -30,34 +66,35 @@
     border-bottom: 1px solid #dee2e6;
   }
   .social-login-divider span {
-    padding: 0 1rem;
+    padding: 0 0.75rem;
     color: #6c757d;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
   }
   /* Circular Social Buttons */
   .social-buttons-container {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
+    margin-bottom: 0.5rem;
   }
   .social-btn-circle {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 50px;
-    height: 50px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   .social-btn-circle:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
   .social-btn-circle i {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
   .btn-google-circle {
     background-color: #fff;
@@ -104,16 +141,23 @@
     background-color: #fff;
     color: #0a66c2;
   }
+  .card-footer p {
+    margin-bottom: 0.5rem !important;
+    font-size: 0.8rem;
+  }
+  .btn.w-100 {
+    padding: 0.6rem 1rem;
+  }
 </style>
 {% endblock stylesheets %}
 
 {% block content %}
   <section>
-    <div class="page-header section-height-75">
-      <div class="container">
-        <div class="row">
+    <div class="page-header">
+      <div class="container login-container">
+        <div class="row w-100">
           <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
-            <div class="card card-plain mt-8">
+            <div class="card card-plain">
               <div class="card-header pb-0 text-left bg-transparent">
                 <h4 class="text-info text-gradient">Login</h4>
                 <p class="mb-0">

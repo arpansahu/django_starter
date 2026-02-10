@@ -1,14 +1,52 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
+{% block stylesheets %}
+<style>
+  /* Make the page fit without scrolling */
+  body {
+    overflow: hidden;
+  }
+  .main-content {
+    height: calc(100vh - 80px);
+    overflow: hidden;
+  }
+  .page-header {
+    height: 100%;
+    min-height: auto !important;
+  }
+  .account-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .card-plain {
+    margin: 0 !important;
+  }
+  .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+  label {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+  }
+  .card-footer p {
+    margin-bottom: 0.5rem !important;
+    font-size: 0.8rem;
+  }
+  .btn.w-100 {
+    padding: 0.6rem 1rem;
+  }
+</style>
+{% endblock stylesheets %}
 
+{% block content %}
   <section>
-    <div class="page-header section-height-75">
-      <div class="container">
-        <div class="row">
+    <div class="page-header">
+      <div class="container account-container">
+        <div class="row w-100">
           <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
-            <div class="card card-plain mt-6">
+            <div class="card card-plain">
               <div class="card-header pb-0 text-left bg-transparent">
                 <div class="card-body">
                     <form role="form text-left" method="post" action="">
@@ -28,7 +66,7 @@
                     </form>
                 </div>
                 <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                    <p class="mb-4 text-sm mx-auto">
+                    <p class="mb-4 text-sm mx-auto" style="margin-bottom: 0.5rem !important;">
                       Want to update Password?
                       <a href="{% url 'password_change' %}" class="text-info text-gradient font-weight-bold">Click here..</a>
                     </p>
