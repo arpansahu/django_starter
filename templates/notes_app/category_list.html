@@ -20,7 +20,7 @@
                         <i class="fas fa-{{ category.icon }}"></i> {{ category.name }}
                     </h5>
                     <p class="card-text text-muted">{{ category.description|truncatewords:20 }}</p>
-                    <span class="badge bg-primary">{{ category.note_count }} notes</span>
+                    <span class="badge bg-primary">{{ category.notes_count }} notes</span>
                 </div>
                 <div class="card-footer">
                     <a href="{% url 'notes_app:category_detail' slug=category.slug %}" class="btn btn-sm btn-outline-primary">

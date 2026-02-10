@@ -64,7 +64,7 @@
                 <strong>Tags:</strong>
                 {% for tag in popular_tags %}
                 <a href="?tag={{ tag.slug }}" class="badge bg-{% if current_tag == tag.slug %}primary{% else %}secondary{% endif %} text-decoration-none">
-                    {{ tag.name }} ({{ tag.note_count }})
+                    {{ tag.name }} ({{ tag.notes_count }})
                 </a>
                 {% endfor %}
             </div>

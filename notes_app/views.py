@@ -46,8 +46,8 @@ class NotesHomeView(TemplateView):
             status=Note.Status.ACTIVE
         ).select_related('author', 'category')[:5]
         context['popular_categories'] = Category.objects.annotate(
-            note_count=Count('notes')
-        ).order_by('-note_count')[:5]
+            notes_count=Count('notes')
+        ).order_by('-notes_count')[:5]
         return context
 
 
@@ -126,8 +126,8 @@ class NoteListView(ListView):
         context['filter_form'] = NoteFilterForm(self.request.GET)
         context['categories'] = Category.objects.all()
         context['popular_tags'] = Tag.objects.annotate(
-            note_count=Count('notes')
-        ).order_by('-note_count')[:10]
+            notes_count=Count('notes')
+        ).order_by('-notes_count')[:10]
         context['current_category'] = self.request.GET.get('category')
         context['current_tag'] = self.request.GET.get('tag')
         return context
@@ -167,7 +167,7 @@ class CategoryListView(ListView):
     
     def get_queryset(self):
         return Category.objects.annotate(
-            note_count=Count('notes')
+            notes_count=Count('notes')
         ).order_by('name')
 
 
@@ -179,8 +179,8 @@ class TagListView(ListView):
     
     def get_queryset(self):
         return Tag.objects.annotate(
-            note_count=Count('notes')
-        ).order_by('-note_count')
+            notes_count=Count('notes')
+        ).order_by('-notes_count')
 
 
 class NotesByCategoryView(ListView):

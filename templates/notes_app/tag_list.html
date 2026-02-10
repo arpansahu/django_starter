@@ -9,7 +9,7 @@
     <div class="d-flex flex-wrap gap-3">
         {% for tag in tags %}
         <a href="{% url 'notes_app:notes_by_tag' slug=tag.slug %}" class="badge bg-secondary text-decoration-none fs-6 p-2">
-            {{ tag.name }} <span class="badge bg-light text-dark">{{ tag.note_count }}</span>
+            {{ tag.name }} <span class="badge bg-light text-dark">{{ tag.notes_count }}</span>
         </a>
         {% empty %}
         <p class="text-muted">No tags yet.</p>
