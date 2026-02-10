@@ -189,6 +189,30 @@ class AccountView(View):
         context['account_form'] = form
         return render(request, 'account/account.html', context)
 
+
+@method_decorator(login_required(redirect_field_name=''), name='dispatch')
+class DeleteAccountView(View):
+    """View for account deletion with confirmation"""
+    
+    def get(self, request, *args, **kwargs):
+        """Show confirmation page before deletion"""
+        return render(request, 'account/delete_account_confirm.html')
+    
+    def post(self, request, *args, **kwargs):
+        """Handle account deletion"""
+        user = request.user
+        
+        # Log user out before deletion
+        logout(request)
+        
+        # Delete the user account
+        user.delete()
+        
+        # Render success page
+        return render(request, 'account/delete_account_done.html', {
+            'message': 'Your account has been successfully deleted. We\'re sorry to see you go!'
+        })
+
 def error_404(request, exception):
     return render(request, 'error/error_404.html')
 
@@ -203,3 +227,32 @@ def error_403(request, exception):
 
 def error_500(request):
     return render(request, 'error/error_500.html')
+
+
+class DataDeletionCallbackView(View):
+    """Public view for Facebook Data Deletion Callback URL
+    Required by Facebook Platform Policy for apps using Facebook Login.
+    This page explains data deletion and provides a way for users to request deletion.
+    """
+    
+    def get(self, request, *args, **kwargs):
+        """Show data deletion information page"""
+        return render(request, 'account/data_deletion_callback.html')
+    
+    def post(self, request, *args, **kwargs):
+        """Handle data deletion request from the page"""
+        email = request.POST.get('email', '')
+        reason = request.POST.get('reason', '')
+        
+        context = {
+            'email': email,
+            'submitted': True,
+            'message': 'Your data deletion request has been received. We will process it within 30 days as per our policy.'
+        }
+        
+        # In production, you might want to:
+        # 1. Send an email notification to admins
+        # 2. Log the request in database
+        # 3. Create a task to process the deletion
+        
+        return render(request, 'account/data_deletion_callback.html', context)

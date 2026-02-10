@@ -118,11 +118,18 @@ The callback URLs follow this pattern: `{PROTOCOL}://{DOMAIN}/accounts/{provider
 2. Create a new app
 3. Add **Facebook Login** product
 4. In **Facebook Login Settings**, add **Valid OAuth Redirect URIs**
-5. Copy App ID and App Secret to `.env`:
+5. **Important:** Add **Data Deletion Callback URL** (required by Facebook):
+   - Local: `http://localhost:8016/data-deletion-callback/`
+   - Prod: `https://yourdomain.com/data-deletion-callback/`
+   - This URL must be publicly accessible (no login required)
+   - See [Facebook Data Deletion Setup](FACEBOOK_DATA_DELETION.md) for details
+6. Copy App ID and App Secret to `.env`:
    ```env
    FACEBOOK_APP_ID=your-app-id
    FACEBOOK_APP_SECRET=your-app-secret
    ```
+
+**Note:** Facebook requires all apps to provide a Data Deletion Callback URL. This page explains how user data is deleted when they remove your app from their Facebook account. For detailed setup instructions and compliance requirements, see [FACEBOOK_DATA_DELETION.md](FACEBOOK_DATA_DELETION.md).
 
 ### 4. Twitter/X OAuth
 

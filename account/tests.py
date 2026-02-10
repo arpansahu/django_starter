@@ -187,6 +187,145 @@ class AccountViewTest(TestCase):
         self.assertIn(response.status_code, [200, 302])
 
 
+class DeleteAccountViewTest(TestCase):
+    """Test cases for account deletion functionality"""
+    
+    def setUp(self):
+        """Set up test client and user"""
+        self.client = Client()
+        self.delete_account_url = reverse('delete_account')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.user.is_active = True
+        self.user.save()
+    
+    def test_delete_account_view_requires_login(self):
+        """Test that delete account page requires authentication"""
+        response = self.client.get(self.delete_account_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login/', response.url)
+    
+    def test_delete_account_view_get_authenticated(self):
+        """Test that authenticated users can access delete confirmation page"""
+        self.client.force_login(self.user)
+        response = self.client.get(self.delete_account_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'account/delete_account_confirm.html')
+    
+    def test_delete_account_post_deletes_user(self):
+        """Test that posting to delete account actually deletes the user"""
+        self.client.force_login(self.user)
+        user_id = self.user.id
+        
+        # Check user exists before deletion
+        self.assertTrue(User.objects.filter(id=user_id).exists())
+        
+        # Delete the account
+        response = self.client.post(self.delete_account_url)
+        
+        # Check response is successful
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'account/delete_account_done.html')
+        
+        # Check user no longer exists
+        self.assertFalse(User.objects.filter(id=user_id).exists())
+    
+    def test_delete_account_logs_out_user(self):
+        """Test that user is logged out after account deletion"""
+        self.client.force_login(self.user)
+        
+        # Delete the account
+        response = self.client.post(self.delete_account_url)
+        
+        # Try to access a protected page
+        account_response = self.client.get(reverse('account'))
+        
+        # Should redirect to login (user is logged out)
+        self.assertEqual(account_response.status_code, 302)
+        self.assertIn('/login/', account_response.url)
+    
+    def test_delete_account_confirmation_shows_warning(self):
+        """Test that confirmation page shows appropriate warnings"""
+        self.client.force_login(self.user)
+        response = self.client.get(self.delete_account_url)
+        
+        # Check that warning messages are present
+        self.assertContains(response, 'Delete Account')
+        self.assertContains(response, 'This action cannot be undone')
+        self.assertContains(response, 'permanently remove')
+
+
+class DataDeletionCallbackViewTest(TestCase):
+    """Test cases for Facebook Data Deletion Callback functionality"""
+    
+    def setUp(self):
+        """Set up test client"""
+        self.client = Client()
+        self.data_deletion_url = reverse('data_deletion_callback')
+    
+    def test_data_deletion_callback_view_get(self):
+        """Test that data deletion callback page loads without authentication"""
+        response = self.client.get(self.data_deletion_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'account/data_deletion_callback.html')
+    
+    def test_data_deletion_callback_no_login_required(self):
+        """Test that the page is accessible without login (public page)"""
+        response = self.client.get(self.data_deletion_url)
+        # Should not redirect to login
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('/login/', response.url if hasattr(response, 'url') else '')
+    
+    def test_data_deletion_callback_shows_information(self):
+        """Test that page displays required information about data deletion"""
+        response = self.client.get(self.data_deletion_url)
+        
+        # Check for key information sections
+        self.assertContains(response, 'What Data We Collect')
+        self.assertContains(response, 'How Your Data is Deleted')
+        self.assertContains(response, 'Request Data Deletion')
+        self.assertContains(response, 'Facebook')
+    
+    def test_data_deletion_callback_post_request(self):
+        """Test submitting a data deletion request through the form"""
+        data = {
+            'email': 'user@example.com',
+            'reason': 'No longer using the service'
+        }
+        response = self.client.post(self.data_deletion_url, data)
+        
+        # Check response is successful
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'account/data_deletion_callback.html')
+        
+        # Check success message is shown
+        self.assertContains(response, 'Request Submitted Successfully')
+        self.assertContains(response, 'deletion request has been received')
+    
+    def test_data_deletion_callback_post_without_reason(self):
+        """Test submitting deletion request without optional reason"""
+        data = {
+            'email': 'user@example.com'
+        }
+        response = self.client.post(self.data_deletion_url, data)
+        
+        # Should still succeed
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Request Submitted Successfully')
+    
+    def test_data_deletion_callback_timeline_info(self):
+        """Test that deletion timeline is displayed"""
+        response = self.client.get(self.data_deletion_url)
+        
+        # Check timeline steps are present
+        self.assertContains(response, 'Within 7 Days')
+        self.assertContains(response, 'Within 30 Days')
+        self.assertContains(response, 'Within 90 Days')
+
+
 class PasswordResetViewTest(TestCase):
     """Test cases for password reset functionality"""
     

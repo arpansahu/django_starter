@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block stylesheets %}
+<style>
+  .data-deletion-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+  .policy-section {
+    background-color: #f8f9fa;
+    border-left: 4px solid #5e72e4;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+  }
+  .policy-section h5 {
+    color: #5e72e4;
+    margin-bottom: 1rem;
+  }
+  .info-box {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .success-box {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .timeline {
+    border-left: 3px solid #5e72e4;
+    padding-left: 1.5rem;
+    margin-left: 0.5rem;
+  }
+  .timeline-item {
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.85rem;
+    top: 0.25rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #5e72e4;
+  }
+  .contact-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container data-deletion-container">
+  <div class="text-center mb-4">
+    <h2 class="font-weight-bolder text-gradient text-info">Facebook Data Deletion</h2>
+    <p class="text-muted">Information about data collection and deletion for Facebook Login users</p>
+  </div>
+
+  {% if submitted %}
+  <div class="success-box">
+    <h6 class="text-success mb-2">
+      <i class="fas fa-check-circle"></i> Request Submitted Successfully
+    </h6>
+    <p class="mb-0">{{ message }}</p>
+  </div>
+  {% endif %}
+
+  <div class="info-box">
+    <h6 class="text-info mb-2">
+      <i class="fas fa-info-circle"></i> About This Page
+    </h6>
+    <p class="mb-0">
+      This page is for users who signed up through Facebook Login. If you've removed our app from your Facebook account 
+      or want to delete your data, you can learn about the process here or submit a deletion request.
+    </p>
+  </div>
+
+  <!-- What Data We Collect -->
+  <div class="policy-section">
+    <h5><i class="fas fa-database"></i> What Data We Collect via Facebook Login</h5>
+    <p>When you sign up using Facebook, we collect:</p>
+    <ul>
+      <li><strong>Email address:</strong> Used for account identification and communication</li>
+      <li><strong>Name:</strong> Used for personalization</li>
+      <li><strong>Profile picture:</strong> Optional, used for your account avatar</li>
+      <li><strong>Facebook User ID:</strong> Used to link your Facebook account to our service</li>
+    </ul>
+    <p class="mb-0 text-sm text-muted">
+      <em>We do not collect or store your Facebook password or any other sensitive authentication data.</em>
+    </p>
+  </div>
+
+  <!-- How Data is Deleted -->
+  <div class="policy-section">
+    <h5><i class="fas fa-trash-alt"></i> How Your Data is Deleted</h5>
+    <p>When you request data deletion, we will:</p>
+    <div class="timeline">
+      <div class="timeline-item">
+        <strong>Step 1 - Immediate</strong>
+        <p class="mb-0 text-sm">Your account is deactivated immediately upon request submission</p>
+      </div>
+      <div class="timeline-item">
+        <strong>Step 2 - Within 7 Days</strong>
+        <p class="mb-0 text-sm">Personal data (name, email, profile picture) is anonymized</p>
+      </div>
+      <div class="timeline-item">
+        <strong>Step 3 - Within 30 Days</strong>
+        <p class="mb-0 text-sm">All associated data and records are permanently deleted from our systems</p>
+      </div>
+      <div class="timeline-item">
+        <strong>Step 4 - Within 90 Days</strong>
+        <p class="mb-0 text-sm">Data is removed from all backups and archives</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Automatic Deletion -->
+  <div class="policy-section">
+    <h5><i class="fas fa-sync-alt"></i> Automatic Deletion</h5>
+    <p>
+      If you remove our app from your Facebook account, we will automatically receive a notification and begin 
+      the deletion process within 48 hours. No additional action is required from you.
+    </p>
+  </div>
+
+  <!-- Request Deletion Form -->
+  <div class="card mt-4">
+    <div class="card-header bg-gradient-info">
+      <h5 class="text-white mb-0"><i class="fas fa-paper-plane"></i> Request Data Deletion</h5>
+    </div>
+    <div class="card-body">
+      <p class="text-sm">
+        If you want to request immediate deletion of your data, please fill out the form below:
+      </p>
+      
+      <form method="post" action="{% url 'data_deletion_callback' %}">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          <label for="email" class="form-label">Email Address *</label>
+          <input 
+            type="email" 
+            class="form-control" 
+            id="email" 
+            name="email" 
+            placeholder="Enter the email associated with your account"
+            required
+          >
+          <small class="text-muted">Enter the email you used to sign up via Facebook</small>
+        </div>
+        
+        <div class="mb-3">
+          <label for="reason" class="form-label">Reason (Optional)</label>
+          <textarea 
+            class="form-control" 
+            id="reason" 
+            name="reason" 
+            rows="3"
+            placeholder="Let us know why you're leaving (optional)"
+          ></textarea>
+        </div>
+        
+        <button type="submit" class="btn bg-gradient-info w-100">
+          <i class="fas fa-paper-plane"></i> Submit Deletion Request
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Alternative Methods -->
+  <div class="card mt-4">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fas fa-users"></i> Alternative Methods</h5>
+    </div>
+    <div class="card-body">
+      <p><strong>If you have an active account:</strong></p>
+      <p class="text-sm">
+        You can delete your account directly from your account settings page after logging in: 
+        <a href="{% url 'account' %}" class="text-info font-weight-bold">Go to Account Settings</a>
+      </p>
+      
+      <p class="mt-3"><strong>Email us directly:</strong></p>
+      <p class="text-sm mb-0">
+        Send an email to <a href="mailto:admin@arpansahu.space" class="text-info font-weight-bold">admin@arpansahu.space</a> 
+        with the subject "Data Deletion Request" and include your email address.
+      </p>
+    </div>
+  </div>
+
+  <!-- Contact Information -->
+  <div class="contact-card">
+    <h5 class="text-white mb-3"><i class="fas fa-envelope"></i> Need Help?</h5>
+    <p class="mb-2">
+      <strong>Email:</strong> <a href="mailto:admin@arpansahu.space" class="text-white">admin@arpansahu.space</a>
+    </p>
+    <p class="mb-2">
+      <strong>Website:</strong> <a href="{% url 'home' %}" class="text-white">{{ request.get_host }}</a>
+    </p>
+    <p class="mb-0 text-sm">
+      We typically respond to data deletion requests within 24-48 hours.
+    </p>
+  </div>
+
+  <!-- Legal Notice -->
+  <div class="text-center mt-4">
+    <p class="text-xs text-muted">
+      By using Facebook Login, you agree to our 
+      <a href="{% url 'privacy_policy' %}" class="text-info">Privacy Policy</a> and 
+      <a href="{% url 'terms_of_service' %}" class="text-info">Terms of Service</a>.
+      <br>
+      This page complies with Facebook Platform Policy requirements for Data Deletion Callback URL.
+    </p>
+  </div>
+</div>
+{% endblock content %}

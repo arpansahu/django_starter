@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block stylesheets %}
+<style>
+  body {
+    overflow: hidden;
+  }
+  .main-content {
+    height: calc(100vh - 80px);
+    overflow: hidden;
+  }
+  .page-header {
+    height: 100%;
+    min-height: auto !important;
+  }
+  .delete-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .card-plain {
+    margin: 0 !important;
+  }
+  .warning-box {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .warning-icon {
+    color: #ff6b6b;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+  <section>
+    <div class="page-header">
+      <div class="container delete-container">
+        <div class="row w-100">
+          <div class="col-xl-5 col-lg-6 col-md-7 d-flex flex-column mx-auto">
+            <div class="card card-plain">
+              <div class="card-header pb-0 text-center bg-transparent">
+                <div class="warning-icon">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="font-weight-bolder text-danger text-gradient">Delete Account</h3>
+                <p class="mb-0">This action cannot be undone</p>
+              </div>
+              
+              <div class="card-body">
+                <div class="warning-box">
+                  <h6 class="text-warning mb-2">
+                    <i class="fas fa-info-circle"></i> Warning
+                  </h6>
+                  <p class="mb-0 text-sm">
+                    Deleting your account will permanently remove:
+                  </p>
+                  <ul class="text-sm mb-0 mt-2">
+                    <li>Your profile and personal information</li>
+                    <li>All your data and uploaded files</li>
+                    <li>Your authentication and access credentials</li>
+                    <li>All associated records</li>
+                  </ul>
+                </div>
+
+                <form method="post" action="{% url 'delete_account' %}">
+                  {% csrf_token %}
+                  
+                  <div class="text-center">
+                    <p class="text-sm font-weight-bold mb-3">
+                      Are you absolutely sure you want to delete your account?
+                    </p>
+                    
+                    <button type="submit" class="btn bg-gradient-danger w-100 mb-2">
+                      <i class="fas fa-trash-alt"></i> Yes, Delete My Account
+                    </button>
+                    
+                    <a href="{% url 'account' %}" class="btn bg-gradient-secondary w-100">
+                      <i class="fas fa-arrow-left"></i> No, Keep My Account
+                    </a>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock content %}

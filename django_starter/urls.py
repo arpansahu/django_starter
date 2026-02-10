@@ -20,6 +20,8 @@ from account.views import (
     AccountView,
     RegistrationView,
     activate,
+    DeleteAccountView,
+    DataDeletionCallbackView,
 )
 
 from .views import (
@@ -50,6 +52,9 @@ urlpatterns = [
     # Legal Pages (publicly accessible)
     path('privacy-policy/', PrivacyPolicyView.as_view(), name='privacy_policy'),
     path('terms-of-service/', TermsOfServiceView.as_view(), name='terms_of_service'),
+    
+    # Facebook Data Deletion Callback (required for Facebook apps)
+    path('data-deletion-callback/', DataDeletionCallbackView.as_view(), name='data_deletion_callback'),
 
     # Social Authentication (django-allauth)
     path('accounts/', include('allauth.urls')),
@@ -92,6 +97,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('login/', LoginView.as_view(), name='login'),
     path('account/', AccountView.as_view(), name='account'),
+    path('account/delete/', DeleteAccountView.as_view(), name='delete_account'),
     re_path(r'activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,40})/', 
             activate, name='account_activate'),
     path('password_change/done/',
