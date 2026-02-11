@@ -19,13 +19,13 @@
       <div class="ms-md-auto pe-md-3 d-flex align-items-center">
 
       </div>
-      <ul class="navbar-nav  justify-content-end">
+      <ul class="navbar-nav  justify-content-end align-items-center">
         <!-- Notification Bell -->
         {% if request.user.is_authenticated %}
-        <li class="nav-item d-flex align-items-center position-relative" id="notif-bell-container" style="margin-right: 8px;">
-          <a href="javascript:;" class="nav-link text-body p-0 position-relative" id="notif-bell" title="Notifications">
-            <i class="fa-solid fa-bell" style="font-size: 1.1rem;"></i>
-            <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">
+        <li class="nav-item d-flex align-items-center position-relative" id="notif-bell-container" style="margin-right: 12px;">
+          <a href="javascript:;" class="nav-link text-body p-0 position-relative d-flex align-items-center" id="notif-bell" title="Notifications" style="line-height: 1;">
+            <i class="fa-solid fa-bell" style="font-size: 1.1rem; vertical-align: middle;"></i>
+            <span id="notif-badge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: -6px; right: -8px; padding: 2px 5px; line-height: 1;">
               0
             </span>
           </a>
