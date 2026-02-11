@@ -488,14 +488,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email',
         ],
-        'PROFILE_FIELDS': [
-            'id',
-            'first-name',
-            'last-name',
-            'email-address',
-            'picture-url',
-            'public-profile-url',
-        ],
+        # LinkedIn API v2 - removed deprecated PROFILE_FIELDS
+        # The provider now uses OpenID Connect which automatically provides profile data
     },
 }
 
