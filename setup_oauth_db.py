@@ -22,9 +22,12 @@ def main():
     print(f'Setting up OAuth for site: {site.domain}')
     print('=' * 75)
     
-    # Delete existing Twitter and LinkedIn apps to avoid conflicts
-    deleted_count = SocialApp.objects.filter(provider__in=['twitter', 'openid_connect']).delete()[0]
-    print(f'✓ Cleared {deleted_count} existing Twitter/LinkedIn configurations')
+    # CRITICAL: Delete ALL existing SocialApp entries to avoid MultipleObjectsReturned errors
+    # Google, GitHub, Facebook should ONLY be in settings.py
+    # Only Twitter and LinkedIn should be in database for fast testing
+    deleted_count = SocialApp.objects.all().delete()[0]
+    print(f'✓ Cleared ALL {deleted_count} existing OAuth configurations from database')
+    print(f'  (Google/GitHub/Facebook will use settings.py config)')
     print()
     
     # Create Twitter SocialApp
@@ -53,6 +56,7 @@ def main():
             'authorization_endpoint': 'https://www.linkedin.com/oauth/v2/authorization',
             'token_endpoint': 'https://www.linkedin.com/oauth/v2/accessToken',
             'userinfo_endpoint': 'https://api.linkedin.com/v2/userinfo',
+            'scope': 'openid profile email',  # Required OIDC scopes
         }
     )
     linkedin_app.sites.add(site)
