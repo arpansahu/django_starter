@@ -135,7 +135,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.twitter',
+    'allauth.socialaccount.providers.twitter_oauth2',
     'allauth.socialaccount.providers.openid_connect',  # LinkedIn now uses OpenID Connect
 ]
 
@@ -470,12 +470,11 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': False,
         'VERSION': 'v18.0',
     },
-    # Twitter OAuth 1.0a
-    'twitter': {
+    # Twitter OAuth 2.0 (OAuth 1.0a deprecated by X/Twitter)
+    'twitter_oauth2': {
         'APP': {
-            'client_id': config('TWITTER_API_KEY', default=''),
-            'secret': config('TWITTER_API_SECRET', default=''),
-            'key': config('TWITTER_API_KEY', default=''),
+            'client_id': config('TWITTER_OAUTH2_CLIENT_ID', default=''),
+            'secret': config('TWITTER_OAUTH2_CLIENT_SECRET', default=''),
         },
     },
     # LinkedIn uses OpenID Connect (linkedin_oauth2 is deprecated)

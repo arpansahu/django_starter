@@ -213,7 +213,7 @@
                       <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-facebook-circle" title="Sign up with Facebook">
                         <i class="fab fa-facebook-f"></i>
                       </a>
-                    {% elif provider.id == 'twitter' %}
+                    {% elif provider.id == 'twitter' or provider.id == 'twitter_oauth2' %}
                       <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-twitter-circle" title="Sign up with X">
                         <i class="fab fa-x-twitter"></i>
                       </a>
