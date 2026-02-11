@@ -145,7 +145,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                         text_body, html_body,
                     )
                 except Exception as e:
-                    logger.warning("Failed to send social connected email: %s", e)
+                    logger.exception("Failed to send social connected email to %s", user.email)
                 # Real-time WebSocket notification
                 try:
                     notify_user(
@@ -155,7 +155,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                         level='success',
                     )
                 except Exception as e:
-                    logger.warning("Failed to send WS connected notification: %s", e)
+                    logger.debug("WS connected notification skipped (channel layer unavailable): %s", e)
             except User.DoesNotExist:
                 pass
     
@@ -195,7 +195,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                     text_body, html_body,
                 )
             except Exception as e:
-                logger.warning("Failed to send welcome email: %s", e)
+                logger.exception("Failed to send welcome email to %s", user.email)
             # Real-time WebSocket notification
             try:
                 notify_user(
@@ -205,7 +205,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                     level='success',
                 )
             except Exception as e:
-                logger.warning("Failed to send WS welcome notification: %s", e)
+                logger.debug("WS welcome notification skipped (channel layer unavailable): %s", e)
         
         return user
     
