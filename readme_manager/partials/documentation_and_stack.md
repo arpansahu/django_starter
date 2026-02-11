@@ -28,4 +28,13 @@
 [![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
 [![DRF](https://img.shields.io/badge/Django%20REST-ff1709?style=for-the-badge&logo=django&logoColor=white)](https://www.django-rest-framework.org/)
+[![Allauth](https://img.shields.io/badge/django--allauth-092E20?style=for-the-badge&logo=django&logoColor=white)](https://docs.allauth.org/)
+[![Daphne](https://img.shields.io/badge/Daphne-092E20?style=for-the-badge&logo=django&logoColor=white)](https://github.com/django/daphne)
+[![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=for-the-badge&logo=gunicorn&logoColor=white)](https://gunicorn.org/)
+[![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://swagger.io/)
+[![Google OAuth](https://img.shields.io/badge/Google%20OAuth-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com/identity)
+[![GitHub OAuth](https://img.shields.io/badge/GitHub%20OAuth-181717?style=for-the-badge&logo=github&logoColor=white)](https://docs.github.com/en/apps/oauth-apps)
+[![Facebook OAuth](https://img.shields.io/badge/Facebook%20OAuth-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://developers.facebook.com/)
+[![Twitter OAuth](https://img.shields.io/badge/Twitter%20OAuth-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://developer.twitter.com/)
+[![LinkedIn OAuth](https://img.shields.io/badge/LinkedIn%20OAuth-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://learn.microsoft.com/en-us/linkedin/)
 
