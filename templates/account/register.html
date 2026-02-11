@@ -197,37 +197,6 @@
                 </p>
               </div>
               <div class="card-body">
-                <!-- Social Login Section (at the top for registration) -->
-                {% get_providers as socialaccount_providers %}
-                <div class="social-buttons-container">
-                  {% for provider in socialaccount_providers %}
-                    {% if provider.id == 'google' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-google-circle" title="Sign up with Google">
-                        <i class="fab fa-google"></i>
-                      </a>
-                    {% elif provider.id == 'github' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-github-circle" title="Sign up with GitHub">
-                        <i class="fab fa-github"></i>
-                      </a>
-                    {% elif provider.id == 'facebook' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-facebook-circle" title="Sign up with Facebook">
-                        <i class="fab fa-facebook-f"></i>
-                      </a>
-                    {% elif provider.id == 'twitter' or provider.id == 'twitter_oauth2' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-twitter-circle" title="Sign up with X">
-                        <i class="fab fa-x-twitter"></i>
-                      </a>
-                    {% endif %}
-                  {% endfor %}
-                  <!-- LinkedIn (OpenID Connect) -->
-                  <a href="{% url 'openid_connect_login' provider_id='linkedin' %}?process=login" class="social-btn-circle btn-linkedin-circle" title="Sign up with LinkedIn">
-                    <i class="fab fa-linkedin-in"></i>
-                  </a>
-                </div>
-                <div class="social-login-divider">
-                  <span>Or register with email</span>
-                </div>
-                
                 <form role="form text-left" method="post" action="">
                   {% csrf_token %}
 
@@ -280,6 +249,37 @@
                     <button type="submit" name="register" class="btn bg-gradient-info w-100 mt-4 mb-0">Sign UP</button>
                   </div>
                 </form>
+
+                <!-- Social Login Section -->
+                {% get_providers as socialaccount_providers %}
+                <div class="social-login-divider">
+                  <span>Or sign up with</span>
+                </div>
+                <div class="social-buttons-container">
+                  {% for provider in socialaccount_providers %}
+                    {% if provider.id == 'google' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-google-circle" title="Sign up with Google">
+                        <i class="fab fa-google"></i>
+                      </a>
+                    {% elif provider.id == 'github' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-github-circle" title="Sign up with GitHub">
+                        <i class="fab fa-github"></i>
+                      </a>
+                    {% elif provider.id == 'facebook' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-facebook-circle" title="Sign up with Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                      </a>
+                    {% elif provider.id == 'twitter' or provider.id == 'twitter_oauth2' %}
+                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-twitter-circle" title="Sign up with X">
+                        <i class="fab fa-x-twitter"></i>
+                      </a>
+                    {% endif %}
+                  {% endfor %}
+                  <!-- LinkedIn (OpenID Connect) -->
+                  <a href="{% url 'openid_connect_login' provider_id='linkedin' %}?process=login" class="social-btn-circle btn-linkedin-circle" title="Sign up with LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                  </a>
+                </div>
               </div>
               <div class="card-footer text-center pt-0 px-lg-2 px-1">
                 <p class="mb-4 text-sm mx-auto" style="margin-bottom: 0.25rem !important;">
