@@ -63,37 +63,40 @@ class CustomPasswordResetView(PasswordContextMixin, FormView):
         return super().form_valid(form)
 
 
-def send_mail_account_activate(reciever_email, user, SUBJECT="Confirm Your Email"):
-    message = render_to_string(template_name='account/activate_account_mail.html', context={
+def send_mail_account_activate(reciever_email, user, SUBJECT="[Django Starter] Confirm Your Email"):
+    template_context = {
         'user': user,
         'protocol': PROTOCOL,
         'domain': DOMAIN,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': account_activation_token.make_token(user),
-    })
+    }
+    text_part = render_to_string('account/activate_account_mail.html', template_context)
+    html_part = render_to_string('email/activation.html', template_context)
 
+    from_email = settings.DEFAULT_FROM_EMAIL
     data = {
         'Messages': [
             {
                 "From": {
-                    "Email": "admin@arpansahu.space",
+                    "Email": from_email,
                     "Name": "Django Starter"
                 },
                 "To": [
                     {
                         "Email": reciever_email,
-                        "Name": "Dear User"
+                        "Name": user.username
                     }
                 ],
                 "Subject": SUBJECT,
-                "TextPart": message,
-                "HTMLPart": f"<h3>Dear {user.username}, Message: {message}",
+                "TextPart": text_part,
+                "HTMLPart": html_part,
                 "CustomID": f"{reciever_email}"
             }
         ]
     }
     result = mailjet.send.create(data=data)
-    print("account activation mail send")
+    print("account activation mail sent")
     return result
 
 

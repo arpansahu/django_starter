@@ -1,0 +1,57 @@
+{% autoescape off %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Django Starter{% endblock %}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:30px 0;">
+    <tr>
+      <td align="center">
+        <!-- Container -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:28px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:0.5px;">
+                🚀 Django Starter
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 40px 20px;">
+              <h2 style="margin:0 0 20px;color:#2d3748;font-size:20px;font-weight:600;">
+                {% block heading %}{% endblock %}
+              </h2>
+              <div style="color:#4a5568;font-size:15px;line-height:1.7;">
+                {% block content %}{% endblock %}
+              </div>
+            </td>
+          </tr>
+
+          <!-- CTA Button -->
+          {% block cta_section %}{% endblock %}
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 40px 28px;border-top:1px solid #e2e8f0;">
+              <p style="margin:0;color:#a0aec0;font-size:12px;line-height:1.6;text-align:center;">
+                This is an automated message from <strong>Django Starter</strong>.<br>
+                If you did not initiate this action, you can safely ignore this email.
+              </p>
+              <p style="margin:10px 0 0;color:#cbd5e0;font-size:11px;text-align:center;">
+                &copy; {% now "Y" %} Django Starter &middot; {{ domain }}
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>{% endautoescape %}

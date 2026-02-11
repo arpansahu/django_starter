@@ -295,12 +295,16 @@ class PasswordResetForm(forms.Form):
         if html_email_template_name is not None:
             html_email = loader.render_to_string(html_email_template_name, context)
 
+        # Render the professional HTML template for password reset
+        html_body = loader.render_to_string('email/password_reset.html', context)
+
         mailjet = Client(auth=(settings.MAIL_JET_API_KEY, settings.MAIL_JET_API_SECRET), version='v3.1')
+        from_email = settings.DEFAULT_FROM_EMAIL
         data = {
             'Messages': [
                 {
                     "From": {
-                        "Email": "admin@arpansahu.space",
+                        "Email": from_email,
                         "Name": "Django Starter"
                     },
                     "To": [
@@ -311,7 +315,7 @@ class PasswordResetForm(forms.Form):
                     ],
                     "Subject": subject,
                     "TextPart": body,
-                    "HTMLPart": body,
+                    "HTMLPart": html_body,
                     "CustomID": f"{user.email}"
                 }
             ]
