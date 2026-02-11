@@ -4,29 +4,36 @@ A comprehensive Django starter project featuring modern best practices, multiple
 
 ## Project Features
 
-1. **Account Management:** Complete authentication with email verification, password reset, and profile management.
-2. **PostgreSQL Database:** Production-grade relational database with migrations and connection pooling.
-3. **AWS S3/MinIO Storage:** Flexible file storage supporting both AWS S3 and self-hosted MinIO.
-4. **Redis Integration:** High-performance caching, session storage, and Celery message broker.
-5. **MailJet Email Service:** Transactional emails with templates and delivery tracking.
-6. **Docker Containerization:** Fully containerized with Docker Compose for local development.
-7. **Kubernetes Deployment:** Production-ready K8s manifests with ConfigMaps and Secrets.
-8. **CI/CD Pipeline:** Automated build, test, and deployment with Jenkins.
-9. **Notes Application:** Full-featured CRUD app with categories, tags, comments, and version history.
-10. **Elasticsearch Search:** Full-text search with analytics dashboard and Kibana integration.
-11. **Kafka Event Streaming:** Real-time event publishing and consumption with Apache Kafka.
-12. **RabbitMQ Messaging:** Message queue system for async notifications and task distribution.
-13. **Commands Dashboard:** Management command execution, scheduling, and metrics tracking.
-14. **REST API:** Complete Django REST Framework API with JWT authentication and Swagger docs.
-15. **Celery Task Queue:** Background task processing with real-time WebSocket progress tracking.
-16. **Comprehensive Testing:** Automated test generation with django-test-enforcer and Playwright UI tests.
+1. **Account Management:** Complete authentication with email verification, password reset, profile management, and account deletion.
+2. **Social Authentication (OAuth):** One-click sign-in via Google, GitHub, Facebook, Twitter/X (OAuth 2.0), and LinkedIn (OpenID Connect) using django-allauth. Includes account page UI to connect/disconnect providers.
+3. **Real-Time WebSocket Notifications:** Push notifications via Django Channels with toast UI, notification bell with badge, and auto-reconnecting WebSocket client.
+4. **Professional HTML Email Templates:** Branded activation, welcome, password reset, and social-connected emails sent via Mailjet REST API with plain-text fallbacks.
+5. **PostgreSQL Database:** Production-grade relational database with migrations and connection pooling.
+6. **AWS S3/MinIO Storage:** Flexible 3-tier file storage (public/protected/private) supporting both AWS S3 and self-hosted MinIO with signed URLs.
+7. **Redis Integration:** High-performance caching, session storage, Celery message broker, and Channels layer backend.
+8. **MailJet Email Service:** Transactional emails via both Mailjet REST API (direct) and django-anymail backend.
+9. **Docker Containerization:** Fully containerized with Docker Compose for local development.
+10. **Kubernetes Deployment:** Production-ready K8s manifests with ConfigMaps, Secrets, and Rancher-compatible service definitions.
+11. **CI/CD Pipeline:** Automated build, test, and deployment with Jenkins (separate build and deploy Jenkinsfiles).
+12. **Notes Application:** Full-featured CRUD app demonstrating all Django Generic Class-Based Views — ListView, DetailView, CreateView, UpdateView, DeleteView, FormView, RedirectView, and TemplateView — with categories, tags, comments, pinning, archiving, and version history.
+13. **Elasticsearch Search:** Full-text search with autocomplete suggestions, analytics dashboard, index management, and cluster health monitoring.
+14. **Kafka Event Streaming:** Real-time event publishing and consumption with Apache Kafka, including event dashboard and analytics views.
+15. **RabbitMQ Messaging:** Priority-based message queue system for async notifications with dashboard and message history.
+16. **Commands Dashboard:** Web UI for management command execution, scheduling, metrics collection, data import/export, and command log tracking — with 19 built-in management commands.
+17. **REST API:** Complete Django REST Framework API with session/basic authentication, Swagger/OpenAPI docs (drf-spectacular), ReDoc, throttling, filtering, and API key management.
+18. **Celery Task Queue:** Background task processing with real-time WebSocket progress tracking via custom Celery progress app and Flower monitoring.
+19. **Comprehensive Testing:** Automated test generation with django-test-enforcer, Playwright UI tests, pytest with parallel execution (xdist), and full coverage reporting.
+20. **Error Tracking:** Sentry integration for production error monitoring and alerting.
+21. **Service Health Checks:** 11 management commands to verify database, cache, email, storage, Elasticsearch, Kafka, RabbitMQ, Celery, Flower, and Harbor connectivity.
 
 ## Why Use This Starter?
 
 - 🚀 **Production-Ready:** Battle-tested configurations for real-world deployments
 - 🔧 **Fully Configured:** All integrations pre-wired and working out of the box
 - 📦 **Modular Design:** Enable/disable features based on your needs
+- 🔐 **Social Auth:** 5 OAuth providers configured and ready to use
 - 🧪 **Test Coverage:** Built-in testing infrastructure with 100% view coverage
+- 📡 **Real-Time:** WebSocket notifications and Celery progress tracking
 - 📖 **Well Documented:** Comprehensive documentation and code comments
 
 Can be cloned and used as a base project for any Django application.
@@ -59,10 +66,106 @@ paradigms, including structured, object-oriented and functional programming.
 ## What is Django ?
 Django is a Python-based free and open-source web framework that follows the model-template-view architectural pattern.
 
+## What is Django REST Framework ?
+Django REST Framework (DRF) is a powerful and flexible toolkit for building Web APIs in Django. It provides serialization, 
+authentication, viewsets, routers, throttling, filtering, and pagination out of the box, making it easy to build 
+RESTful APIs that follow best practices.
+
+## What is drf-spectacular ?
+drf-spectacular is an OpenAPI 3.0 schema generation library for Django REST Framework. It auto-generates Swagger UI 
+and ReDoc documentation from your API views and serializers, providing interactive API documentation for developers.
+
 ## What is Redis ?
-    
 Redis is an in-memory data structure project implementing a distributed, in-memory key-value database with optional durability. 
-The most common Redis use cases are session cache, full-page cache, queues, leader boards and counting, publish-subscribe, and much more. in this case, we will use Redis as a message broker.
+The most common Redis use cases are session cache, full-page cache, queues, leader boards and counting, publish-subscribe, and much more. In this project, Redis is used as a cache backend, Celery message broker, and Django Channels layer.
+
+## What is Celery ?
+Celery is an asynchronous task queue/job queue based on distributed message passing. It is focused on real-time operation 
+but supports scheduling as well. In this project, Celery handles background task processing with real-time WebSocket 
+progress tracking via a custom progress recorder.
+
+## What is Flower ?
+Flower is a real-time web-based monitoring tool for Celery. It provides detailed information about the state of workers, 
+tasks, and queues. It allows you to monitor task progress, view task details, and control worker pools from a web interface.
+
+## What is Django Channels ?
+Django Channels extends Django to handle WebSockets, HTTP2, and other protocols beyond traditional HTTP. It builds on 
+ASGI (Asynchronous Server Gateway Interface) and enables real-time features like push notifications, live updates, 
+and chat systems. In this project, Channels powers real-time notification delivery and Celery task progress updates.
+
+## What is Daphne ?
+Daphne is an HTTP, HTTP2, and WebSocket protocol server for ASGI and ASGI-HTTP, developed as part of the Django Channels 
+project. It serves as the production-ready ASGI server for Django applications that need WebSocket support.
+
+## What is PostgreSQL ?
+PostgreSQL is a powerful, open-source object-relational database system with a strong reputation for reliability, 
+feature robustness, and performance. It supports advanced data types, full-text search, and JSON storage.
+
+## What is Elasticsearch ?
+Elasticsearch is a distributed, RESTful search and analytics engine built on Apache Lucene. It provides full-text 
+search, structured search, analytics, and logging capabilities. In this project, it powers the search app with 
+autocomplete suggestions, index management, cluster health monitoring, and search analytics.
+
+## What is Apache Kafka ?
+Apache Kafka is an open-source distributed event streaming platform used for high-performance data pipelines, 
+streaming analytics, data integration, and mission-critical applications. In this project, Kafka handles real-time 
+event publishing and consumption with an event dashboard and analytics views.
+
+## What is RabbitMQ ?
+RabbitMQ is an open-source message broker that implements the Advanced Message Queuing Protocol (AMQP). It supports 
+multiple messaging patterns including point-to-point, publish-subscribe, and request-reply. In this project, 
+RabbitMQ powers priority-based async notifications with a dashboard and message history.
+
+## What is MinIO ?
+MinIO is a high-performance, S3-compatible object storage system. It is designed for large-scale data infrastructure 
+and provides an API compatible with Amazon S3. In this project, MinIO serves as self-hosted object storage for 
+public, protected, and private file uploads.
+
+## What is Docker ?
+Docker is a platform for developing, shipping, and running applications inside lightweight, portable containers. 
+Containers package an application with all its dependencies, ensuring it runs consistently across different environments.
+
+## What is Kubernetes ?
+Kubernetes is an open-source container orchestration platform that automates deploying, scaling, and managing 
+containerized applications. In this project, K8s manifests, ConfigMaps, Secrets, and service definitions are 
+provided for production deployment.
+
+## What is Jenkins ?
+Jenkins is an open-source automation server that enables continuous integration and continuous delivery (CI/CD). 
+This project includes separate Jenkinsfiles for build and deploy pipelines.
+
+## What is Nginx ?
+Nginx is a high-performance HTTP server and reverse proxy. In this project, Nginx handles SSL termination, 
+HTTP-to-HTTPS redirection, WebSocket proxying, and reverse proxying to the application server.
+
+## What is Harbor ?
+Harbor is an open-source container image registry that provides role-based access control, image scanning, 
+and replication. It is used in this project to store Docker images built by the CI/CD pipeline.
+
+## What is Sentry ?
+Sentry is an application monitoring platform that provides real-time error tracking and performance monitoring. 
+It helps developers identify, triage, and resolve issues in production applications.
+
+## What is django-allauth ?
+django-allauth is a comprehensive Django authentication library that handles account registration, login, 
+social authentication, email verification, and account management. In this project, it provides OAuth sign-in 
+via Google, GitHub, Facebook, Twitter/X (OAuth 2.0), and LinkedIn (OpenID Connect), with a custom adapter 
+for sending branded welcome emails and WebSocket notifications on social signup.
+
+## What is Mailjet ?
+Mailjet is a cloud-based email delivery service for sending transactional and marketing emails. In this project, 
+it is used both as a direct REST API (via mailjet-rest) for custom email sends and as a Django email backend 
+(via django-anymail) for allauth-triggered emails.
+
+## What is Playwright ?
+Playwright is a framework for end-to-end testing of web applications. It supports Chromium, Firefox, and 
+WebKit browsers and provides APIs for automating browser interactions. In this project, Playwright is used 
+for UI integration tests alongside pytest.
+
+## What is Pytest ?
+Pytest is a mature full-featured Python testing tool. It supports fixtures, parameterization, markers, and 
+plugins. Combined with pytest-django, pytest-xdist (parallel execution), and coverage, it forms the testing 
+backbone of this project.
 
 
 ## Tech Stack
@@ -97,12 +200,30 @@ The most common Redis use cases are session cache, full-page cache, queues, lead
 [![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
 [![DRF](https://img.shields.io/badge/Django%20REST-ff1709?style=for-the-badge&logo=django&logoColor=white)](https://www.django-rest-framework.org/)
+[![Allauth](https://img.shields.io/badge/django--allauth-092E20?style=for-the-badge&logo=django&logoColor=white)](https://docs.allauth.org/)
+[![Daphne](https://img.shields.io/badge/Daphne-092E20?style=for-the-badge&logo=django&logoColor=white)](https://github.com/django/daphne)
+[![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=for-the-badge&logo=gunicorn&logoColor=white)](https://gunicorn.org/)
+[![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://swagger.io/)
+[![Google OAuth](https://img.shields.io/badge/Google%20OAuth-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com/identity)
+[![GitHub OAuth](https://img.shields.io/badge/GitHub%20OAuth-181717?style=for-the-badge&logo=github&logoColor=white)](https://docs.github.com/en/apps/oauth-apps)
+[![Facebook OAuth](https://img.shields.io/badge/Facebook%20OAuth-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://developers.facebook.com/)
+[![Twitter OAuth](https://img.shields.io/badge/Twitter%20OAuth-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://developer.twitter.com/)
+[![LinkedIn OAuth](https://img.shields.io/badge/LinkedIn%20OAuth-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://learn.microsoft.com/en-us/linkedin/)
 
 
 
 ## Demo
 
 Available at: https://django-starter.arpansahu.space
+
+### Demo Features
+
+- **Homepage Dashboard:** File manager, async tasks, messaging, event streaming, search, notifications, notes, API, and commands sections.
+- **Social Login:** Sign in with Google, GitHub, Facebook, Twitter/X, or LinkedIn via circular OAuth buttons on login/register pages.
+- **Account Management:** View profile, connect/disconnect social providers, change password, and delete account at `/account/`.
+- **Real-Time Notifications:** WebSocket-powered toast notifications with bell icon and badge counter in the navbar.
+- **REST API Docs:** Interactive Swagger UI at `/api/docs/` and ReDoc at `/api/redoc/`.
+- **Flower Dashboard:** Celery task monitoring at port 8054.
 
 admin login details:--
 email: admin@arpansahu.space
@@ -122,7 +243,74 @@ Installing Pre requisites
 
 Create .env File and don't forget to add .env to gitignore
 ```bash
-  add variables mentioned in .env.example
+  cp env.example .env
+  # Edit .env and add your values for all required variables
+```
+
+### Required Environment Variables
+
+```bash
+# Core
+SECRET_KEY=your-secret-key
+DEBUG=True
+ALLOWED_HOSTS=*
+DOMAIN=localhost:8016
+PROTOCOL=http
+
+# Database
+DATABASE_URL=postgres://user:pass@localhost:5432/django_starter
+
+# Redis (used for cache, Celery broker, and Channels layer)
+REDIS_CLOUD_URL=redis://localhost:6379
+
+# Email (Mailjet)
+MAIL_JET_API_KEY=your-mailjet-api-key
+MAIL_JET_API_SECRET=your-mailjet-api-secret
+
+# Storage (S3/MinIO)
+AWS_ACCESS_KEY_ID=your-key
+AWS_SECRET_ACCESS_KEY=your-secret
+AWS_STORAGE_BUCKET_NAME=your-bucket
+BUCKET_TYPE=MINIO
+USE_S3=True
+
+# Social Authentication (OAuth) — all optional, only configure providers you need
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+FACEBOOK_APP_ID=
+FACEBOOK_APP_SECRET=
+TWITTER_API_KEY=
+TWITTER_API_SECRET=
+LINKEDIN_CLIENT_ID=
+LINKEDIN_CLIENT_SECRET=
+
+# Elasticsearch (optional)
+ELASTICSEARCH_HOST=https://localhost:9200
+ELASTICSEARCH_USER=elastic
+ELASTICSEARCH_PASSWORD=
+
+# Kafka (optional)
+KAFKA_BOOTSTRAP_SERVERS=
+KAFKA_SECURITY_PROTOCOL=SASL_SSL
+KAFKA_SASL_MECHANISM=PLAIN
+KAFKA_SASL_USERNAME=
+KAFKA_SASL_PASSWORD=
+
+# RabbitMQ (optional)
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USER=guest
+RABBITMQ_PASSWORD=guest
+
+# Sentry (optional)
+SENTRY_DSH_URL=
+SENTRY_ENVIRONMENT=development
+
+# Flower (Celery monitoring)
+FLOWER_ADMIN_USERNAME=admin
+FLOWER_ADMIN_PASS=admin
 ```
 
 Making Migrations and Migrating them.
@@ -130,14 +318,27 @@ Making Migrations and Migrating them.
   python manage.py makemigrations
   python manage.py migrate
 ```
-Run update_data Command
-```
-  python manage.py update_data
-```
+
 Creating Super User
 ```bash
   python manage.py createsuperuser
 ```
+
+### Setting up Social Authentication (OAuth)
+
+Configure OAuth callback URLs in each provider's developer console:
+
+| Provider | Callback URL |
+|----------|-------------|
+| Google | `http://localhost:8016/accounts/google/login/callback/` |
+| GitHub | `http://localhost:8016/accounts/github/login/callback/` |
+| Facebook | `http://localhost:8016/accounts/facebook/login/callback/` |
+| Twitter/X | `http://localhost:8016/accounts/twitter/login/callback/` |
+| LinkedIn | `http://localhost:8016/accounts/linkedin_oauth2/login/callback/` |
+
+For production, replace `http://localhost:8016` with `https://yourdomain.com`.
+
+See `docs/OAUTH_SETUP.md` for detailed setup instructions for each provider.
 
 Installing Redis On Local (For ubuntu) for other Os Please refer to their website https://redis.io/
 ```bash
@@ -152,13 +353,31 @@ to check if its running or not
   sudo systemctl status redis
 ```
 
-Run Server
+Run Server (choose one)
 ```bash
-  python manage.py runserver
+  # Development server (no WebSocket support)
+  python manage.py runserver 8016
 
-  or 
+  # ASGI server with WebSocket support (recommended for real-time features)
+  daphne -b 127.0.0.1 -p 8016 django_starter.asgi:application
 
+  # Production WSGI server
   gunicorn --bind 0.0.0.0:8016 django_starter.wsgi
+```
+
+Run Celery Worker (for background tasks)
+```bash
+  celery -A django_starter worker -l info
+```
+
+Run Flower (Celery monitoring dashboard)
+```bash
+  celery -A django_starter flower --port=8054
+```
+
+Verify All Services
+```bash
+  python manage.py test_all_services
 ```
 
 Use these CACHE settings
@@ -282,16 +501,103 @@ and you are good to go
 
 ## Custom Django Management Commands
 
-1. Test DB
-  Django management command designed to test the basic functionality of the database. It performs a series of CRUD (Create, Read, Update, Delete) operations to ensure the database is working correctly.
+### Service Health Check Commands
+
+1. **test_all_services** — Run all service health checks for the Django Starter application.
+```bash
+python manage.py test_all_services
+```
+
+2. **test_db** — Test if the database is working properly by performing CRUD operations.
 ```bash
 python manage.py test_db
 ```
 
-2. Test Cache
-   Django management command designed to test the basic functionality of the caching system. It performs a set and get operation to ensure the cache is working correctly and validates the expiration of cache entries.
+3. **test_cache** — Test if the caching system (Redis) is working correctly with set/get operations and expiration validation.
 ```bash
 python manage.py test_cache
+```
+
+4. **test_email** — Test if the email service (MailJet) is configured and working properly.
+```bash
+python manage.py test_email
+```
+
+5. **test_storage** — Test if MinIO/S3 storage is working properly.
+```bash
+python manage.py test_storage
+```
+
+6. **test_elasticsearch** — Test if Elasticsearch is working properly.
+```bash
+python manage.py test_elasticsearch
+```
+
+7. **test_kafka** — Test if Kafka is working properly.
+```bash
+python manage.py test_kafka
+```
+
+8. **test_rabbitmq** — Test if RabbitMQ is working properly.
+```bash
+python manage.py test_rabbitmq
+```
+
+9. **test_celery** — Test if Celery is working properly.
+```bash
+python manage.py test_celery
+```
+
+10. **test_flower** — Test if Flower (Celery monitoring) is accessible.
+```bash
+python manage.py test_flower
+```
+
+11. **test_harbor** — Test if Harbor Docker Registry is working properly.
+```bash
+python manage.py test_harbor
+```
+
+### Commands App — Management Commands Dashboard
+
+12. **send_notifications** — Send notifications via email, SMS, or webhook.
+```bash
+python manage.py send_notifications
+```
+
+13. **health_check** — Perform comprehensive system health checks.
+```bash
+python manage.py health_check
+```
+
+14. **run_scheduled_tasks** — Run scheduled tasks that are due for execution.
+```bash
+python manage.py run_scheduled_tasks
+```
+
+15. **generate_report** — Generate reports from command execution data.
+```bash
+python manage.py generate_report
+```
+
+16. **collect_metrics** — Collect system metrics and store them in the database.
+```bash
+python manage.py collect_metrics
+```
+
+17. **cleanup_old_data** — Clean up old data based on retention policies.
+```bash
+python manage.py cleanup_old_data
+```
+
+18. **import_data** — Import data from CSV, JSON, or API sources.
+```bash
+python manage.py import_data
+```
+
+19. **export_data** — Export data to CSV, JSON, or Excel formats.
+```bash
+python manage.py export_data
 ```
 
 ## Readme Manager
@@ -10395,6 +10701,18 @@ My Harbor instance: https://harbor.arpansahu.space
 For CI/CD integration, see Jenkins documentation.
 
 
+## Third-Party Services
+
+| Service | Purpose | Configuration |
+|---------|---------|---------------|
+| **Mailjet** | Transactional email delivery (activation, welcome, password reset, social connected) | `MAIL_JET_API_KEY`, `MAIL_JET_API_SECRET` |
+| **Sentry** | Error tracking and performance monitoring | `SENTRY_DSH_URL`, `SENTRY_ENVIRONMENT` |
+| **Google OAuth** | Social authentication | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| **GitHub OAuth** | Social authentication | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` |
+| **Facebook OAuth** | Social authentication | `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET` |
+| **Twitter/X OAuth 2.0** | Social authentication | `TWITTER_API_KEY`, `TWITTER_API_SECRET` |
+| **LinkedIn OpenID Connect** | Social authentication | `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` |
+
 
 
 # Website Uptime Monitor
@@ -10620,6 +10938,15 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 [![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
 [![DRF](https://img.shields.io/badge/Django%20REST-ff1709?style=for-the-badge&logo=django&logoColor=white)](https://www.django-rest-framework.org/)
+[![Allauth](https://img.shields.io/badge/django--allauth-092E20?style=for-the-badge&logo=django&logoColor=white)](https://docs.allauth.org/)
+[![Daphne](https://img.shields.io/badge/Daphne-092E20?style=for-the-badge&logo=django&logoColor=white)](https://github.com/django/daphne)
+[![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=for-the-badge&logo=gunicorn&logoColor=white)](https://gunicorn.org/)
+[![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://swagger.io/)
+[![Google OAuth](https://img.shields.io/badge/Google%20OAuth-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com/identity)
+[![GitHub OAuth](https://img.shields.io/badge/GitHub%20OAuth-181717?style=for-the-badge&logo=github&logoColor=white)](https://docs.github.com/en/apps/oauth-apps)
+[![Facebook OAuth](https://img.shields.io/badge/Facebook%20OAuth-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://developers.facebook.com/)
+[![Twitter OAuth](https://img.shields.io/badge/Twitter%20OAuth-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://developer.twitter.com/)
+[![LinkedIn OAuth](https://img.shields.io/badge/LinkedIn%20OAuth-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://learn.microsoft.com/en-us/linkedin/)
 
 
 
