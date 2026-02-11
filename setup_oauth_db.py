@@ -56,7 +56,8 @@ def main():
             'authorization_endpoint': 'https://www.linkedin.com/oauth/v2/authorization',
             'token_endpoint': 'https://www.linkedin.com/oauth/v2/accessToken',
             'userinfo_endpoint': 'https://api.linkedin.com/v2/userinfo',
-            'scope': 'openid profile email',  # Required OIDC scopes
+            'scope': ['openid', 'profile', 'email'],  # MUST be a list, not a string
+            'token_auth_method': 'client_secret_basic',  # LinkedIn requires HTTP Basic Auth
         }
     )
     linkedin_app.sites.add(site)

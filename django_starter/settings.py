@@ -615,7 +615,11 @@ LOGGING = {
             'level': 'WARNING',  # You can set this to INFO or DEBUG as needed
             'propagate': False,
         },
-        # You can add more loggers here if needed
+        'allauth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Capture all allauth activity
+            'propagate': False,
+        },
     },
     'formatters': {
         'verbose': {
