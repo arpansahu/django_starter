@@ -400,6 +400,15 @@ LOGOUT_REDIRECT_URL = "/"
 # ==================== Email Configuration ====================
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'anymail.backends.mailjet.EmailBackend'
+
+ANYMAIL = {
+    'MAILJET_API_KEY': MAIL_JET_API_KEY,
+    'MAILJET_SECRET_KEY': MAIL_JET_API_SECRET,
+}
+
+DEFAULT_FROM_EMAIL = f'noreply@{DOMAIN}'
 
 # ==================== Django-Allauth Configuration ====================
 # Account settings
