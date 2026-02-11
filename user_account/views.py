@@ -172,6 +172,55 @@ class LoginView(View):
 
 @method_decorator(login_required(redirect_field_name=''), name='dispatch')
 class AccountView(View):
+    def _get_social_context(self, user):
+        """Build a list of all enabled providers with their connection status."""
+        from allauth.socialaccount.models import SocialAccount
+        connected = {sa.provider: sa for sa in SocialAccount.objects.filter(user=user)}
+        
+        providers = [
+            {
+                'id': 'google',
+                'name': 'Google',
+                'icon': 'fab fa-google',
+                'color': '#ea4335',
+                'connected': 'google' in connected,
+                'login_url': '/accounts/google/login/?process=connect',
+            },
+            {
+                'id': 'github',
+                'name': 'GitHub',
+                'icon': 'fab fa-github',
+                'color': '#24292e',
+                'connected': 'github' in connected,
+                'login_url': '/accounts/github/login/?process=connect',
+            },
+            {
+                'id': 'facebook',
+                'name': 'Facebook',
+                'icon': 'fab fa-facebook-f',
+                'color': '#1877f2',
+                'connected': 'facebook' in connected,
+                'login_url': '/accounts/facebook/login/?process=connect',
+            },
+            {
+                'id': 'twitter_oauth2',
+                'name': 'X (Twitter)',
+                'icon': 'fab fa-x-twitter',
+                'color': '#000000',
+                'connected': 'twitter_oauth2' in connected,
+                'login_url': '/accounts/twitter_oauth2/login/?process=connect',
+            },
+            {
+                'id': 'linkedin',
+                'name': 'LinkedIn',
+                'icon': 'fab fa-linkedin-in',
+                'color': '#0a66c2',
+                'connected': 'linkedin' in connected,
+                'login_url': '/accounts/openid_connect/login/?provider_id=linkedin&process=connect',
+            },
+        ]
+        return providers
+
     def get(self, request, *args, **kwargs):
         context = {}
         form = AccountUpdateForm(
@@ -181,6 +230,7 @@ class AccountView(View):
             }
         )
         context['account_form'] = form
+        context['social_providers'] = self._get_social_context(request.user)
         return render(request, 'account/account.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -190,7 +240,46 @@ class AccountView(View):
             form.save()
 
         context['account_form'] = form
+        context['social_providers'] = self._get_social_context(request.user)
         return render(request, 'account/account.html', context)
+
+
+@method_decorator(login_required(redirect_field_name=''), name='dispatch')
+class SocialDisconnectView(View):
+    """Disconnect a social account from the current user."""
+    
+    def post(self, request, provider_id):
+        from allauth.socialaccount.models import SocialAccount
+        try:
+            account = SocialAccount.objects.get(user=request.user, provider=provider_id)
+            
+            # Safety: ensure user still has a way to log in (password or another social account)
+            other_socials = SocialAccount.objects.filter(user=request.user).exclude(pk=account.pk).count()
+            has_password = request.user.has_usable_password()
+            
+            if not has_password and other_socials == 0:
+                from django.contrib import messages
+                messages.error(
+                    request,
+                    "Cannot disconnect — you have no password set and this is your only sign-in method. "
+                    "Please set a password first."
+                )
+                return redirect('account')
+            
+            provider_name = {
+                'google': 'Google', 'github': 'GitHub', 'facebook': 'Facebook',
+                'twitter_oauth2': 'X (Twitter)', 'linkedin': 'LinkedIn',
+            }.get(provider_id, provider_id.title())
+            
+            account.delete()
+            
+            from django.contrib import messages
+            messages.success(request, f'{provider_name} account disconnected successfully.')
+        except SocialAccount.DoesNotExist:
+            from django.contrib import messages
+            messages.error(request, 'Social account not found.')
+        
+        return redirect('account')
 
 
 @method_decorator(login_required(redirect_field_name=''), name='dispatch')

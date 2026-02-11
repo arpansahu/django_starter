@@ -3,22 +3,17 @@
 
 {% block stylesheets %}
 <style>
-  /* Make the page fit without scrolling */
-  body {
-    overflow: hidden;
-  }
   .main-content {
-    height: calc(100vh - 80px);
-    overflow: hidden;
+    min-height: calc(100vh - 80px);
   }
   .page-header {
-    height: 100%;
     min-height: auto !important;
+    padding: 2rem 0;
   }
   .account-container {
-    height: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    padding-top: 1rem;
   }
   .card-plain {
     margin: 0 !important;
@@ -37,6 +32,101 @@
   .btn.w-100 {
     padding: 0.6rem 1rem;
   }
+  /* Social Providers Section */
+  .social-section {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  .social-section h6 {
+    color: #4a5568;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+  }
+  .social-provider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .social-provider-row:last-child {
+    border-bottom: none;
+  }
+  .provider-info {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .provider-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .provider-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #2d3748;
+  }
+  .provider-status {
+    font-size: 0.7rem;
+    color: #a0aec0;
+  }
+  .provider-status.connected {
+    color: #38a169;
+  }
+  .btn-connect {
+    padding: 0.3rem 0.85rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-connect-link {
+    background-color: #667eea;
+    color: #fff;
+  }
+  .btn-connect-link:hover {
+    background-color: #5a67d8;
+    color: #fff;
+    text-decoration: none;
+  }
+  .btn-disconnect {
+    background-color: #fff;
+    color: #e53e3e;
+    border: 1px solid #e53e3e;
+  }
+  .btn-disconnect:hover {
+    background-color: #e53e3e;
+    color: #fff;
+  }
+  /* Messages */
+  .alert {
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+  .alert-success {
+    background-color: #f0fff4;
+    color: #276749;
+    border: 1px solid #c6f6d5;
+  }
+  .alert-error {
+    background-color: #fff5f5;
+    color: #9b2c2c;
+    border: 1px solid #fed7d7;
+  }
 </style>
 {% endblock stylesheets %}
 
@@ -48,9 +138,16 @@
           <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
             <div class="card card-plain">
               <div class="card-header pb-0 text-left bg-transparent">
+                <h4 class="text-info text-gradient">My Account</h4>
+              </div>
                 <div class="card-body">
-                    <form role="form text-left" method="post" action="">
+                    {% if messages %}
+                      {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                      {% endfor %}
+                    {% endif %}
 
+                    <form role="form text-left" method="post" action="">
                       {% csrf_token %}
                       <label>Email</label>
                       <div class="mb-3">
@@ -61,9 +158,42 @@
                         {{ account_form.username }}
                       </div>
                       <div class="text-center">
-                        <button type="submit" name="login" class="btn bg-gradient-info w-100 mt-4 mb-0">Update Account Details</button>
+                        <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Update Account Details</button>
                       </div>
                     </form>
+
+                    <!-- Connected Social Accounts -->
+                    <div class="social-section">
+                      <h6>Connected Accounts</h6>
+                      {% for provider in social_providers %}
+                        <div class="social-provider-row">
+                          <div class="provider-info">
+                            <div class="provider-icon" style="background-color: {{ provider.color }};">
+                              <i class="{{ provider.icon }}"></i>
+                            </div>
+                            <div>
+                              <div class="provider-name">{{ provider.name }}</div>
+                              <div class="provider-status {% if provider.connected %}connected{% endif %}">
+                                {% if provider.connected %}Connected{% else %}Not connected{% endif %}
+                              </div>
+                            </div>
+                          </div>
+                          {% if provider.connected %}
+                            <form method="post" action="{% url 'social_disconnect' provider.id %}" style="margin:0;">
+                              {% csrf_token %}
+                              <button type="submit" class="btn-connect btn-disconnect"
+                                      onclick="return confirm('Disconnect {{ provider.name }}?')">
+                                Disconnect
+                              </button>
+                            </form>
+                          {% else %}
+                            <a href="{{ provider.login_url }}" class="btn-connect btn-connect-link">
+                              Connect
+                            </a>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
                 </div>
                 <div class="card-footer text-center pt-0 px-lg-2 px-1">
                     <p class="mb-4 text-sm mx-auto" style="margin-bottom: 0.5rem !important;">
@@ -75,12 +205,6 @@
                       <a href="{% url 'delete_account' %}" class="text-danger text-gradient font-weight-bold">Delete Account</a>
                     </p>
                   </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </section>
 {% endblock content %}
 

@@ -10,8 +10,50 @@ import traceback
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
+from django.template.loader import render_to_string
+from mailjet_rest import Client
 
 logger = logging.getLogger(__name__)
+
+
+def _get_provider_display_name(sociallogin):
+    """Get a human-readable provider name from a sociallogin."""
+    provider_id = sociallogin.account.provider
+    name_map = {
+        'google': 'Google',
+        'github': 'GitHub',
+        'facebook': 'Facebook',
+        'twitter_oauth2': 'X (Twitter)',
+        'linkedin': 'LinkedIn',
+    }
+    return name_map.get(provider_id, provider_id.title())
+
+
+def _send_mailjet_email(to_email, to_name, subject, text_body, html_body):
+    """Send an email via Mailjet REST API."""
+    mailjet = Client(
+        auth=(settings.MAIL_JET_API_KEY, settings.MAIL_JET_API_SECRET),
+        version='v3.1',
+    )
+    data = {
+        'Messages': [{
+            "From": {
+                "Email": settings.DEFAULT_FROM_EMAIL,
+                "Name": "Django Starter",
+            },
+            "To": [{
+                "Email": to_email,
+                "Name": to_name,
+            }],
+            "Subject": subject,
+            "TextPart": text_body,
+            "HTMLPart": html_body,
+            "CustomID": to_email,
+        }]
+    }
+    result = mailjet.send.create(data=data)
+    logger.info("Mailjet send result for %s: %s", to_email, result.status_code)
+    return result
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
@@ -78,6 +120,30 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             try:
                 user = User.objects.get(email=email)
                 sociallogin.connect(request, user)
+                # Send connected notification email
+                provider_name = _get_provider_display_name(sociallogin)
+                try:
+                    ctx = {
+                        'user': user,
+                        'provider': provider_name,
+                        'domain': settings.DOMAIN,
+                        'protocol': settings.PROTOCOL,
+                    }
+                    text_body = (
+                        f"Hi {user.username},\n\n"
+                        f"Your {provider_name} account has been connected to your Django Starter account.\n"
+                        f"You can now sign in using {provider_name}.\n\n"
+                        f"If you did not do this, please secure your account immediately.\n\n"
+                        f"— Django Starter Team"
+                    )
+                    html_body = render_to_string('email/social_connected.html', ctx)
+                    _send_mailjet_email(
+                        user.email, user.username,
+                        f'[Django Starter] {provider_name} Account Connected',
+                        text_body, html_body,
+                    )
+                except Exception as e:
+                    logger.warning("Failed to send social connected email: %s", e)
             except User.DoesNotExist:
                 pass
     
@@ -90,6 +156,34 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         # Activate user immediately for social logins
         user.is_active = True
         user.save()
+        
+        # Send welcome email for first-time social signup
+        provider_name = _get_provider_display_name(sociallogin)
+        if user.email:
+            try:
+                ctx = {
+                    'user': user,
+                    'provider': provider_name,
+                    'domain': settings.DOMAIN,
+                    'protocol': settings.PROTOCOL,
+                }
+                text_body = (
+                    f"Hi {user.username},\n\n"
+                    f"Welcome to Django Starter! Your account has been created using {provider_name}.\n\n"
+                    f"Username: {user.username}\n"
+                    f"Email: {user.email}\n"
+                    f"Signed up via: {provider_name}\n\n"
+                    f"You can now explore all features. Visit your account page to manage your profile.\n\n"
+                    f"— Django Starter Team"
+                )
+                html_body = render_to_string('email/welcome_social.html', ctx)
+                _send_mailjet_email(
+                    user.email, user.username,
+                    f'[Django Starter] Welcome, {user.username}!',
+                    text_body, html_body,
+                )
+            except Exception as e:
+                logger.warning("Failed to send welcome email: %s", e)
         
         return user
     

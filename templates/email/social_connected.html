@@ -1,0 +1,44 @@
+{% extends "email/base.html" %}
+{% load i18n %}
+
+{% block title %}Social Account Connected — Django Starter{% endblock %}
+
+{% block heading %}🔗 {{ provider }} Account Connected{% endblock %}
+
+{% block content %}
+<p style="margin:0 0 16px;color:#4a5568;font-size:15px;">
+  Hi <strong>{{ user.get_username }}</strong>,
+</p>
+<p style="margin:0 0 16px;color:#4a5568;font-size:15px;">
+  Your <strong>{{ provider }}</strong> account has been successfully linked to your
+  Django Starter account.
+</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;background-color:#f7fafc;border-radius:6px;border-left:4px solid #667eea;width:100%;">
+  <tr>
+    <td style="padding:14px 18px;">
+      <p style="margin:0;color:#4a5568;font-size:14px;">
+        <strong>What this means:</strong>
+      </p>
+      <ul style="margin:8px 0 0;padding-left:20px;color:#718096;font-size:13px;line-height:1.6;">
+        <li>You can now sign in using {{ provider }} at any time</li>
+        <li>Your {{ provider }} profile is linked to your existing account</li>
+        <li>You can disconnect this provider from your account settings</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+<p style="margin:16px 0 0;color:#718096;font-size:13px;">
+  If you did not perform this action, please secure your account immediately.
+</p>
+{% endblock %}
+
+{% block cta_section %}
+<tr>
+  <td style="padding:0 40px 30px;text-align:center;">
+    <a href="{{ protocol }}://{{ domain }}/account/"
+       style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;border-radius:6px;letter-spacing:0.3px;">
+      Manage Connected Accounts
+    </a>
+  </td>
+</tr>
+{% endblock %}
