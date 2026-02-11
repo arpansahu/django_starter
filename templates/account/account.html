@@ -141,12 +141,6 @@
                 <h4 class="text-info text-gradient">My Account</h4>
               </div>
                 <div class="card-body">
-                    {% if messages %}
-                      {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                      {% endfor %}
-                    {% endif %}
-
                     <form role="form text-left" method="post" action="">
                       {% csrf_token %}
                       <label>Email</label>

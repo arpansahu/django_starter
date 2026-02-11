@@ -426,6 +426,12 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
 ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else PROTOCOL.rstrip('://')  # http for local dev, https for production
 
+# Suppress verbose allauth session messages (we use toast notifications instead)
+ACCOUNT_MESSAGES = {
+    "logged_in": {"level": None},          # Suppress "Successfully signed in as ..."
+    "logged_out": {"level": None},         # Suppress "You have signed out."
+}
+
 # Social Account settings
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True

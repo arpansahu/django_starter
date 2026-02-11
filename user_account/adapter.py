@@ -13,6 +13,8 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from mailjet_rest import Client
 
+from user_account.notifications import notify_user
+
 logger = logging.getLogger(__name__)
 
 
@@ -144,6 +146,16 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                     )
                 except Exception as e:
                     logger.warning("Failed to send social connected email: %s", e)
+                # Real-time WebSocket notification
+                try:
+                    notify_user(
+                        user.id,
+                        f'{provider_name} Connected',
+                        f'Your {provider_name} account has been linked to your Django Starter account.',
+                        level='success',
+                    )
+                except Exception as e:
+                    logger.warning("Failed to send WS connected notification: %s", e)
             except User.DoesNotExist:
                 pass
     
@@ -184,6 +196,16 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 )
             except Exception as e:
                 logger.warning("Failed to send welcome email: %s", e)
+            # Real-time WebSocket notification
+            try:
+                notify_user(
+                    user.id,
+                    'Welcome!',
+                    f'Your account has been created via {provider_name}. Explore all features!',
+                    level='success',
+                )
+            except Exception as e:
+                logger.warning("Failed to send WS welcome notification: %s", e)
         
         return user
     

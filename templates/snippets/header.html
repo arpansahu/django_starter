@@ -20,8 +20,32 @@
 
       </div>
       <ul class="navbar-nav  justify-content-end">
+        <!-- Notification Bell -->
+        {% if request.user.is_authenticated %}
+        <li class="nav-item d-flex align-items-center position-relative" id="notif-bell-container" style="margin-right: 8px;">
+          <a href="javascript:;" class="nav-link text-body p-0 position-relative" id="notif-bell" title="Notifications">
+            <i class="fa-solid fa-bell" style="font-size: 1.1rem;"></i>
+            <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">
+              0
+            </span>
+          </a>
+          <!-- Notification Dropdown -->
+          <div id="notif-dropdown" class="position-absolute bg-white shadow rounded-3" style="display:none; top: 100%; right: 0; width: 320px; max-height: 360px; overflow-y: auto; z-index: 1050; margin-top: 8px; border: 1px solid #e2e8f0;">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2" style="border-bottom: 1px solid #e2e8f0;">
+              <span style="font-weight: 600; font-size: 0.85rem; color: #2d3748;">Notifications</span>
+              <a href="javascript:;" id="notif-clear-all" style="font-size: 0.7rem; color: #667eea; text-decoration: none;">Clear All</a>
+            </div>
+            <div id="notif-list">
+              <div id="notif-empty" class="text-center py-4" style="color: #a0aec0; font-size: 0.8rem;">
+                <i class="fa-regular fa-bell-slash" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                No notifications
+              </div>
+            </div>
+          </div>
+        </li>
+        {% endif %}
+
         <li class="nav-item d-flex align-items-center">
-          {% comment %} <a href="admin/" style="margin-right: 13px;">Admin Panel</a> {% endcomment %}
           <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
             <a style="margin-right: 10px;" href="{% url 'account' %}"><i class="fa-solid fa-user me-sm-1"></i></a>
 
