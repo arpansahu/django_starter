@@ -470,31 +470,31 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': False,
         'VERSION': 'v18.0',
     },
-    'twitter': { 
-        'APP': {
-            'client_id': config('TWITTER_API_KEY', default=''),
-            'secret': config('TWITTER_API_SECRET', default=''),
-            'key': config('TWITTER_API_KEY', default=''),  # ← Add this
-        },
-    },
-    # LinkedIn now uses OpenID Connect (linkedin_oauth2 is deprecated)
-    'openid_connect': {
-        'APPS': [
-            {
-                'provider_id': 'linkedin',
-                'name': 'LinkedIn',
-                'client_id': config('LINKEDIN_CLIENT_ID', default=''),
-                'secret': config('LINKEDIN_CLIENT_SECRET', default=''),
-                'settings': {
-                    # LinkedIn's OpenID Connect endpoints (doesn't support auto-discovery)
-                    'server_url': 'https://www.linkedin.com/oauth',
-                    'authorization_endpoint': 'https://www.linkedin.com/oauth/v2/authorization',
-                    'token_endpoint': 'https://www.linkedin.com/oauth/v2/accessToken',
-                    'userinfo_endpoint': 'https://api.linkedin.com/v2/userinfo',
-                },
-            }
-        ]
-    },
+    # TWITTER & LINKEDIN: Using database SocialApp entries for faster testing
+    # Uncomment below to use settings.py configuration instead
+    # 'twitter': { 
+    #     'APP': {
+    #         'client_id': config('TWITTER_API_KEY', default=''),
+    #         'secret': config('TWITTER_API_SECRET', default=''),
+    #         'key': config('TWITTER_API_KEY', default=''),
+    #     },
+    # },
+    # 'openid_connect': {
+    #     'APPS': [
+    #         {
+    #             'provider_id': 'linkedin',
+    #             'name': 'LinkedIn',
+    #             'client_id': config('LINKEDIN_CLIENT_ID', default=''),
+    #             'secret': config('LINKEDIN_CLIENT_SECRET', default=''),
+    #             'settings': {
+    #                 'server_url': 'https://www.linkedin.com/oauth',
+    #                 'authorization_endpoint': 'https://www.linkedin.com/oauth/v2/authorization',
+    #                 'token_endpoint': 'https://www.linkedin.com/oauth/v2/accessToken',
+    #                 'userinfo_endpoint': 'https://api.linkedin.com/v2/userinfo',
+    #             },
+    #         }
+    #     ]
+    # },
 }
 
 # Custom Allauth Adapters
