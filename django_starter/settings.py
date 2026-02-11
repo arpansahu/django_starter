@@ -470,11 +470,11 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': False,
         'VERSION': 'v18.0',
     },
-    'twitter': {
+    'twitter': { 
         'APP': {
             'client_id': config('TWITTER_API_KEY', default=''),
             'secret': config('TWITTER_API_SECRET', default=''),
-            'key': ''
+            'key': config('TWITTER_API_KEY', default=''),  # ← Add this
         },
     },
     # LinkedIn now uses OpenID Connect (linkedin_oauth2 is deprecated)

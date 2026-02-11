@@ -190,7 +190,6 @@
                 
                 <!-- Social Login Section -->
                 {% get_providers as socialaccount_providers %}
-                {% if socialaccount_providers %}
                 <div class="social-login-divider">
                   <span>Or continue with</span>
                 </div>
@@ -212,14 +211,13 @@
                       <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-twitter-circle" title="Continue with X">
                         <i class="fab fa-x-twitter"></i>
                       </a>
-                    {% elif provider.id == 'linkedin' %}
-                      <a href="{% url 'openid_connect_login' provider_id='linkedin' %}?process=login" class="social-btn-circle btn-linkedin-circle" title="Continue with LinkedIn">
-                        <i class="fab fa-linkedin-in"></i>
-                      </a>
                     {% endif %}
                   {% endfor %}
+                  <!-- LinkedIn (OpenID Connect) -->
+                  <a href="{% url 'openid_connect_login' provider_id='linkedin' %}?process=login" class="social-btn-circle btn-linkedin-circle" title="Continue with LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                  </a>
                 </div>
-                {% endif %}
               </div>
               <div class="card-footer text-center pt-0 px-lg-2 px-1">
                 <p class="mb-4 text-sm mx-auto">

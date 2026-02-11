@@ -199,7 +199,6 @@
               <div class="card-body">
                 <!-- Social Login Section (at the top for registration) -->
                 {% get_providers as socialaccount_providers %}
-                {% if socialaccount_providers %}
                 <div class="social-buttons-container">
                   {% for provider in socialaccount_providers %}
                     {% if provider.id == 'google' %}
@@ -218,17 +217,16 @@
                       <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-twitter-circle" title="Sign up with X">
                         <i class="fab fa-x-twitter"></i>
                       </a>
-                    {% elif provider.id == 'linkedin' %}
-                      <a href="{% url 'openid_connect_login' provider_id='linkedin' %}?process=login" class="social-btn-circle btn-linkedin-circle" title="Continue with LinkedIn">
-                        <i class="fab fa-linkedin-in"></i>
-                      </a>
                     {% endif %}
                   {% endfor %}
+                  <!-- LinkedIn (OpenID Connect) -->
+                  <a href="{% url 'openid_connect_login' provider_id='linkedin' %}?process=login" class="social-btn-circle btn-linkedin-circle" title="Sign up with LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                  </a>
                 </div>
                 <div class="social-login-divider">
                   <span>Or register with email</span>
                 </div>
-                {% endif %}
                 
                 <form role="form text-left" method="post" action="">
                   {% csrf_token %}
