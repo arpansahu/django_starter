@@ -486,7 +486,11 @@ SOCIALACCOUNT_PROVIDERS = {
                 'client_id': config('LINKEDIN_CLIENT_ID', default=''),
                 'secret': config('LINKEDIN_CLIENT_SECRET', default=''),
                 'settings': {
+                    # LinkedIn's OpenID Connect endpoints (doesn't support auto-discovery)
                     'server_url': 'https://www.linkedin.com/oauth',
+                    'authorization_endpoint': 'https://www.linkedin.com/oauth/v2/authorization',
+                    'token_endpoint': 'https://www.linkedin.com/oauth/v2/accessToken',
+                    'userinfo_endpoint': 'https://api.linkedin.com/v2/userinfo',
                 },
             }
         ]
