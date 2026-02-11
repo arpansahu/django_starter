@@ -136,7 +136,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.twitter',
-    'allauth.socialaccount.providers.linkedin_oauth2',
+    'allauth.socialaccount.providers.openid_connect',  # LinkedIn now uses OpenID Connect
 ]
 
 # Django REST Framework Configuration
@@ -391,8 +391,8 @@ AUTHENTICATION_BACKENDS = [
 SITE_ID = 1
 
 # Login_required Decorator
-LOGIN_URL = 'account_login'
-LOGOUT_URL = 'account_logout'
+LOGIN_URL = 'login'  # Use custom login page at /login/
+LOGOUT_URL = 'logout'
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -477,19 +477,19 @@ SOCIALACCOUNT_PROVIDERS = {
             'key': ''
         },
     },
-    'linkedin_oauth2': {
-        'APP': {
-            'client_id': config('LINKEDIN_CLIENT_ID', default=''),
-            'secret': config('LINKEDIN_CLIENT_SECRET', default=''),
-            'key': ''
-        },
-        'SCOPE': [
-            'openid',
-            'profile',
-            'email',
-        ],
-        # LinkedIn API v2 - removed deprecated PROFILE_FIELDS
-        # The provider now uses OpenID Connect which automatically provides profile data
+    # LinkedIn now uses OpenID Connect (linkedin_oauth2 is deprecated)
+    'openid_connect': {
+        'APPS': [
+            {
+                'provider_id': 'linkedin',
+                'name': 'LinkedIn',
+                'client_id': config('LINKEDIN_CLIENT_ID', default=''),
+                'secret': config('LINKEDIN_CLIENT_SECRET', default=''),
+                'settings': {
+                    'server_url': 'https://www.linkedin.com/oauth',
+                },
+            }
+        ]
     },
 }
 

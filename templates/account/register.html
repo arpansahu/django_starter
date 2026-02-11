@@ -218,8 +218,8 @@
                       <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-twitter-circle" title="Sign up with X">
                         <i class="fab fa-x-twitter"></i>
                       </a>
-                    {% elif provider.id == 'linkedin_oauth2' %}
-                      <a href="{% provider_login_url provider.id process='login' %}" class="social-btn-circle btn-linkedin-circle" title="Sign up with LinkedIn">
+                    {% elif provider.id == 'linkedin' %}
+                      <a href="{% url 'openid_connect_login' provider_id='linkedin' %}?process=login" class="social-btn-circle btn-linkedin-circle" title="Continue with LinkedIn">
                         <i class="fab fa-linkedin-in"></i>
                       </a>
                     {% endif %}

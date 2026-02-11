@@ -56,9 +56,13 @@ urlpatterns = [
     # Facebook Data Deletion Callback (required for Facebook apps)
     path('data-deletion-callback/', DataDeletionCallbackView.as_view(), name='data_deletion_callback'),
 
-    # Social Authentication (django-allauth)
-    path('accounts/', include('allauth.urls')),
+    # Redirect allauth login to custom login page (must be BEFORE allauth.urls)
+    path('accounts/login/', RedirectView.as_view(pattern_name='login', permanent=False)),
+    path('accounts/logout/', RedirectView.as_view(pattern_name='logout', permanent=False)),
 
+    # Social Authentication (django-allauth) - Keep for OAuth callbacks
+    path('accounts/', include('allauth.urls')),
+    
     path('', HomeView.as_view(), name='home'),
 
     # file manager views
