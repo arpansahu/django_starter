@@ -408,7 +408,7 @@ ANYMAIL = {
     'MAILJET_SECRET_KEY': MAIL_JET_API_SECRET,
 }
 
-DEFAULT_FROM_EMAIL = f'noreply@{DOMAIN}'
+DEFAULT_FROM_EMAIL = 'noreply@arpansahu.space'
 
 # ==================== Django-Allauth Configuration ====================
 # Account settings
