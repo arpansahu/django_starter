@@ -23,6 +23,7 @@ from user_account.views import (
     DeleteAccountView,
     DataDeletionCallbackView,
     SocialDisconnectView,
+    test_notification,
 )
 
 from .views import (
@@ -104,6 +105,7 @@ urlpatterns = [
     path('account/', AccountView.as_view(), name='account'),
     path('account/delete/', DeleteAccountView.as_view(), name='delete_account'),
     path('account/social/disconnect/<str:provider_id>/', SocialDisconnectView.as_view(), name='social_disconnect'),
+    path('notifications/test/', test_notification, name='test_notification'),
     re_path(r'activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,40})/', 
             activate, name='account_activate'),
     path('password_change/done/',

@@ -321,6 +321,28 @@ def error_500(request):
     return render(request, 'error/error_500.html')
 
 
+@login_required
+def test_notification(request):
+    """Send a test WebSocket notification to the current user."""
+    import json
+    from django.http import JsonResponse
+    from user_account.notifications import notify_user
+
+    if request.method == 'POST':
+        body = json.loads(request.body) if request.body else {}
+        title = body.get('title', 'Test Notification')
+        message = body.get('message', 'This is a test notification sent via WebSocket.')
+        level = body.get('level', 'info')
+
+        try:
+            notify_user(request.user.id, title, message, level=level)
+            return JsonResponse({'status': 'ok', 'detail': 'Notification sent.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'detail': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'detail': 'POST required.'}, status=405)
+
+
 class DataDeletionCallbackView(View):
     """Public view for Facebook Data Deletion Callback URL
     Required by Facebook Platform Policy for apps using Facebook Login.
