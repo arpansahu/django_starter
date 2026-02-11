@@ -397,6 +397,10 @@ LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
+# ==================== Email Configuration ====================
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # ==================== Django-Allauth Configuration ====================
 # Account settings
 ACCOUNT_LOGIN_METHODS = {'email'}  # Use email for login instead of username
@@ -411,7 +415,7 @@ ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
 ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = PROTOCOL.rstrip('://')  # Derive from PROTOCOL (e.g. 'https://' -> 'https')
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else PROTOCOL.rstrip('://')  # http for local dev, https for production
 
 # Social Account settings
 SOCIALACCOUNT_AUTO_SIGNUP = True
@@ -420,6 +424,12 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_STORE_TOKENS = True
+
+# Custom social signup form: auto-connects to existing users by email
+# (needed for providers like Twitter that don't return email)
+SOCIALACCOUNT_FORMS = {
+    'signup': 'user_account.forms.AutoConnectSocialSignupForm',
+}
 
 # Social Account Providers Configuration
 SOCIALACCOUNT_PROVIDERS = {
@@ -471,12 +481,12 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': False,
         'VERSION': 'v18.0',
     },
-    # Twitter OAuth 2.0 (OAuth 1.0a deprecated by X/Twitter)
     'twitter_oauth2': {
         'APP': {
             'client_id': config('TWITTER_OAUTH2_CLIENT_ID', default=''),
             'secret': config('TWITTER_OAUTH2_CLIENT_SECRET', default=''),
         },
+        'SCOPE': ['tweet.read', 'users.read'],
     },
     # LinkedIn uses OpenID Connect (linkedin_oauth2 is deprecated)
     'openid_connect': {

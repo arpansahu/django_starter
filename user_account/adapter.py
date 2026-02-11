@@ -52,15 +52,26 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         Called just after a user successfully authenticates via a social provider,
         but before the login is actually processed.
         
-        This is a good place to connect social accounts to existing users
-        if the email matches.
+        This connects social accounts to existing users if the email matches.
         """
         # If user exists with the same email, connect the social account
         if sociallogin.is_existing:
             return
         
-        # Try to find an existing user by email
+        # Try to find an existing user by email from multiple sources
+        email = None
+        
+        # Source 1: extra_data (Google, GitHub, Facebook, etc.)
         email = sociallogin.account.extra_data.get('email')
+        
+        # Source 2: email_addresses from allauth (covers all providers)
+        if not email and sociallogin.email_addresses:
+            email = sociallogin.email_addresses[0].email
+        
+        # Source 3: user object populated by allauth
+        if not email and sociallogin.user and sociallogin.user.email:
+            email = sociallogin.user.email
+        
         if email:
             from django.contrib.auth import get_user_model
             User = get_user_model()
@@ -102,7 +113,10 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # For Google/Facebook - use part of email
             elif user.email:
                 username = user.email.split('@')[0]
-            # For Twitter
+            # For Twitter OAuth 2.0
+            elif 'username' in extra_data:
+                username = extra_data.get('username', '')
+            # For Twitter OAuth 1.0a (legacy)
             elif 'screen_name' in extra_data:
                 username = extra_data.get('screen_name', '')
             # For LinkedIn

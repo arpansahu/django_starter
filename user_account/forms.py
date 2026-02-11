@@ -16,6 +16,93 @@ UserModel = get_user_model()
 from django.conf import settings
 from mailjet_rest import Client
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# ==================== Social Account Signup Form ====================
+
+class AutoConnectSocialSignupForm(forms.Form):
+    """
+    Custom social signup form that auto-connects social accounts to existing
+    users when the email matches. This is needed because providers like
+    Twitter OAuth 2.0 don't return email, so the user must enter it manually.
+    
+    When the entered email matches an existing account, instead of showing
+    "email already exists", we connect the social account to that user.
+    """
+    
+    email = forms.EmailField(
+        label=_("Email"),
+        widget=forms.EmailInput(attrs={
+            "placeholder": "Email address",
+            "class": "form-control",
+        }),
+    )
+    username = forms.CharField(
+        label=_("Username"),
+        max_length=30,
+        widget=forms.TextInput(attrs={
+            "placeholder": "Username",
+            "class": "form-control",
+        }),
+    )
+    
+    def __init__(self, *args, **kwargs):
+        self.sociallogin = kwargs.pop("sociallogin")
+        # Get initial data from the social provider
+        from allauth.socialaccount.adapter import get_adapter
+        initial = get_adapter().get_signup_form_initial_data(self.sociallogin)
+        kwargs.setdefault("initial", {}).update(initial)
+        # Pop email_required to avoid passing it to Form.__init__
+        kwargs.pop("email_required", None)
+        super().__init__(*args, **kwargs)
+        self._existing_user = None
+    
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if not email:
+            raise forms.ValidationError(_("Email is required."))
+        
+        # Check if a user with this email already exists
+        User = get_user_model()
+        try:
+            self._existing_user = User.objects.get(email__iexact=email)
+            logger.info(
+                "Social signup: email %s matches existing user %s, will auto-connect",
+                email, self._existing_user.username,
+            )
+        except User.DoesNotExist:
+            self._existing_user = None
+        
+        return email
+    
+    def save(self, request):
+        if self._existing_user:
+            # Connect the social account to the existing user
+            self.sociallogin.connect(request, self._existing_user)
+            logger.info(
+                "Auto-connected %s social account to existing user %s",
+                self.sociallogin.account.provider,
+                self._existing_user.username,
+            )
+            return self._existing_user
+        
+        # New user — create account
+        from allauth.socialaccount.adapter import get_adapter
+        adapter = get_adapter()
+        user = adapter.save_user(request, self.sociallogin, form=self)
+        return user
+    
+    def try_save(self, request):
+        """Called by allauth's signup_by_form flow.
+        Must return (user, response) tuple.
+        """
+        user = self.save(request)
+        return user, None
+
+
 # Django Admin forms
 
 class CustomAccountCreationForm(UserCreationForm):
