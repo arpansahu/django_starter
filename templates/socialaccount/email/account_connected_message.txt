@@ -1,0 +1,6 @@
+{% extends "account/email/base_notification.txt" %}
+{% load i18n %}
+
+{% block notification_message %}{% autoescape off %}Your {{ provider }} account has been successfully connected to your Django Starter account.
+
+You can now sign in using {{ provider }} at any time. If you wish to disconnect this account, visit your account settings.{% endautoescape %}{% endblock notification_message %}
