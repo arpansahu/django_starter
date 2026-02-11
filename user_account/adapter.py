@@ -17,6 +17,29 @@ from user_account.notifications import notify_user
 
 logger = logging.getLogger(__name__)
 
+ADMIN_NOTIFICATION_EMAIL = getattr(settings, 'ADMIN_NOTIFICATION_EMAIL', 'arpanrocks95@gmail.com')
+
+
+def _notify_admin_error(action, detail):
+    """Email a brief error report to the admin when an adapter action fails."""
+    try:
+        tb = traceback.format_exc()
+        subject = f'[Django Starter] Adapter Error: {action}'
+        text_body = f"Action: {action}\nDetail: {detail}\n\nTraceback:\n{tb}"
+        html_body = (
+            f'<h3 style="color:#e53e3e;">Adapter Error</h3>'
+            f'<p><strong>Action:</strong> {action}</p>'
+            f'<p><strong>Detail:</strong> {detail}</p>'
+            f'<pre style="background:#f7f7f7;padding:12px;border-radius:6px;'
+            f'font-size:12px;overflow-x:auto;">{tb}</pre>'
+        )
+        _send_mailjet_email(
+            ADMIN_NOTIFICATION_EMAIL, 'Admin',
+            subject, text_body, html_body,
+        )
+    except Exception:
+        logger.debug("Could not send admin error notification (Mailjet may be down)", exc_info=True)
+
 
 def _get_provider_display_name(sociallogin):
     """Get a human-readable provider name from a sociallogin."""
@@ -146,6 +169,10 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                     )
                 except Exception as e:
                     logger.exception("Failed to send social connected email to %s", user.email)
+                    _notify_admin_error(
+                        'Social Connected Email',
+                        f'Failed for user {user.username} ({user.email}), provider {provider_name}: {e}',
+                    )
                 # Real-time WebSocket notification
                 try:
                     notify_user(
@@ -196,6 +223,10 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 )
             except Exception as e:
                 logger.exception("Failed to send welcome email to %s", user.email)
+                _notify_admin_error(
+                    'Welcome Email',
+                    f'Failed for user {user.username} ({user.email}), provider {provider_name}: {e}',
+                )
             # Real-time WebSocket notification
             try:
                 notify_user(
