@@ -4,9 +4,14 @@ Custom Allauth Adapter for the Account model.
 This adapter customizes how django-allauth handles user creation
 and authentication with our custom Account model.
 """
+import logging
+import traceback
+
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
@@ -124,3 +129,22 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         Returns the URL to redirect to after successfully connecting a social account.
         """
         return settings.LOGIN_REDIRECT_URL
+
+    def on_authentication_error(self, request, provider, error=None, exception=None, extra_context=None):
+        """
+        Called when social authentication fails. Logs the full error details
+        so we can debug "Third-Party Login Failure" errors.
+        """
+        provider_id = getattr(provider, 'id', provider)
+        logger.error(
+            "Social auth error for provider '%s': error=%s, exception=%s",
+            provider_id, error, exception,
+        )
+        if exception:
+            logger.error(
+                "Social auth exception traceback:\n%s",
+                traceback.format_exception(type(exception), exception, exception.__traceback__),
+            )
+        if extra_context:
+            logger.error("Social auth extra_context: %s", extra_context)
+        super().on_authentication_error(request, provider, error, exception, extra_context)

@@ -470,31 +470,29 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': False,
         'VERSION': 'v18.0',
     },
-    # TWITTER & LINKEDIN: Using database SocialApp entries for faster testing
-    # Uncomment below to use settings.py configuration instead
-    # 'twitter': { 
-    #     'APP': {
-    #         'client_id': config('TWITTER_API_KEY', default=''),
-    #         'secret': config('TWITTER_API_SECRET', default=''),
-    #         'key': config('TWITTER_API_KEY', default=''),
-    #     },
-    # },
-    # 'openid_connect': {
-    #     'APPS': [
-    #         {
-    #             'provider_id': 'linkedin',
-    #             'name': 'LinkedIn',
-    #             'client_id': config('LINKEDIN_CLIENT_ID', default=''),
-    #             'secret': config('LINKEDIN_CLIENT_SECRET', default=''),
-    #             'settings': {
-    #                 'server_url': 'https://www.linkedin.com/oauth',
-    #                 'authorization_endpoint': 'https://www.linkedin.com/oauth/v2/authorization',
-    #                 'token_endpoint': 'https://www.linkedin.com/oauth/v2/accessToken',
-    #                 'userinfo_endpoint': 'https://api.linkedin.com/v2/userinfo',
-    #             },
-    #         }
-    #     ]
-    # },
+    # Twitter OAuth 1.0a
+    'twitter': {
+        'APP': {
+            'client_id': config('TWITTER_API_KEY', default=''),
+            'secret': config('TWITTER_API_SECRET', default=''),
+            'key': config('TWITTER_API_KEY', default=''),
+        },
+    },
+    # LinkedIn uses OpenID Connect (linkedin_oauth2 is deprecated)
+    'openid_connect': {
+        'APPS': [
+            {
+                'provider_id': 'linkedin',
+                'name': 'LinkedIn',
+                'client_id': config('LINKEDIN_CLIENT_ID', default=''),
+                'secret': config('LINKEDIN_CLIENT_SECRET', default=''),
+                'settings': {
+                    'server_url': 'https://www.linkedin.com/oauth',
+                    'token_auth_method': 'client_secret_post',
+                },
+            }
+        ]
+    },
 }
 
 # Custom Allauth Adapters
@@ -618,6 +616,16 @@ LOGGING = {
         'allauth': {
             'handlers': ['console'],
             'level': 'DEBUG',  # Capture all allauth activity
+            'propagate': True,  # Also send to root logger
+        },
+        'allauth.socialaccount': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'user_account': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
