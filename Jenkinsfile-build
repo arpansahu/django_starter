@@ -4,7 +4,7 @@ pipeline {
     parameters {
         booleanParam(
             name: 'RUN_TESTS',
-            defaultValue: false,
+            defaultValue: true,
             description: 'Run unit and UI tests before building the image. Set to false to skip tests and build faster.'
         )
     }
