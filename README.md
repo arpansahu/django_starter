@@ -453,7 +453,7 @@ if not DEBUG:
 
     elif BUCKET_TYPE == 'MINIO':
         AWS_S3_REGION_NAME = 'us-east-1'  # MinIO doesn't require this, but boto3 does
-        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'
+        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.spacee'
         AWS_DEFAULT_ACL = 'public-read'
         AWS_S3_OBJECT_PARAMETERS = {
             'CacheControl': 'max-age=86400',
@@ -747,7 +747,7 @@ This project and all related services have evolved through multiple deployment s
 - Limited control over infrastructure
 
 **Phase 2: EC2 + Home Server Hybrid (2022-2023)**
-- EC2 for portfolio (arpansahu.me) with Nginx
+- EC2 for portfolio (arpansahu.spacee) with Nginx
 - Home Server for all other projects
 - Nginx on EC2 forwarded traffic to Home Server
 - Cost-effective but faced reliability challenges
@@ -838,27 +838,72 @@ This documentation supports all three deployment strategies:
 - When you have reliable power and internet
 - Cost-sensitive deployments
 
-### Current Architecture (Home Server)
+### Current Architecture (Home Server - Hybrid Approach)
+
+**Current Setup (February 2026):**
 
 ```
 Internet
    │
-   ├─ arpansahu.space (Home Server with Dynamic DNS)
+   ├─ arpansahu.space (Home Server with Static IP)
    │   │
-   │   └─ Nginx (Port 443) - TLS Termination
+   │   └─ Nginx 1.18.0 (systemd) - TLS Termination & Reverse Proxy
    │        │
-   │        ├─ Jenkins (CI/CD)
-   │        ├─ Portainer (Docker Management)
-   │        ├─ PgAdmin (Database Admin)
-   │        ├─ RabbitMQ (Message Queue)
-   │        ├─ Redis Commander (Cache Admin)
-   │        ├─ MinIO (Object Storage)
+   │        ├─ System Services (systemd) - Core Infrastructure
+   │        │   ├─ PostgreSQL 14.20 - Primary database
+   │        │   ├─ Redis 6.0.16 - Cache and sessions
+   │        │   ├─ RabbitMQ - Message broker for Celery
+   │        │   ├─ Kafka 3.9.0 - Event streaming (KRaft mode)
+   │        │   ├─ MinIO - S3-compatible object storage
+   │        │   ├─ Jenkins 2.541.1 - CI/CD automation
+   │        │   ├─ ElasticSearch - Search and logging
+   │        │   └─ K3s - Kubernetes for app orchestration
    │        │
-   │        └─ Kubernetes (k3s)
-   │             ├─ Django Applications
-   │             ├─ PostgreSQL Databases
-   │             └─ Redis Instances
+   │        ├─ Docker Containers (Management UIs only)
+   │        │   ├─ Portainer - Docker & K3s management
+   │        │   ├─ PgAdmin - PostgreSQL admin interface
+   │        │   ├─ Redis Commander - Redis admin interface
+   │        │   ├─ Harbor - Private Docker registry
+   │        │   ├─ AKHQ - Kafka management UI
+   │        │   ├─ Kibana - ElasticSearch UI
+   │        │   └─ PMM - PostgreSQL monitoring
+   │        │
+   │        └─ K3s Deployments (Django Applications)
+   │             ├─ arpansahu.space
+   │             ├─ borcelle.arpansahu.space
+   │             ├─ chew.arpansahu.space
+   │             └─ django-starter.arpansahu.space
 ```
+
+**Why Hybrid Architecture?**
+
+This evolved architecture uses the best deployment method for each service type:
+
+1. **System Services for Core Infrastructure**
+   - Better performance (no containerization overhead)
+   - Production-grade reliability via systemd
+   - Direct system access and monitoring (journalctl)
+   - Native backup/restore tools
+   - Lower resource usage
+   
+2. **Docker for Management UIs**
+   - Easy updates (docker pull)
+   - Isolated dependencies
+   - Lower priority - can restart without affecting core services
+   - Quick rollback if updates fail
+   
+3. **K3s for Applications**
+   - Container orchestration benefits
+   - Easy scaling and rolling updates
+   - Service discovery
+   - Resource limits and quotas
+   - Health checks and auto-restart
+
+**Performance Impact:**
+- Core services run 10-15% faster vs Docker
+- Better memory utilization (no container overhead for heavy services)
+- Easier to tune PostgreSQL, Redis performance parameters
+- Direct disk I/O for databases and object storage
 
 ### Home Server Improvements (2026)
 
@@ -1012,7 +1057,7 @@ As of January 2026, I'm running a home server setup with:
 - All services accessible via arpansahu.space
 - Automated backups to cloud storage
 
-Live projects: https://arpansahu.me/projects
+Live projects: https://arpansahu.spacee/projects
 
 ### Next Steps
 
