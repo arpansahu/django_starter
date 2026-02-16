@@ -24,7 +24,7 @@ class RegistrationViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'account/register.html')
     
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_registration_view_post_valid_data(self, mock_mailjet):
         """Test successful user registration"""
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
@@ -345,7 +345,7 @@ class PasswordResetViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/password_reset_form.html')
     
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_password_reset_view_post(self, mock_mailjet):
         """Test password reset email is sent"""
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
@@ -450,7 +450,7 @@ class EmailVerificationTest(TestCase):
         self.client = Client()
         self.register_url = reverse('register')
         
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_email_verification_token_generation(self, mock_mailjet):
         """Test that email verification generates valid token"""
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
@@ -474,7 +474,7 @@ class EmailVerificationTest(TestCase):
         self.assertIsNotNone(token)
         self.assertTrue(len(token) > 0)
     
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_email_verification_token_validation(self, mock_mailjet):
         """Test that generated tokens are valid"""
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
@@ -496,7 +496,7 @@ class EmailVerificationTest(TestCase):
         is_valid = account_activation_token.check_token(user, token)
         self.assertTrue(is_valid)
     
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_email_verification_link_structure(self, mock_mailjet):
         """Test that activation link has correct structure"""
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
@@ -531,7 +531,7 @@ class EmailVerificationTest(TestCase):
         })
         self.assertTrue(activation_url.startswith('/activate/'))
     
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_email_sent_with_correct_data(self, mock_mailjet):
         """Test that email is sent with correct activation data"""
         mock_send = MagicMock()
@@ -563,7 +563,7 @@ class EmailVerificationTest(TestCase):
         self.assertEqual(message['To'][0]['Email'], 'emailtest@example.com')
         self.assertIn('Subject', message)
     
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_activation_link_activates_user(self, mock_mailjet):
         """Test that clicking activation link activates the user"""
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
@@ -597,7 +597,7 @@ class EmailVerificationTest(TestCase):
         user.refresh_from_db()
         self.assertTrue(user.is_active)
     
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_invalid_activation_link_doesnt_activate(self, mock_mailjet):
         """Test that invalid activation link doesn't activate user"""
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
@@ -631,7 +631,7 @@ class EmailVerificationTest(TestCase):
         user.refresh_from_db()
         self.assertFalse(user.is_active)
     
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_token_expires_for_used_activation(self, mock_mailjet):
         """Test that token becomes invalid after use"""
         mock_mailjet.send.create.return_value = MagicMock(status_code=200)
@@ -806,7 +806,7 @@ class TestAccountFunctions(TestCase):
         from user_account.views import error_500
         self.assertIsNotNone(error_500)
 
-    @patch('account.views.mailjet')
+    @patch('user_account.views.mailjet')
     def test_send_mail_account_activate_function(self, mock_mailjet):
         """
         Test account.views.send_mail_account_activate function
@@ -1053,7 +1053,7 @@ class PasswordResetFormExtendedTests(TestCase):
         users = list(form.get_users('reset@test.com'))
         self.assertEqual(len(users), 0)
     
-    @patch('account.forms.Client')
+    @patch('user_account.forms.Client')
     def test_send_mail(self, mock_client_class):
         """Test send_mail sends via Mailjet"""
         mock_client = MagicMock()
