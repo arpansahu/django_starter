@@ -42,8 +42,13 @@ REDIS_CLOUD_URL = config('REDIS_CLOUD_URL')
 MAIL_JET_API_KEY = config('MAIL_JET_API_KEY')
 MAIL_JET_API_SECRET = config('MAIL_JET_API_SECRET')
 
-DOMAIN = config('DOMAIN')
-PROTOCOL = config('PROTOCOL')
+# Domain and Protocol Configuration
+if DEBUG:
+    DOMAIN = config('DOMAIN', default='localhost:8016')
+    PROTOCOL = config('PROTOCOL', default='http')
+else:
+    DOMAIN = config('DOMAIN')
+    PROTOCOL = config('PROTOCOL')
 
 SENTRY_ENVIRONMENT = config('SENTRY_ENVIRONMENT')  # production Or "staging", "development", etc.
 SENTRY_DSH_URL = config('SENTRY_DSH_URL')
