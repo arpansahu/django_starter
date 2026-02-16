@@ -809,8 +809,8 @@ class TestNoteListUIExtended:
         authenticated_page.goto(f"{base_url}/notes/notes/")
         authenticated_page.wait_for_load_state("networkidle")
         
-        # More specific selector to avoid matching notification badges
-        element = authenticated_page.locator("main .badge, .card .badge, .note-item .badge, article .badge")
+        # Explicitly exclude the hidden notification badge by ID
+        element = authenticated_page.locator(".badge:not(#notif-badge)")
         if element.count() > 0:
             expect(element.first).to_be_visible()
 
