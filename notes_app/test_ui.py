@@ -175,7 +175,8 @@ class TestTagListUI:
         
         authenticated_page.goto(f"{base_url}/notes/tags/")
         
-        element = authenticated_page.locator("a.tag, a[href*='tag'], .badge, .tag")
+        # More specific selector to avoid matching notification badges
+        element = authenticated_page.locator("main a.tag, main a[href*='/tag/'], main .tag-item, .content a.badge")
         if element.count() > 0:
             expect(element.first).to_be_visible()
         else:
@@ -226,7 +227,8 @@ class TestNotesByTagUI:
     def test_link(self, authenticated_page: Page, base_url):
         """Test notes by tag"""
         authenticated_page.goto(f"{base_url}/notes/tags/")
-        tag_links = authenticated_page.locator("a[href*='tag'], .tag, .badge")
+        # More specific selector to avoid matching notification badges
+        tag_links = authenticated_page.locator("main a[href*='/tag/'], main .tag-item, .content a[href*='/tag/']")
         if tag_links.count() > 0:
             tag_links.first.click()
             authenticated_page.wait_for_load_state("networkidle")
@@ -807,7 +809,8 @@ class TestNoteListUIExtended:
         authenticated_page.goto(f"{base_url}/notes/notes/")
         authenticated_page.wait_for_load_state("networkidle")
         
-        element = authenticated_page.locator(".badge")
+        # More specific selector to avoid matching notification badges
+        element = authenticated_page.locator("main .badge, .card .badge, .note-item .badge, article .badge")
         if element.count() > 0:
             expect(element.first).to_be_visible()
 
