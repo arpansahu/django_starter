@@ -7,9 +7,9 @@ We provide security patches for the latest release of our project. Users are enc
 
 | Version       | Supported          |
 | ------------- | ------------------ |
-| Latest        | 1.0.0 |
-| Previous      |  |
-| Older versions |                |
+| Latest        | 1.1.0 |
+| 1.0.0         | :white_check_mark: |
+| Older versions | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -41,6 +41,12 @@ We encourage our users to follow these best practices to secure their deployment
 - Use strong, unique passwords for different accounts.
 - Enable two-factor authentication (2FA) where possible.
 - Regularly review and update your security settings.
+- Run the full test suite (unit + UI tests) before deploying to production to catch potential security issues early.
+
+### Recent Security Enhancements (v1.1.0)
+
+- Improved test coverage reliability: Fixed test suite issues to ensure consistent CI/CD pipeline execution, enabling early detection of potential security vulnerabilities.
+- Enhanced authentication module tests: Corrected mock configurations to properly validate email service integrations and authentication flows.
 
 ## Contact
 
