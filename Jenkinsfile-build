@@ -25,6 +25,9 @@ pipeline {
             steps {
                 script {
                     withCredentials([file(credentialsId: 'django_starter_env_file', variable: 'ENV_FILE')]) {
+                        // Remove existing .env file if it exists (handles read-only files)
+                        sh 'rm -f .env || true'
+                        
                         sh "cp \$ENV_FILE .env"
                         echo '.env file created successfully from credentials'
                     }
