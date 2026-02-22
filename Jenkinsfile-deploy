@@ -6,21 +6,8 @@ pipeline {
         string(name: 'IMAGE_TAG', defaultValue: '', description: 'Image tag to deploy (leave empty to auto-detect from build)')
     }
     environment {
-        REGISTRY = "harbor.arpansahu.space"
-        REPOSITORY = "library/django_starter"
+        IMAGE_TAG = "${params.IMAGE_TAG}"  
         KUBECONFIG = "${env.WORKSPACE}/kubeconfig"
-        NGINX_CONF = "/etc/nginx/sites-available/django-starter"
-        NGINX_CONF_FLOWER = "/etc/nginx/sites-available/flower-django-starter"
-        ENV_PROJECT_NAME = "django_starter"
-        DOCKER_PORT = "8016"
-        FLOWER_PORT = "8054"
-        PROJECT_NAME_WITH_DASH = "django-starter"
-        SERVER_NAME= "django-starter.arpansahu.space"
-        FLOWER_SERVER_NAME = "flower-django-starter.arpansahu.space"
-        BUILD_PROJECT_NAME = "django_starter_build"
-        JENKINS_DOMAIN = "jenkins.arpansahu.space"
-        SENTRY_ORG="arpansahu"
-        SENTRY_PROJECT="django_starter"
     }
     stages {
         stage('Initialize') {
@@ -38,13 +25,45 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 script {
-                    echo "Loading environment variables from Jenkins credentials..."
-                    withCredentials([file(credentialsId: 'django_starter_env_file', variable: 'ENV_FILE')]) {
-                        // Remove existing .env file if it exists (handles read-only files)
-                        sh 'rm -f .env || true'
-                        
-                        sh "cp \$ENV_FILE .env"
-                        echo "✅ Environment file created successfully"
+                    withCredentials([file(credentialsId: 'jenkins-admin-credentials', variable: 'CRED_FILE')]) {
+                        // Parse the credentials file to set environment variables
+                        def credentials = readFile(CRED_FILE)
+                        credentials.split('\n').each { line ->
+                            def trimmedLine = line.trim()
+                            if (trimmedLine && !trimmedLine.startsWith('#')) {
+                                def parts = trimmedLine.split('=', 2)
+                                if (parts.length == 2) {
+                                    def key = parts[0].trim()
+                                    def value = parts[1].trim()
+                                    env."${key}" = value
+                                }
+                            }
+                        }
+
+                        // Compute derived variables
+                        env.BUILD_PROJECT_NAME = "${env.ENV_PROJECT_NAME}_build"
+                        env.PROJECT_NAME_WITH_DASH = env.ENV_PROJECT_NAME.replaceAll('_', '-')
+                        env.NGINX_CONF_PATH = "/etc/nginx/sites-available/${env.PROJECT_NAME_WITH_DASH}"
+                        env.NGINX_CONF_FLOWER_PATH = "/etc/nginx/sites-available/flower-${env.PROJECT_NAME_WITH_DASH}"
+                        env.REGISTRY = env.DOCKER_REGISTRY
+                        env.REPOSITORY = env.DOCKER_REPOSITORY
+
+                        // Log parsed values for verification
+                        echo "Environment variables loaded:"
+                        echo "ENV_PROJECT_NAME: ${env.ENV_PROJECT_NAME}"
+                        echo "BUILD_PROJECT_NAME: ${env.BUILD_PROJECT_NAME}"
+                        echo "PROJECT_NAME_WITH_DASH: ${env.PROJECT_NAME_WITH_DASH}"
+                        echo "SERVER_NAME: ${env.SERVER_NAME}"
+                        echo "DOCKER_PORT: ${env.DOCKER_PORT}"
+                        echo "FLOWER_PORT: ${env.FLOWER_PORT}"
+                        echo "FLOWER_SERVER_NAME: ${env.FLOWER_SERVER_NAME}"
+                        echo "NGINX_CONF_PATH: ${env.NGINX_CONF_PATH}"
+                        echo "NGINX_CONF_FLOWER_PATH: ${env.NGINX_CONF_FLOWER_PATH}"
+                        echo "REGISTRY: ${env.REGISTRY}"
+                        echo "REPOSITORY: ${env.REPOSITORY}"
+                        echo "JENKINS_DOMAIN: ${env.JENKINS_DOMAIN}"
+                        echo "SENTRY_ORG: ${env.SENTRY_ORG}"
+                        echo "SENTRY_PROJECT: ${env.SENTRY_PROJECT}"
                     }
                 }
             }
@@ -66,22 +85,22 @@ pipeline {
             steps {
                 script {
                     // Check if the Nginx configuration file exists
-                    def configExists = sh(script: "test -f ${NGINX_CONF} && echo 'exists' || echo 'not exists'", returnStdout: true).trim()
+                    def configExists = sh(script: "test -f ${env.NGINX_CONF_PATH} && echo 'exists' || echo 'not exists'", returnStdout: true).trim()
 
                     if (configExists == 'not exists') {
                         echo "Nginx configuration file does not exist. Creating it now..."
 
-                        // Create or overwrite the NGINX_CONF file with the content of nginx.conf using sudo tee
-                        sh "sudo cat nginx.conf | sudo tee ${NGINX_CONF} > /dev/null"
+                        // Create or overwrite the NGINX_CONF_PATH file with the content of nginx.conf using sudo tee
+                        sh "sudo cat nginx.conf | sudo tee ${env.NGINX_CONF_PATH} > /dev/null"
 
                         // Replace placeholders in the configuration file
-                        sh "sudo sed -i 's|SERVER_NAME|${SERVER_NAME}|g' ${NGINX_CONF}"
-                        sh "sudo sed -i 's|DOCKER_PORT|${DOCKER_PORT}|g' ${NGINX_CONF}"
+                        sh "sudo sed -i 's|SERVER_NAME|${env.SERVER_NAME}|g' ${env.NGINX_CONF_PATH}"
+                        sh "sudo sed -i 's|DOCKER_PORT|${env.DOCKER_PORT}|g' ${env.NGINX_CONF_PATH}"
 
                         echo "Nginx configuration file created."
 
                         // Ensure Nginx is aware of the new configuration
-                        sh "sudo ln -sf ${NGINX_CONF} /etc/nginx/sites-enabled/"
+                        sh "sudo ln -sf ${env.NGINX_CONF_PATH} /etc/nginx/sites-enabled/"
                     } else {
                         echo "Nginx configuration file already exists."
                     }                    
@@ -92,22 +111,22 @@ pipeline {
             steps {
                 script {
                     // Check if the Nginx configuration file exists
-                    def configExists = sh(script: "test -f ${NGINX_CONF_FLOWER} && echo 'exists' || echo 'not exists'", returnStdout: true).trim()
+                    def configExists = sh(script: "test -f ${env.NGINX_CONF_FLOWER_PATH} && echo 'exists' || echo 'not exists'", returnStdout: true).trim()
 
                     if (configExists == 'not exists') {
                         echo "Nginx configuration file does not exist. Creating it now..."
 
-                        // Create or overwrite the NGINX_CONF_FLOWER file with the content of nginx-flower.conf using sudo tee
-                        sh "sudo cat nginx-flower.conf | sudo tee ${NGINX_CONF_FLOWER} > /dev/null"
+                        // Create or overwrite the NGINX_CONF_FLOWER_PATH file with the content of nginx-flower.conf using sudo tee
+                        sh "sudo cat nginx-flower.conf | sudo tee ${env.NGINX_CONF_FLOWER_PATH} > /dev/null"
 
                         // Replace placeholders in the configuration file
-                        sh "sudo sed -i 's|SERVER_NAME|${FLOWER_SERVER_NAME}|g' ${NGINX_CONF_FLOWER}"
-                        sh "sudo sed -i 's|DOCKER_PORT|${FLOWER_PORT}|g' ${NGINX_CONF_FLOWER}"
+                        sh "sudo sed -i 's|SERVER_NAME|${env.FLOWER_SERVER_NAME}|g' ${env.NGINX_CONF_FLOWER_PATH}"
+                        sh "sudo sed -i 's|DOCKER_PORT|${env.FLOWER_PORT}|g' ${env.NGINX_CONF_FLOWER_PATH}"
 
                         echo "Nginx configuration file created."
 
                         // Ensure Nginx is aware of the new configuration
-                        sh "sudo ln -sf ${NGINX_CONF_FLOWER} /etc/nginx/sites-enabled/"
+                        sh "sudo ln -sf ${env.NGINX_CONF_FLOWER_PATH} /etc/nginx/sites-enabled/"
                     } else {
                         echo "Nginx configuration file already exists."
                     }                    
@@ -136,7 +155,7 @@ pipeline {
                         
                         // Add basic auth to flower nginx config
                         sh """
-                            sudo sed -i '/location \\/ {/a\\        auth_basic "Flower Monitoring";\\n        auth_basic_user_file /etc/nginx/.htpasswd_flower;' ${NGINX_CONF_FLOWER}
+                            sudo sed -i '/location \\/ {/a\\        auth_basic "Flower Monitoring";\\n        auth_basic_user_file /etc/nginx/.htpasswd_flower;' ${env.NGINX_CONF_FLOWER_PATH}
                         """
                         
                         // Reload nginx
@@ -155,10 +174,10 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Retrieve image tag from ${BUILD_PROJECT_NAME}"
+                    echo "Retrieve image tag from ${env.BUILD_PROJECT_NAME}"
 
                     // Construct the API URL for the latest build
-                    def api_url = "https://${JENKINS_DOMAIN}/job/${BUILD_PROJECT_NAME}/lastSuccessfulBuild/api/json"
+                    def api_url = "https://${env.JENKINS_DOMAIN}/job/${env.BUILD_PROJECT_NAME}/lastSuccessfulBuild/api/json"
 
                     // Log the API URL for debugging purposes
                     echo "Hitting API URL: ${api_url}"
@@ -179,7 +198,7 @@ pipeline {
 
 
                         // Check if REGISTRY, REPOSITORY, and imageTag are all defined and not empty
-                        if (REGISTRY && REPOSITORY && imageTag) {
+                        if (env.REGISTRY && env.REPOSITORY && imageTag) {
                             if (params.DEPLOY_TYPE == 'kubernetes') {
                                 // Replace the placeholder in the deployment YAML
                                 sh "sed -i 's|:latest|:${imageTag}|g' ${WORKSPACE}/deployment.yaml"
@@ -188,7 +207,7 @@ pipeline {
                             if (params.DEPLOY_TYPE == 'docker') {
                                 // Ensure the correct image tag is used in the docker-compose.yml
                                 sh """
-                                sed -i 's|image: .*|image: ${REGISTRY}/${REPOSITORY}:${imageTag}|' docker-compose.yml
+                                sed -i 's|image: .*|image: ${env.REGISTRY}/${env.REPOSITORY}:${imageTag}|' docker-compose.yml
                                 """
                             }
                         } else {
@@ -207,18 +226,18 @@ pipeline {
                     if (params.DEPLOY_TYPE == 'docker') {
                         // Deploy using Docker Compose
                         sh 'docker compose down'
-                        sh 'docker rm -f ${ENV_PROJECT_NAME} || true'  // Remove any orphaned container
+                        sh 'docker rm -f ${env.ENV_PROJECT_NAME} || true'  // Remove any orphaned container
                         // Override .env with correct MinIO credentials from server
                         sh 'cp /tmp/django_starter.env .env || true'
                         sh 'docker compose pull'
                         sh 'docker compose up -d'
 
                         // Verify the container is running
-                        def containerRunning = sh(script: "docker ps -q -f name=${ENV_PROJECT_NAME}", returnStdout: true).trim()
+                        def containerRunning = sh(script: "docker ps -q -f name=${env.ENV_PROJECT_NAME}", returnStdout: true).trim()
                         if (!containerRunning) {
-                            error "Container ${ENV_PROJECT_NAME} is not running"
+                            error "Container ${env.ENV_PROJECT_NAME} is not running"
                         } else {
-                            echo "Container ${ENV_PROJECT_NAME} is running"
+                            echo "Container ${env.ENV_PROJECT_NAME} is running"
                             // Health check with retry mechanism (migrations + collectstatic take time)
                             sh """
                                 set +e  # Don't exit on error
@@ -232,7 +251,7 @@ pipeline {
                                 while [ \$ATTEMPT -lt \$MAX_RETRIES ]; do
                                     ATTEMPT=\$((ATTEMPT + 1))
                                     echo "Health check attempt \$ATTEMPT/\$MAX_RETRIES..."
-                                    HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" -L http://localhost:${DOCKER_PORT} || echo "000")
+                                    HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" -L http://localhost:${env.DOCKER_PORT} || echo "000")
                                     echo "HTTP Status: \$HTTP_STATUS"
                                     
                                     if [ "\$HTTP_STATUS" = "200" ] || [ "\$HTTP_STATUS" = "302" ]; then
@@ -250,20 +269,20 @@ pipeline {
                                 
                                 # Update Nginx configuration if status code is 200 (OK) or 302 (Redirect)
                                 if [ "\$HTTP_STATUS" = "200" ] || [ "\$HTTP_STATUS" = "302" ]; then
-                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://0.0.0.0:${DOCKER_PORT};|' ${NGINX_CONF}
-                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://0.0.0.0:${FLOWER_PORT};|' ${NGINX_CONF_FLOWER}
+                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://0.0.0.0:${env.DOCKER_PORT};|' ${env.NGINX_CONF_PATH}
+                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://0.0.0.0:${env.FLOWER_PORT};|' ${env.NGINX_CONF_FLOWER_PATH}
                                     sudo nginx -s reload
                                     echo '✅ Nginx configuration updated and reloaded successfully.'
                                 else
                                     echo '❌ Service not available after \$MAX_RETRIES attempts. HTTP Status: \$HTTP_STATUS'
-                                    echo 'Check container logs with: docker logs ${ENV_PROJECT_NAME}'
+                                    echo 'Check container logs with: docker logs ${env.ENV_PROJECT_NAME}'
                                     error 'Docker deployment health check failed'
                                 fi
 
                                 # Scale down Kubernetes deployment if it exists and is running
-                                replicas=\$(kubectl get deployment ${PROJECT_NAME_WITH_DASH}-app -o=jsonpath='{.spec.replicas}') || true
+                                replicas=\$(kubectl get deployment ${env.PROJECT_NAME_WITH_DASH}-app -o=jsonpath='{.spec.replicas}') || true
                                 if [ "\$replicas" != "" ] && [ \$replicas -gt 0 ]; then
-                                    kubectl scale deployment ${PROJECT_NAME_WITH_DASH}-app --replicas=0
+                                    kubectl scale deployment ${env.PROJECT_NAME_WITH_DASH}-app --replicas=0
                                     echo 'Kubernetes deployment scaled down successfully.'
                                 else
                                     echo 'No running Kubernetes deployment to scale down.'
@@ -321,20 +340,20 @@ pipeline {
 
                             // Check deployment status
                             // sh """
-                            // kubectl rollout status deployment/${PROJECT_NAME_WITH_DASH}-app
+                            // kubectl rollout status deployment/${env.PROJECT_NAME_WITH_DASH}-app
                             // """
                             sh """
-                                kubectl describe deployment/${PROJECT_NAME_WITH_DASH}-app
+                                kubectl describe deployment/${env.PROJECT_NAME_WITH_DASH}-app
                             """
                             
                             // Note: Database migrations now run automatically in Dockerfile CMD
                             // This ensures compatibility with both Kubernetes and Docker Compose deployments
                             
                             // Verify service and get NodePort
-                            def nodePort = sh(script: "kubectl get service ${PROJECT_NAME_WITH_DASH}-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
+                            def nodePort = sh(script: "kubectl get service ${env.PROJECT_NAME_WITH_DASH}-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
                             echo "Service NodePort: ${nodePort}"
 
-                            def nodePortFlower = sh(script: "kubectl get service ${PROJECT_NAME_WITH_DASH}-service -o=jsonpath='{.spec.ports[1].nodePort}'", returnStdout: true).trim()
+                            def nodePortFlower = sh(script: "kubectl get service ${env.PROJECT_NAME_WITH_DASH}-service -o=jsonpath='{.spec.ports[1].nodePort}'", returnStdout: true).trim()
                             echo "Service NodePortFlower: ${nodePortFlower}"
 
                             // Get cluster IP address
@@ -370,9 +389,9 @@ pipeline {
                                 if [ "\$HTTP_STATUS" = "200" ] || [ "\$HTTP_STATUS" = "302" ]; then
                                     echo "Service is reachable at http://${clusterIP}:${nodePort}"
 
-                                    echo "Updating Nginx configuration at ${NGINX_CONF}..."
-                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://${clusterIP}:${nodePort};|' ${NGINX_CONF}
-                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://${clusterIP}:${nodePortFlower};|' ${NGINX_CONF_FLOWER}
+                                    echo "Updating Nginx configuration at ${env.NGINX_CONF_PATH}..."
+                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://${clusterIP}:${nodePort};|' ${env.NGINX_CONF_PATH}
+                                    sudo sed -i 's|proxy_pass .*;|proxy_pass http://${clusterIP}:${nodePortFlower};|' ${env.NGINX_CONF_FLOWER_PATH}
                                     
                                     if [ \$? -ne 0 ]; then
                                         echo "Failed to update Nginx configuration"
@@ -389,19 +408,19 @@ pipeline {
                                     
                                     echo "Nginx reloaded successfully"
                                     
-                                    DOCKER_CONTAINER=\$(docker ps -q -f name=${ENV_PROJECT_NAME})
+                                    DOCKER_CONTAINER=\$(docker ps -q -f name=${env.ENV_PROJECT_NAME})
                                     
                                     if [ "\$DOCKER_CONTAINER" ]; then
-                                        echo "Docker container ${ENV_PROJECT_NAME} is running. Removing it..."
-                                        docker rm -f ${ENV_PROJECT_NAME}
+                                        echo "Docker container ${env.ENV_PROJECT_NAME} is running. Removing it..."
+                                        docker rm -f ${env.ENV_PROJECT_NAME}
                                         
                                         if [ \$? -ne 0 ]; then
-                                            echo "Failed to remove Docker container ${ENV_PROJECT_NAME}"
+                                            echo "Failed to remove Docker container ${env.ENV_PROJECT_NAME}"
                                             exit 1
                                         fi
                                         
                                     else
-                                        echo "Docker container ${ENV_PROJECT_NAME} is not running. Skipping removal"
+                                        echo "Docker container ${env.ENV_PROJECT_NAME} is not running. Skipping removal"
                                     fi
 
                                 else
@@ -432,10 +451,10 @@ pipeline {
                             
                             echo "Creating Sentry release for version: \$VERSION"
 
-                            sentry-cli releases -o ${SENTRY_ORG} -p ${SENTRY_PROJECT} new \$VERSION
+                            sentry-cli releases -o ${env.SENTRY_ORG} -p ${env.SENTRY_PROJECT} new \$VERSION
 
                             # Deploy the release
-                            sentry-cli releases -o ${SENTRY_ORG} -p ${SENTRY_PROJECT} deploys \$VERSION new -e production
+                            sentry-cli releases -o ${env.SENTRY_ORG} -p ${env.SENTRY_PROJECT} deploys \$VERSION new -e production
                             
                             echo "✅ Sentry release created successfully"
                         """
@@ -476,7 +495,7 @@ pipeline {
                 // Trigger the common_readme job on success when last commit is not Automatic Update from common_readme
                 def commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
                 if (!commitMessage.contains("Automatic Update")) {
-                    def expandedProjectUrl = "https://github.com/arpansahu/${ENV_PROJECT_NAME}"
+                    def expandedProjectUrl = "https://github.com/arpansahu/${env.ENV_PROJECT_NAME}"
                     build job: 'common_readme', parameters: [
                         string(name: 'project_git_url', value: expandedProjectUrl),
                         string(name: 'environment', value: 'prod')
