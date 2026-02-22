@@ -42,11 +42,16 @@ def test_user_credentials():
 @pytest.fixture
 def authenticated_page(page: Page, test_user_credentials, base_url):
     """Login and return authenticated page"""
-    page.goto(f"{base_url}/login/")
+    page.goto(f"{base_url}/login/", timeout=60000)
     page.fill("input[name='username']", test_user_credentials["email"])
     page.fill("input[name='password']", test_user_credentials["password"])
-    page.click("button[type='submit']")
-    page.wait_for_load_state("networkidle")
+    
+    # Use force=True and no_wait_after to avoid hanging on navigation
+    page.locator("button[type='submit']").click(force=True, no_wait_after=True)
+    
+    # Explicitly wait for navigation to complete
+    page.wait_for_url(lambda url: "/login" not in url, timeout=30000)
+    page.wait_for_load_state("networkidle", timeout=60000)
     
     # Check if login succeeded (not still on login page with errors)
     current_url = page.url
