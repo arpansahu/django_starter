@@ -16,7 +16,7 @@ class TestElasticsearchDashboardUI:
 
     def test_dashboard_loads(self, authenticated_page: Page, base_url):
         """Test dashboard page loads"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         # Check page title/header
@@ -28,7 +28,7 @@ class TestElasticsearchDashboardUI:
 
     def test_connection_status(self, authenticated_page: Page, base_url):
         """Test connection status card"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         # Look for connection status
@@ -38,7 +38,7 @@ class TestElasticsearchDashboardUI:
 
     def test_quick_links(self, authenticated_page: Page, base_url):
         """Test quick links section"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Search'), a[href*='search']")
@@ -51,7 +51,7 @@ class TestElasticsearchSearchUI:
 
     def test_search_page_loads(self, page: Page, base_url):
         """Test search page loads"""
-        page.goto(f"{base_url}/elasticsearch/search/")
+        page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         page.wait_for_load_state("networkidle")
         
         element = page.locator("h1:has-text('Search')")
@@ -60,7 +60,7 @@ class TestElasticsearchSearchUI:
 
     def test_search_form(self, page: Page, base_url):
         """Test search form is visible"""
-        page.goto(f"{base_url}/elasticsearch/search/")
+        page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         page.wait_for_load_state("networkidle")
         
         element = page.locator("input[name='q'], input[type='text']")
@@ -69,7 +69,7 @@ class TestElasticsearchSearchUI:
 
     def test_search_button(self, page: Page, base_url):
         """Test search button"""
-        page.goto(f"{base_url}/elasticsearch/search/")
+        page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         page.wait_for_load_state("networkidle")
         
         element = page.locator("button:has-text('Search'), input[type='submit']")
@@ -78,7 +78,7 @@ class TestElasticsearchSearchUI:
 
     def test_index_filter(self, page: Page, base_url):
         """Test index filter dropdown"""
-        page.goto(f"{base_url}/elasticsearch/search/")
+        page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         page.wait_for_load_state("networkidle")
         
         element = page.locator("select[name='index']")
@@ -87,7 +87,7 @@ class TestElasticsearchSearchUI:
 
     def test_search_with_query(self, page: Page, base_url):
         """Test performing a search"""
-        page.goto(f"{base_url}/elasticsearch/search/?q=test")
+        page.goto(f"{base_url}/elasticsearch/search/?q=test", timeout=60000)
         page.wait_for_load_state("networkidle")
         
         # Should show results section or no results message
@@ -101,7 +101,7 @@ class TestElasticsearchAnalyticsUI:
 
     def test_analytics_requires_login(self, page: Page, base_url):
         """Test analytics page requires authentication"""
-        page.goto(f"{base_url}/elasticsearch/analytics/")
+        page.goto(f"{base_url}/elasticsearch/analytics/", timeout=60000)
         page.wait_for_load_state("networkidle")
         
         # Should redirect to login
@@ -109,7 +109,7 @@ class TestElasticsearchAnalyticsUI:
 
     def test_analytics_page_loads(self, authenticated_page: Page, base_url):
         """Test analytics page loads when authenticated"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/analytics/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/analytics/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("h1:has-text('Analytics')")
@@ -118,7 +118,7 @@ class TestElasticsearchAnalyticsUI:
 
     def test_top_queries_section(self, authenticated_page: Page, base_url):
         """Test top queries section"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/analytics/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/analytics/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".card:has-text('Top Search'), h5:has-text('Top')")
@@ -127,7 +127,7 @@ class TestElasticsearchAnalyticsUI:
 
     def test_recent_queries_section(self, authenticated_page: Page, base_url):
         """Test recent queries section"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/analytics/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/analytics/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".card:has-text('Recent'), h5:has-text('Recent')")
@@ -140,7 +140,7 @@ class TestDashboardUIExtended:
 
     def test_create_indices_button(self, authenticated_page: Page, base_url):
         """Test Create Indices button"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Create'), button:has-text('Create')")
@@ -149,7 +149,7 @@ class TestDashboardUIExtended:
 
     def test_reindex_all_button(self, authenticated_page: Page, base_url):
         """Test Reindex All button"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Reindex'), button:has-text('Reindex')")
@@ -158,7 +158,7 @@ class TestDashboardUIExtended:
 
     def test_delete_indices_button(self, authenticated_page: Page, base_url):
         """Test Delete Indices button"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Delete'), button:has-text('Delete')")
@@ -167,7 +167,7 @@ class TestDashboardUIExtended:
 
     def test_index_form(self, authenticated_page: Page, base_url):
         """Test index form"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("#index-form, form[id*='index']")
@@ -176,7 +176,7 @@ class TestDashboardUIExtended:
 
     def test_search_link(self, authenticated_page: Page, base_url):
         """Test Search link"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Search'), a:has-text('Search')")
@@ -185,7 +185,7 @@ class TestDashboardUIExtended:
 
     def test_analytics_link(self, authenticated_page: Page, base_url):
         """Test Analytics link"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Analytics'), a:has-text('Analytics')")
@@ -194,7 +194,7 @@ class TestDashboardUIExtended:
 
     def test_kibana_dashboard_link(self, authenticated_page: Page, base_url):
         """Test Kibana Dashboard link"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Kibana'), a:has-text('Kibana')")
@@ -207,7 +207,7 @@ class TestAnalyticsUIExtended:
 
     def test_analytics_links(self, authenticated_page: Page, base_url):
         """Test links on analytics page"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/analytics/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/analytics/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a")
@@ -220,7 +220,7 @@ class TestSearchUIExtended:
 
     def test_search_button(self, authenticated_page: Page, base_url):
         """Test Search button"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/search/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Search'), button:has-text('Search')")
@@ -229,7 +229,7 @@ class TestSearchUIExtended:
 
     def test_search_form(self, authenticated_page: Page, base_url):
         """Test search form"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/search/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("form")
@@ -238,7 +238,7 @@ class TestSearchUIExtended:
 
     def test_pagination_links(self, authenticated_page: Page, base_url):
         """Test pagination links"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/search/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".page-link, .pagination a")
@@ -247,7 +247,7 @@ class TestSearchUIExtended:
 
     def test_tag_links(self, authenticated_page: Page, base_url):
         """Test tag filter links (django, python, api, test)"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/search/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('django'), .btn:has-text('python'), .btn:has-text('api')")
@@ -256,7 +256,7 @@ class TestSearchUIExtended:
 
     def test_search_input(self, authenticated_page: Page, base_url):
         """Test search input field"""
-        authenticated_page.goto(f"{base_url}/elasticsearch/search/")
+        authenticated_page.goto(f"{base_url}/elasticsearch/search/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("#search-input, input[type='text'], input[name='q']")

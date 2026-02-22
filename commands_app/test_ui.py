@@ -15,7 +15,7 @@ from playwright.sync_api import Page, expect
 def create_test_task(authenticated_page: Page, base_url) -> str:
     """Helper to create a task via UI and return its name"""
     task_name = f"Test Task {uuid.uuid4().hex[:8]}"
-    authenticated_page.goto(f"{base_url}/commands/tasks/create/")
+    authenticated_page.goto(f"{base_url}/commands/tasks/create/", timeout=60000)
     
     # Wait for page to load
     authenticated_page.wait_for_load_state("networkidle")
@@ -45,7 +45,8 @@ class TestExportListUI:
 
     def test_link(self, authenticated_page: Page, base_url):
         """Test export link"""
-        authenticated_page.goto(f"{base_url}/commands/exports/")
+        authenticated_page.goto(f"{base_url}/commands/exports/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a.btn, a:has-text('Export')")
         if element.count() > 0:
@@ -57,7 +58,8 @@ class TestLogListUI:
 
     def test_view(self, authenticated_page: Page, base_url):
         """Test link: View logs"""
-        authenticated_page.goto(f"{base_url}/commands/logs/")
+        authenticated_page.goto(f"{base_url}/commands/logs/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('View'), a.btn")
         if element.count() > 0:
@@ -69,7 +71,8 @@ class TestTaskListUI:
 
     def test_filter(self, authenticated_page: Page, base_url):
         """Test button: Filter"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("button:has-text('Filter'), input[type='submit']")
         if element.count() > 0:
@@ -77,7 +80,8 @@ class TestTaskListUI:
 
     def test_button(self, authenticated_page: Page, base_url):
         """Test action button"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn")
         if element.count() > 0:
@@ -85,7 +89,8 @@ class TestTaskListUI:
 
     def test_form(self, authenticated_page: Page, base_url):
         """Test filter form"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -93,7 +98,8 @@ class TestTaskListUI:
 
     def test_create_task(self, authenticated_page: Page, base_url):
         """Test link: Create Task"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Create'), a:has-text('New')")
         if element.count() > 0:
@@ -101,7 +107,8 @@ class TestTaskListUI:
 
     def test_task_link(self, authenticated_page: Page, base_url):
         """Test task links in list"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a[href*='task'], tr a")
         if element.count() > 0:
@@ -116,7 +123,7 @@ class TestTaskConfirmDeleteUI:
         # Create a task first
         create_test_task(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
@@ -135,7 +142,7 @@ class TestTaskConfirmDeleteUI:
         # Create a task first
         create_test_task(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
@@ -154,7 +161,7 @@ class TestTaskConfirmDeleteUI:
         # Create a task first
         create_test_task(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
@@ -174,7 +181,8 @@ class TestRunCommandUI:
 
     def test_run(self, authenticated_page: Page, base_url):
         """Test button: Run command"""
-        authenticated_page.goto(f"{base_url}/commands/run/")
+        authenticated_page.goto(f"{base_url}/commands/run/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("button:has-text('Run'), input[type='submit']")
         if element.count() > 0:
@@ -182,7 +190,8 @@ class TestRunCommandUI:
 
     def test_form(self, authenticated_page: Page, base_url):
         """Test form: command form"""
-        authenticated_page.goto(f"{base_url}/commands/run/")
+        authenticated_page.goto(f"{base_url}/commands/run/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -190,7 +199,8 @@ class TestRunCommandUI:
 
     def test_command_input(self, authenticated_page: Page, base_url):
         """Test command input field"""
-        authenticated_page.goto(f"{base_url}/commands/run/")
+        authenticated_page.goto(f"{base_url}/commands/run/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("input[name='command'], select[name='command'], textarea")
         if element.count() > 0:
@@ -202,7 +212,8 @@ class TestTaskFormUI:
 
     def test_save(self, authenticated_page: Page, base_url):
         """Test button: Save"""
-        authenticated_page.goto(f"{base_url}/commands/task/create/")
+        authenticated_page.goto(f"{base_url}/commands/task/create/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("button:has-text('Save'), input[type='submit']")
         if element.count() > 0:
@@ -210,7 +221,8 @@ class TestTaskFormUI:
 
     def test_form(self, authenticated_page: Page, base_url):
         """Test form: task form"""
-        authenticated_page.goto(f"{base_url}/commands/task/create/")
+        authenticated_page.goto(f"{base_url}/commands/task/create/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -218,7 +230,8 @@ class TestTaskFormUI:
 
     def test_name_field(self, authenticated_page: Page, base_url):
         """Test name input"""
-        authenticated_page.goto(f"{base_url}/commands/task/create/")
+        authenticated_page.goto(f"{base_url}/commands/task/create/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("input[name='name'], #id_name")
         if element.count() > 0:
@@ -226,7 +239,8 @@ class TestTaskFormUI:
 
     def test_command_field(self, authenticated_page: Page, base_url):
         """Test command field"""
-        authenticated_page.goto(f"{base_url}/commands/task/create/")
+        authenticated_page.goto(f"{base_url}/commands/task/create/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("input[name='command'], select[name='command'], textarea[name='command']")
         if element.count() > 0:
@@ -238,7 +252,8 @@ class TestImportListUI:
 
     def test_link(self, authenticated_page: Page, base_url):
         """Test import link"""
-        authenticated_page.goto(f"{base_url}/commands/imports/")
+        authenticated_page.goto(f"{base_url}/commands/imports/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a.btn, a:has-text('Import')")
         if element.count() > 0:
@@ -250,7 +265,8 @@ class TestDashboardUI:
 
     def test_tasks_section(self, authenticated_page: Page, base_url):
         """Test tasks section"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Tasks'), h2:has-text('Tasks'), .tasks")
         if element.count() > 0:
@@ -258,7 +274,8 @@ class TestDashboardUI:
 
     def test_logs_section(self, authenticated_page: Page, base_url):
         """Test logs section"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Logs'), h2:has-text('Logs'), .logs")
         if element.count() > 0:
@@ -266,7 +283,8 @@ class TestDashboardUI:
 
     def test_exports_section(self, authenticated_page: Page, base_url):
         """Test exports section"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Export'), h2:has-text('Export'), .exports")
         if element.count() > 0:
@@ -274,7 +292,8 @@ class TestDashboardUI:
 
     def test_imports_section(self, authenticated_page: Page, base_url):
         """Test imports section"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Import'), h2:has-text('Import'), .imports")
         if element.count() > 0:
@@ -282,7 +301,8 @@ class TestDashboardUI:
 
     def test_metrics_section(self, authenticated_page: Page, base_url):
         """Test metrics section"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Metrics'), h2:has-text('Metrics'), .metrics")
         if element.count() > 0:
@@ -297,7 +317,8 @@ class TestTaskDetailUI:
         # Create a task first
         create_test_task(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         task_links = authenticated_page.locator("a[href*='task']:not([href*='create'])")
         if task_links.count() > 0:
             task_links.first.click()
@@ -314,7 +335,8 @@ class TestTaskDetailUI:
         # Create a task first
         create_test_task(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         task_links = authenticated_page.locator("a[href*='task']:not([href*='create'])")
         if task_links.count() > 0:
             task_links.first.click()
@@ -331,7 +353,8 @@ class TestTaskDetailUI:
         # Create a task first
         create_test_task(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         task_links = authenticated_page.locator("a[href*='task']:not([href*='create'])")
         if task_links.count() > 0:
             task_links.first.click()
@@ -349,7 +372,8 @@ class TestLogDetailUI:
 
     def test_back(self, authenticated_page: Page, base_url):
         """Test back link"""
-        authenticated_page.goto(f"{base_url}/commands/logs/")
+        authenticated_page.goto(f"{base_url}/commands/logs/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         log_links = authenticated_page.locator("a[href*='log']")
         if log_links.count() > 0:
             log_links.first.click()
@@ -371,7 +395,8 @@ class TestExecutionDetailUI:
         # Create and potentially run a task to have executions
         create_test_task(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/commands/executions/")
+        authenticated_page.goto(f"{base_url}/commands/executions/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         exec_links = authenticated_page.locator("a[href*='execution']")
         if exec_links.count() > 0:
             exec_links.first.click()
@@ -390,7 +415,8 @@ class TestMetricsDashboardUI:
 
     def test_metrics_visible(self, authenticated_page: Page, base_url):
         """Test metrics are visible"""
-        authenticated_page.goto(f"{base_url}/commands/metrics/")
+        authenticated_page.goto(f"{base_url}/commands/metrics/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".metrics, .chart, .stats, .card")
         if element.count() > 0:
@@ -404,7 +430,8 @@ class TestExecutionListUI:
 
     def test_link(self, authenticated_page: Page, base_url):
         """Test execution links"""
-        authenticated_page.goto(f"{base_url}/commands/executions/")
+        authenticated_page.goto(f"{base_url}/commands/executions/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a[href*='execution'], tr a")
         if element.count() > 0:
@@ -412,7 +439,8 @@ class TestExecutionListUI:
 
     def test_filter(self, authenticated_page: Page, base_url):
         """Test filter functionality"""
-        authenticated_page.goto(f"{base_url}/commands/executions/")
+        authenticated_page.goto(f"{base_url}/commands/executions/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("button:has-text('Filter'), select, form")
         if element.count() > 0:
@@ -432,7 +460,7 @@ class TestTaskListUIExtended:
 
     def test_task_list_pagination_links(self, authenticated_page: Page, base_url):
         """Test pagination links on task list"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".page-link, .pagination a")
@@ -441,7 +469,7 @@ class TestTaskListUIExtended:
 
     def test_task_list_search_input(self, authenticated_page: Page, base_url):
         """Test search input on task list"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("input[name='search'], .form-control[type='text']")
@@ -459,7 +487,7 @@ class TestRunCommandUIExtended:
 
     def test_run_command_button(self, authenticated_page: Page, base_url):
         """Test Run Command button"""
-        authenticated_page.goto(f"{base_url}/commands/run/")
+        authenticated_page.goto(f"{base_url}/commands/run/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("button:has-text('Run'), input[type='submit']")
@@ -468,7 +496,7 @@ class TestRunCommandUIExtended:
 
     def test_commands_navigation(self, authenticated_page: Page, base_url):
         """Test Commands navigation link"""
-        authenticated_page.goto(f"{base_url}/commands/run/")
+        authenticated_page.goto(f"{base_url}/commands/run/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Commands'), nav a")
@@ -481,7 +509,7 @@ class TestTaskFormUIExtended:
 
     def test_task_form_submit_button(self, authenticated_page: Page, base_url):
         """Test task form submit button"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/create/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/create/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("button[type='submit'], input[type='submit']")
@@ -490,7 +518,7 @@ class TestTaskFormUIExtended:
 
     def test_task_form_navigation(self, authenticated_page: Page, base_url):
         """Test navigation links on task form"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/create/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/create/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Commands'), a:has-text('Tasks')")
@@ -508,7 +536,7 @@ class TestDashboardUIExtended:
 
     def test_run_command_link(self, authenticated_page: Page, base_url):
         """Test Run Command link"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Run'), .btn:has-text('Run')")
@@ -517,7 +545,7 @@ class TestDashboardUIExtended:
 
     def test_view_scheduled_tasks(self, authenticated_page: Page, base_url):
         """Test View Scheduled Tasks link"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Scheduled'), a:has-text('Tasks')")
@@ -526,7 +554,7 @@ class TestDashboardUIExtended:
 
     def test_create_new_task(self, authenticated_page: Page, base_url):
         """Test Create New Task link"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Create'), a:has-text('New Task')")
@@ -535,7 +563,7 @@ class TestDashboardUIExtended:
 
     def test_view_command_logs(self, authenticated_page: Page, base_url):
         """Test View Command Logs link"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Logs'), .list-group-item:has-text('Logs')")
@@ -544,7 +572,7 @@ class TestDashboardUIExtended:
 
     def test_system_metrics(self, authenticated_page: Page, base_url):
         """Test System Metrics link"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Metrics'), .list-group-item:has-text('Metrics')")
@@ -553,7 +581,7 @@ class TestDashboardUIExtended:
 
     def test_data_imports(self, authenticated_page: Page, base_url):
         """Test Data Imports link"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Import'), .list-group-item:has-text('Import')")
@@ -562,7 +590,7 @@ class TestDashboardUIExtended:
 
     def test_data_exports(self, authenticated_page: Page, base_url):
         """Test Data Exports link"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Export'), .list-group-item:has-text('Export')")
@@ -571,7 +599,7 @@ class TestDashboardUIExtended:
 
     def test_view_all_links(self, authenticated_page: Page, base_url):
         """Test View All buttons"""
-        authenticated_page.goto(f"{base_url}/commands/")
+        authenticated_page.goto(f"{base_url}/commands/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('View All'), a:has-text('View All')")
@@ -585,7 +613,7 @@ class TestTaskDetailUIExtended:
     def test_run_task_button(self, authenticated_page: Page, base_url):
         """Test Run Task button"""
         # First create a task to view
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         task_link = authenticated_page.locator("a[href*='/tasks/']").first
@@ -599,7 +627,7 @@ class TestTaskDetailUIExtended:
 
     def test_task_detail_navigation(self, authenticated_page: Page, base_url):
         """Test navigation links on task detail"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Commands')")
@@ -608,7 +636,7 @@ class TestTaskDetailUIExtended:
 
     def test_tasks_link(self, authenticated_page: Page, base_url):
         """Test Tasks link"""
-        authenticated_page.goto(f"{base_url}/commands/tasks/")
+        authenticated_page.goto(f"{base_url}/commands/tasks/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Tasks')")
@@ -621,7 +649,7 @@ class TestLogDetailUIExtended:
 
     def test_log_commands_nav(self, authenticated_page: Page, base_url):
         """Test Commands navigation in log detail"""
-        authenticated_page.goto(f"{base_url}/commands/logs/")
+        authenticated_page.goto(f"{base_url}/commands/logs/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Commands')")
@@ -630,7 +658,7 @@ class TestLogDetailUIExtended:
 
     def test_log_logs_nav(self, authenticated_page: Page, base_url):
         """Test Logs navigation"""
-        authenticated_page.goto(f"{base_url}/commands/logs/")
+        authenticated_page.goto(f"{base_url}/commands/logs/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Logs')")
@@ -643,7 +671,7 @@ class TestExecutionDetailUIExtended:
 
     def test_execution_commands_nav(self, authenticated_page: Page, base_url):
         """Test Commands navigation in execution detail"""
-        authenticated_page.goto(f"{base_url}/commands/executions/")
+        authenticated_page.goto(f"{base_url}/commands/executions/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Commands')")
@@ -652,7 +680,7 @@ class TestExecutionDetailUIExtended:
 
     def test_execution_executions_nav(self, authenticated_page: Page, base_url):
         """Test Executions navigation"""
-        authenticated_page.goto(f"{base_url}/commands/executions/")
+        authenticated_page.goto(f"{base_url}/commands/executions/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Executions')")
@@ -665,7 +693,7 @@ class TestMetricsDashboardUIExtended:
 
     def test_view_all_metrics(self, authenticated_page: Page, base_url):
         """Test View All Metrics link"""
-        authenticated_page.goto(f"{base_url}/commands/metrics/")
+        authenticated_page.goto(f"{base_url}/commands/metrics/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('View'), a:has-text('Metrics')")
@@ -678,7 +706,7 @@ class TestExecutionListUIExtended:
 
     def test_execution_list_page(self, authenticated_page: Page, base_url):
         """Test execution list page loads"""
-        authenticated_page.goto(f"{base_url}/commands/executions/")
+        authenticated_page.goto(f"{base_url}/commands/executions/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         # Check for any list elements

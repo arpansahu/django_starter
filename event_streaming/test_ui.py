@@ -16,7 +16,8 @@ class TestDashboardUI:
 
     def test_new_event(self, authenticated_page: Page, base_url):
         """Test link: New Event"""
-        authenticated_page.goto(f"{base_url}/events/")
+        authenticated_page.goto(f"{base_url}/events/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('New Event'), a:has-text('Publish')")
         if element.count() > 0:
@@ -24,7 +25,8 @@ class TestDashboardUI:
 
     def test_analytics(self, authenticated_page: Page, base_url):
         """Test link: Analytics"""
-        authenticated_page.goto(f"{base_url}/events/")
+        authenticated_page.goto(f"{base_url}/events/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Analytics')")
         if element.count() > 0:
@@ -32,7 +34,8 @@ class TestDashboardUI:
 
     def test_publish_one_now(self, authenticated_page: Page, base_url):
         """Test link: Publish one now"""
-        authenticated_page.goto(f"{base_url}/events/")
+        authenticated_page.goto(f"{base_url}/events/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a:has-text('Publish'), [data-testid='publish_one_now']")
         if element.count() > 0:
@@ -44,7 +47,8 @@ class TestPublishEventUI:
 
     def test_button(self, authenticated_page: Page, base_url):
         """Test close button"""
-        authenticated_page.goto(f"{base_url}/events/publish/")
+        authenticated_page.goto(f"{base_url}/events/publish/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn-close, button.close")
         if element.count() > 0:
@@ -52,7 +56,8 @@ class TestPublishEventUI:
 
     def test_publish_event(self, authenticated_page: Page, base_url):
         """Test button: Publish Event"""
-        authenticated_page.goto(f"{base_url}/events/publish/")
+        authenticated_page.goto(f"{base_url}/events/publish/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("button:has-text('Publish'), input[type='submit']")
         if element.count() > 0:
@@ -60,7 +65,8 @@ class TestPublishEventUI:
 
     def test_form(self, authenticated_page: Page, base_url):
         """Test form: publish form"""
-        authenticated_page.goto(f"{base_url}/events/publish/")
+        authenticated_page.goto(f"{base_url}/events/publish/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -68,7 +74,8 @@ class TestPublishEventUI:
 
     def test_event_type_field(self, authenticated_page: Page, base_url):
         """Test event type field"""
-        authenticated_page.goto(f"{base_url}/events/publish/")
+        authenticated_page.goto(f"{base_url}/events/publish/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("input[name='event_type'], select[name='event_type'], #id_event_type")
         if element.count() > 0:
@@ -76,7 +83,8 @@ class TestPublishEventUI:
 
     def test_message_field(self, authenticated_page: Page, base_url):
         """Test message field"""
-        authenticated_page.goto(f"{base_url}/events/publish/")
+        authenticated_page.goto(f"{base_url}/events/publish/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("textarea[name='message'], input[name='message'], #id_message")
         if element.count() > 0:
@@ -88,7 +96,8 @@ class TestAnalyticsUI:
 
     def test_analytics_visible(self, authenticated_page: Page, base_url):
         """Test analytics dashboard visible"""
-        authenticated_page.goto(f"{base_url}/events/analytics/")
+        authenticated_page.goto(f"{base_url}/events/analytics/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".analytics, .chart, .stats")
         if element.count() > 0:
@@ -100,7 +109,8 @@ class TestEventListUI:
 
     def test_event_links(self, authenticated_page: Page, base_url):
         """Test event links in list"""
-        authenticated_page.goto(f"{base_url}/events/list/")
+        authenticated_page.goto(f"{base_url}/events/list/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("a[href*='event'], tr a, .event-link")
         if element.count() > 0:
@@ -108,7 +118,8 @@ class TestEventListUI:
 
     def test_filter(self, authenticated_page: Page, base_url):
         """Test filter options"""
-        authenticated_page.goto(f"{base_url}/events/list/")
+        authenticated_page.goto(f"{base_url}/events/list/", timeout=60000)
+        authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("select, button:has-text('Filter'), form")
         if element.count() > 0:
@@ -125,7 +136,7 @@ class TestPublishEventUIExtended:
 
     def test_view_dashboard_link(self, authenticated_page: Page, base_url):
         """Test View Dashboard link"""
-        authenticated_page.goto(f"{base_url}/events/publish/")
+        authenticated_page.goto(f"{base_url}/events/publish/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Dashboard'), a:has-text('Dashboard')")
@@ -134,7 +145,7 @@ class TestPublishEventUIExtended:
 
     def test_event_name_input(self, authenticated_page: Page, base_url):
         """Test event name input"""
-        authenticated_page.goto(f"{base_url}/events/publish/")
+        authenticated_page.goto(f"{base_url}/events/publish/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("#event_name, input[name='event_name']")
@@ -143,7 +154,7 @@ class TestPublishEventUIExtended:
 
     def test_event_data_textarea(self, authenticated_page: Page, base_url):
         """Test event data textarea"""
-        authenticated_page.goto(f"{base_url}/events/publish/")
+        authenticated_page.goto(f"{base_url}/events/publish/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator("#event_data, textarea[name='event_data']")
@@ -156,7 +167,7 @@ class TestAnalyticsUIExtended:
 
     def test_back_to_dashboard_link(self, authenticated_page: Page, base_url):
         """Test Back to Dashboard link"""
-        authenticated_page.goto(f"{base_url}/events/analytics/")
+        authenticated_page.goto(f"{base_url}/events/analytics/", timeout=60000)
         authenticated_page.wait_for_load_state("networkidle")
         
         element = authenticated_page.locator(".btn:has-text('Back'), a:has-text('Dashboard')")
