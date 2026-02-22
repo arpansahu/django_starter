@@ -25,10 +25,11 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'jenkins-admin-credentials', variable: 'CRED_FILE')]) {
-                        // Parse the credentials file to set environment variables
-                        def credentials = readFile(CRED_FILE)
-                        credentials.split('\n').each { line ->
+                    // Load environment variables from .env file in the workspace
+                    def envFile = readFile('.env')
+                    
+                    // Parse the .env file to set environment variables
+                    envFile.split('\n').each { line ->
                             def trimmedLine = line.trim()
                             if (trimmedLine && !trimmedLine.startsWith('#')) {
                                 def parts = trimmedLine.split('=', 2)
@@ -64,7 +65,6 @@ pipeline {
                         echo "JENKINS_DOMAIN: ${env.JENKINS_DOMAIN}"
                         echo "SENTRY_ORG: ${env.SENTRY_ORG}"
                         echo "SENTRY_PROJECT: ${env.SENTRY_PROJECT}"
-                    }
                 }
             }
         }
