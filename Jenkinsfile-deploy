@@ -25,6 +25,13 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 script {
+                    // Create .env file from Jenkins credentials
+                    withCredentials([file(credentialsId: 'django_starter_env_file', variable: 'ENV_FILE')]) {
+                        sh 'rm -f .env || true'
+                        sh "cp \$ENV_FILE .env"
+                        echo '.env file created successfully from credentials'
+                    }
+                    
                     // Load environment variables from .env file in the workspace
                     def envFile = readFile('.env')
                     
