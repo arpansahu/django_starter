@@ -15,8 +15,8 @@ from playwright.sync_api import Page, expect
 def create_test_category(authenticated_page: Page, base_url) -> str:
     """Helper to create a category via UI and return its name"""
     category_name = f"Test Category {uuid.uuid4().hex[:8]}"
-    authenticated_page.goto(f"{base_url}/notes/categories/create/", timeout=60000)
-    authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+    authenticated_page.goto(f"{base_url}/notes/categories/create/")
+    authenticated_page.wait_for_load_state("load")
     
     name_field = authenticated_page.locator("input[name='name'], #id_name")
     if name_field.count() > 0:
@@ -25,15 +25,15 @@ def create_test_category(authenticated_page: Page, base_url) -> str:
     submit_btn = authenticated_page.locator("button[type='submit'], input[type='submit'], .btn-primary")
     if submit_btn.count() > 0:
         submit_btn.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
     return category_name
 
 
 def create_test_note(authenticated_page: Page, base_url) -> str:
     """Helper to create a note via UI and return its title"""
     note_title = f"Test Note {uuid.uuid4().hex[:8]}"
-    authenticated_page.goto(f"{base_url}/notes/notes/quick/", timeout=60000)
-    authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+    authenticated_page.goto(f"{base_url}/notes/notes/quick/")
+    authenticated_page.wait_for_load_state("load")
     
     # Fill in quick note form
     title_field = authenticated_page.locator("input[name='title'], #id_title")
@@ -47,7 +47,7 @@ def create_test_note(authenticated_page: Page, base_url) -> str:
     submit_btn = authenticated_page.locator("button[type='submit'], input[type='submit'], .btn-primary")
     if submit_btn.count() > 0:
         submit_btn.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
     return note_title
 
 
@@ -59,8 +59,8 @@ class TestNoteConfirmDeleteUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         # Try different selectors for delete link
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
@@ -70,7 +70,7 @@ class TestNoteConfirmDeleteUI:
             return
         
         delete_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Delete'), input[value*='Delete'], button:has-text('Yes'), input[type='submit']")
         if element.count() > 0:
@@ -83,8 +83,8 @@ class TestNoteConfirmDeleteUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
         if delete_links.count() == 0:
@@ -92,7 +92,7 @@ class TestNoteConfirmDeleteUI:
             return
         
         delete_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -103,8 +103,8 @@ class TestNoteConfirmDeleteUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
         if delete_links.count() == 0:
@@ -112,7 +112,7 @@ class TestNoteConfirmDeleteUI:
             return
         
         delete_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Cancel'), button:has-text('Cancel'), a:has-text('Back')")
         if element.count() > 0:
@@ -126,8 +126,8 @@ class TestHomeUI:
 
     def test_view_all(self, authenticated_page: Page, base_url):
         """Test link: View All"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('View All'), a:has-text('All Notes')")
         if element.count() > 0:
@@ -135,8 +135,8 @@ class TestHomeUI:
 
     def test_create_new_note(self, authenticated_page: Page, base_url):
         """Test link: Create New Note"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Create'), a:has-text('New Note'), a:has-text('Add')")
         if element.count() > 0:
@@ -144,8 +144,8 @@ class TestHomeUI:
 
     def test_quick_note(self, authenticated_page: Page, base_url):
         """Test link: Quick Note"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Quick Note'), a:has-text('Quick')")
         if element.count() > 0:
@@ -153,8 +153,8 @@ class TestHomeUI:
 
     def test_new_category(self, authenticated_page: Page, base_url):
         """Test link: New Category"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Category'), a:has-text('New Category')")
         if element.count() > 0:
@@ -162,8 +162,8 @@ class TestHomeUI:
 
     def test_my_notes(self, authenticated_page: Page, base_url):
         """Test link: My Notes"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('My Notes')")
         if element.count() > 0:
@@ -178,8 +178,8 @@ class TestTagListUI:
         # Create a note with tags first (if tags are added during note creation)
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/tags/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/tags/")
+        authenticated_page.wait_for_load_state("load")
         
         # More specific selector to avoid matching notification badges
         element = authenticated_page.locator("main a.tag, main a[href*='/tag/'], main .tag-item, .content a.badge")
@@ -198,12 +198,12 @@ class TestNotesByCategoryUI:
         # Create a category first
         create_test_category(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         category_links = authenticated_page.locator("a[href*='category'], .category-link, .card a")
         if category_links.count() > 0:
             category_links.first.click()
-            authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+            authenticated_page.wait_for_load_state("load")
             expect(authenticated_page.locator("body")).to_be_visible()
         else:
             # Page should still load
@@ -211,8 +211,8 @@ class TestNotesByCategoryUI:
 
     def test_previous(self, authenticated_page: Page, base_url):
         """Test pagination: Previous"""
-        authenticated_page.goto(f"{base_url}/notes/all/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/all/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Previous'), .pagination .prev, .page-link:has-text('Prev')")
         # Pagination may not exist with few notes
@@ -221,8 +221,8 @@ class TestNotesByCategoryUI:
 
     def test_next(self, authenticated_page: Page, base_url):
         """Test pagination: Next"""
-        authenticated_page.goto(f"{base_url}/notes/all/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/all/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Next'), .pagination .next, .page-link:has-text('Next')")
         # Pagination may not exist with few notes
@@ -235,13 +235,13 @@ class TestNotesByTagUI:
 
     def test_link(self, authenticated_page: Page, base_url):
         """Test notes by tag"""
-        authenticated_page.goto(f"{base_url}/notes/tags/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/tags/")
+        authenticated_page.wait_for_load_state("load")
         # More specific selector to avoid matching notification badges
         tag_links = authenticated_page.locator("main a[href*='/tag/'], main .tag-item, .content a[href*='/tag/']")
         if tag_links.count() > 0:
             tag_links.first.click()
-            authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+            authenticated_page.wait_for_load_state("load")
         
         expect(authenticated_page.locator("body")).to_be_visible()
 
@@ -251,8 +251,8 @@ class TestContactUI:
 
     def test_send_message(self, page: Page, base_url):
         """Test button: Send Message"""
-        page.goto(f"{base_url}/notes/contact/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/notes/contact/")
+        page.wait_for_load_state("load")
         
         element = page.locator("button:has-text('Send'), input[type='submit']")
         if element.count() > 0:
@@ -260,8 +260,8 @@ class TestContactUI:
 
     def test_form(self, page: Page, base_url):
         """Test form: contact form"""
-        page.goto(f"{base_url}/notes/contact/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/notes/contact/")
+        page.wait_for_load_state("load")
         
         element = page.locator("form")
         if element.count() > 0:
@@ -276,15 +276,15 @@ class TestCategoryConfirmDeleteUI:
         # Create a category first
         create_test_category(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
         if delete_links.count() == 0:
             expect(authenticated_page.locator("body")).to_be_visible()
             return
         delete_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Delete'), input[value*='Delete'], button:has-text('Yes'), input[type='submit']")
         if element.count() > 0:
@@ -295,15 +295,15 @@ class TestCategoryConfirmDeleteUI:
         # Create a category first
         create_test_category(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
         if delete_links.count() == 0:
             expect(authenticated_page.locator("body")).to_be_visible()
             return
         delete_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -314,15 +314,15 @@ class TestCategoryConfirmDeleteUI:
         # Create a category first
         create_test_category(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         delete_links = authenticated_page.locator("a.btn-outline-danger, a:has-text('Delete'), a[href*='delete']")
         if delete_links.count() == 0:
             expect(authenticated_page.locator("body")).to_be_visible()
             return
         delete_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Cancel'), button:has-text('Cancel'), a:has-text('Back')")
         if element.count() > 0:
@@ -337,8 +337,8 @@ class TestNoteConfirmPublishUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         publish_links = authenticated_page.locator("a:has-text('Publish'), a[href*='publish']")
         if publish_links.count() == 0:
@@ -346,7 +346,7 @@ class TestNoteConfirmPublishUI:
             expect(authenticated_page.locator("body")).to_be_visible()
             return
         publish_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Publish'), input[value*='Publish'], button:has-text('Yes'), input[type='submit']")
         if element.count() > 0:
@@ -357,15 +357,15 @@ class TestNoteConfirmPublishUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         publish_links = authenticated_page.locator("a:has-text('Publish'), a[href*='publish']")
         if publish_links.count() == 0:
             expect(authenticated_page.locator("body")).to_be_visible()
             return
         publish_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -376,15 +376,15 @@ class TestNoteConfirmPublishUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         publish_links = authenticated_page.locator("a:has-text('Publish'), a[href*='publish']")
         if publish_links.count() == 0:
             expect(authenticated_page.locator("body")).to_be_visible()
             return
         publish_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Cancel'), button:has-text('Cancel'), a:has-text('Back')")
         if element.count() > 0:
@@ -400,12 +400,12 @@ class TestCommentConfirmDeleteUI:
         create_test_note(authenticated_page, base_url)
         
         # Navigate to note detail to find comments
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         note_links = authenticated_page.locator("a[href*='note'], .card a, .note-link")
         if note_links.count() > 0:
             note_links.first.click()
-            authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+            authenticated_page.wait_for_load_state("load")
         
         # Look for comment delete links
         delete_links = authenticated_page.locator("a:has-text('Delete Comment'), .comment a:has-text('Delete')")
@@ -415,7 +415,7 @@ class TestCommentConfirmDeleteUI:
             return
         
         delete_links.first.click()
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Delete'), input[value*='Delete'], input[type='submit']")
         if element.count() > 0:
@@ -424,15 +424,15 @@ class TestCommentConfirmDeleteUI:
     def test_form(self, authenticated_page: Page, base_url):
         """Test form: delete confirmation form"""
         # Same as above - comments may not exist
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         expect(authenticated_page.locator("body")).to_be_visible()
 
     def test_cancel(self, authenticated_page: Page, base_url):
         """Test link: Cancel"""
         # Same as above - comments may not exist
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         expect(authenticated_page.locator("body")).to_be_visible()
 
 
@@ -444,13 +444,13 @@ class TestCategoryDetailUI:
         # Create a category first
         create_test_category(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         category_links = authenticated_page.locator("a[href*='category'], .category-link, .card a")
         if category_links.count() > 0:
             category_links.first.click()
-            authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+            authenticated_page.wait_for_load_state("load")
         
         expect(authenticated_page.locator("body")).to_be_visible()
 
@@ -459,8 +459,8 @@ class TestCategoryDetailUI:
         # Create a category first
         create_test_category(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         edit_links = authenticated_page.locator("a:has-text('Edit')")
         if edit_links.count() > 0:
@@ -475,8 +475,8 @@ class TestNoteListUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/all/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/all/")
+        authenticated_page.wait_for_load_state("load")
         
         note_links = authenticated_page.locator("a[href*='note'], .note-link, .card a")
         if note_links.count() > 0:
@@ -487,8 +487,8 @@ class TestNoteListUI:
 
     def test_search(self, authenticated_page: Page, base_url):
         """Test search functionality"""
-        authenticated_page.goto(f"{base_url}/notes/all/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/all/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("input[type='search'], input[name='q'], input[name='search'], input[placeholder*='Search']")
         if element.count() > 0:
@@ -496,8 +496,8 @@ class TestNoteListUI:
 
     def test_filter(self, authenticated_page: Page, base_url):
         """Test filter options"""
-        authenticated_page.goto(f"{base_url}/notes/all/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/all/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("select, .filter, [data-filter]")
         if element.count() > 0:
@@ -505,8 +505,8 @@ class TestNoteListUI:
 
     def test_sort(self, authenticated_page: Page, base_url):
         """Test sort options"""
-        authenticated_page.goto(f"{base_url}/notes/all/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/all/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("select[name='sort'], .sort, [data-sort]")
         if element.count() > 0:
@@ -521,8 +521,8 @@ class TestMyNotesUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         note_links = authenticated_page.locator("a[href*='note'], .note-link, .card a")
         if note_links.count() > 0:
@@ -532,8 +532,8 @@ class TestMyNotesUI:
 
     def test_create_new(self, authenticated_page: Page, base_url):
         """Test create new note link"""
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Create'), a:has-text('New'), a:has-text('Add')")
         if element.count() > 0:
@@ -541,8 +541,8 @@ class TestMyNotesUI:
 
     def test_bulk_actions(self, authenticated_page: Page, base_url):
         """Test bulk actions"""
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("input[type='checkbox'], .bulk-select")
         if element.count() > 0:
@@ -557,8 +557,8 @@ class TestCategoryListUI:
         # Create a category first
         create_test_category(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         category_links = authenticated_page.locator("a[href*='category'], .category-link, .card a")
         if category_links.count() > 0:
@@ -568,8 +568,8 @@ class TestCategoryListUI:
 
     def test_create_new(self, authenticated_page: Page, base_url):
         """Test create new category link"""
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Create'), a:has-text('New'), a:has-text('Add')")
         if element.count() > 0:
@@ -584,13 +584,13 @@ class TestNoteDetailUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/all/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/all/")
+        authenticated_page.wait_for_load_state("load")
         
         note_links = authenticated_page.locator("a[href*='note'], .card a")
         if note_links.count() > 0:
             note_links.first.click()
-            authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+            authenticated_page.wait_for_load_state("load")
         
         expect(authenticated_page.locator("body")).to_be_visible()
 
@@ -599,8 +599,8 @@ class TestNoteDetailUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         edit_links = authenticated_page.locator("a:has-text('Edit')")
         if edit_links.count() > 0:
@@ -611,8 +611,8 @@ class TestNoteDetailUI:
         # Create a note first
         create_test_note(authenticated_page, base_url)
         
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         delete_links = authenticated_page.locator("a:has-text('Delete')")
         if delete_links.count() > 0:
@@ -620,8 +620,8 @@ class TestNoteDetailUI:
 
     def test_share(self, authenticated_page: Page, base_url):
         """Test share button"""
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         share_links = authenticated_page.locator("a:has-text('Share'), button:has-text('Share')")
         if share_links.count() > 0:
@@ -633,8 +633,8 @@ class TestNoteFormUI:
 
     def test_save(self, authenticated_page: Page, base_url):
         """Test save button"""
-        authenticated_page.goto(f"{base_url}/notes/notes/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Save'), button:has-text('Create'), input[type='submit'], button[type='submit']")
         if element.count() > 0:
@@ -645,8 +645,8 @@ class TestNoteFormUI:
 
     def test_form(self, authenticated_page: Page, base_url):
         """Test note form"""
-        authenticated_page.goto(f"{base_url}/notes/notes/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("form, .note-form, #note-form")
         if element.count() > 0:
@@ -656,8 +656,8 @@ class TestNoteFormUI:
 
     def test_title_field(self, authenticated_page: Page, base_url):
         """Test title input"""
-        authenticated_page.goto(f"{base_url}/notes/notes/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("input[name='title'], #id_title")
         if element.count() > 0:
@@ -665,8 +665,8 @@ class TestNoteFormUI:
 
     def test_content_field(self, authenticated_page: Page, base_url):
         """Test content textarea"""
-        authenticated_page.goto(f"{base_url}/notes/notes/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("textarea[name='content'], #id_content, .editor")
         if element.count() > 0:
@@ -678,8 +678,8 @@ class TestBulkActionUI:
 
     def test_select_all(self, authenticated_page: Page, base_url):
         """Test select all checkbox"""
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("input[type='checkbox'].select-all, #select-all")
         if element.count() > 0:
@@ -687,8 +687,8 @@ class TestBulkActionUI:
 
     def test_bulk_delete(self, authenticated_page: Page, base_url):
         """Test bulk delete button"""
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Delete Selected'), .bulk-delete")
         if element.count() > 0:
@@ -700,8 +700,8 @@ class TestQuickNoteFormUI:
 
     def test_save(self, authenticated_page: Page, base_url):
         """Test save button"""
-        authenticated_page.goto(f"{base_url}/notes/notes/quick/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/quick/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Save'), input[type='submit'], button[type='submit']")
         if element.count() > 0:
@@ -709,8 +709,8 @@ class TestQuickNoteFormUI:
 
     def test_form(self, authenticated_page: Page, base_url):
         """Test quick note form"""
-        authenticated_page.goto(f"{base_url}/notes/notes/quick/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/quick/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -722,8 +722,8 @@ class TestCategoryFormUI:
 
     def test_save(self, authenticated_page: Page, base_url):
         """Test save button"""
-        authenticated_page.goto(f"{base_url}/notes/categories/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Save'), input[type='submit'], button[type='submit']")
         if element.count() > 0:
@@ -731,8 +731,8 @@ class TestCategoryFormUI:
 
     def test_form(self, authenticated_page: Page, base_url):
         """Test category form"""
-        authenticated_page.goto(f"{base_url}/notes/categories/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -740,8 +740,8 @@ class TestCategoryFormUI:
 
     def test_name_field(self, authenticated_page: Page, base_url):
         """Test name input"""
-        authenticated_page.goto(f"{base_url}/notes/categories/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("input[name='name'], #id_name")
         if element.count() > 0:
@@ -758,8 +758,8 @@ class TestHomeUIExtended:
 
     def test_view_all_links(self, authenticated_page: Page, base_url):
         """Test View All links on home page"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('View All'), a:has-text('View All')")
         if element.count() > 0:
@@ -767,8 +767,8 @@ class TestHomeUIExtended:
 
     def test_recent_items(self, authenticated_page: Page, base_url):
         """Test recent items list"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".list-group-item, .recent-item")
         if element.count() > 0:
@@ -776,8 +776,8 @@ class TestHomeUIExtended:
 
     def test_create_one_link(self, authenticated_page: Page, base_url):
         """Test Create one! link"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Create'), a:has-text('New')")
         if element.count() > 0:
@@ -829,8 +829,8 @@ class TestNoteListUIExtended:
 
     def test_new_note_button(self, authenticated_page: Page, base_url):
         """Test New Note button"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('New'), a:has-text('New Note')")
         if element.count() > 0:
@@ -838,8 +838,8 @@ class TestNoteListUIExtended:
 
     def test_reset_button(self, authenticated_page: Page, base_url):
         """Test Reset button"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('Reset'), a:has-text('Reset')")
         if element.count() > 0:
@@ -847,8 +847,8 @@ class TestNoteListUIExtended:
 
     def test_note_badges(self, authenticated_page: Page, base_url):
         """Test note badges (tags, categories)"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         # Explicitly exclude the hidden notification badge by ID
         element = authenticated_page.locator(".badge:not(#notif-badge)")
@@ -857,8 +857,8 @@ class TestNoteListUIExtended:
 
     def test_pagination_links(self, authenticated_page: Page, base_url):
         """Test pagination links"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".page-link, .pagination a")
         if element.count() > 0:
@@ -870,8 +870,8 @@ class TestMyNotesUIExtended:
 
     def test_create_first_note_link(self, authenticated_page: Page, base_url):
         """Test Create your first note! link"""
-        authenticated_page.goto(f"{base_url}/notes/my-notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/my-notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Create'), a:has-text('New')")
         if element.count() > 0:
@@ -883,8 +883,8 @@ class TestCategoryListUIExtended:
 
     def test_view_details_link(self, authenticated_page: Page, base_url):
         """Test View Details link"""
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('View'), .btn:has-text('Details')")
         if element.count() > 0:
@@ -892,8 +892,8 @@ class TestCategoryListUIExtended:
 
     def test_view_notes_link(self, authenticated_page: Page, base_url):
         """Test View Notes link"""
-        authenticated_page.goto(f"{base_url}/notes/categories/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('Notes'), a:has-text('View Notes')")
         if element.count() > 0:
@@ -905,13 +905,13 @@ class TestNoteDetailUIExtended:
 
     def test_post_comment_button(self, authenticated_page: Page, base_url):
         """Test Post Comment button"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         note_link = authenticated_page.locator("a[href*='/notes/']").first
         if note_link.count() > 0:
             note_link.click()
-            authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+            authenticated_page.wait_for_load_state("load")
             
             element = authenticated_page.locator(".btn:has-text('Comment'), button:has-text('Post')")
             if element.count() > 0:
@@ -919,8 +919,8 @@ class TestNoteDetailUIExtended:
 
     def test_delete_link(self, authenticated_page: Page, base_url):
         """Test Delete link"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('Delete'), a:has-text('Delete')")
         if element.count() > 0:
@@ -928,13 +928,13 @@ class TestNoteDetailUIExtended:
 
     def test_back_to_notes_link(self, authenticated_page: Page, base_url):
         """Test Back to Notes link"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         note_link = authenticated_page.locator("a[href*='/notes/']").first
         if note_link.count() > 0:
             note_link.click()
-            authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+            authenticated_page.wait_for_load_state("load")
             
             element = authenticated_page.locator(".btn:has-text('Back'), a:has-text('Notes')")
             if element.count() > 0:
@@ -942,8 +942,8 @@ class TestNoteDetailUIExtended:
 
     def test_publish_note_link(self, authenticated_page: Page, base_url):
         """Test Publish Note link"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('Publish'), a:has-text('Publish')")
         if element.count() > 0:
@@ -951,8 +951,8 @@ class TestNoteDetailUIExtended:
 
     def test_random_note_link(self, authenticated_page: Page, base_url):
         """Test Random Note link"""
-        authenticated_page.goto(f"{base_url}/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('Random'), a:has-text('Random')")
         if element.count() > 0:
@@ -964,8 +964,8 @@ class TestNoteFormUIExtended:
 
     def test_form_submit_button(self, authenticated_page: Page, base_url):
         """Test form submit button"""
-        authenticated_page.goto(f"{base_url}/notes/notes/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button[type='submit'], input[type='submit'], .btn:has-text('Save')")
         if element.count() > 0:
@@ -977,8 +977,8 @@ class TestBulkActionUIExtended:
 
     def test_apply_button(self, authenticated_page: Page, base_url):
         """Test Apply button"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('Apply'), button:has-text('Apply')")
         if element.count() > 0:
@@ -986,8 +986,8 @@ class TestBulkActionUIExtended:
 
     def test_checkbox_inputs(self, authenticated_page: Page, base_url):
         """Test checkbox inputs for note selection"""
-        authenticated_page.goto(f"{base_url}/notes/notes/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/notes/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".form-check-input, input[type='checkbox']")
         if element.count() > 0:
@@ -999,8 +999,8 @@ class TestQuickNoteFormUIExtended:
 
     def test_create_quick_note_button(self, authenticated_page: Page, base_url):
         """Test Create Quick Note button"""
-        authenticated_page.goto(f"{base_url}/notes/quick-note/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/quick-note/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('Create'), button:has-text('Quick')")
         if element.count() > 0:
@@ -1008,8 +1008,8 @@ class TestQuickNoteFormUIExtended:
 
     def test_title_input(self, authenticated_page: Page, base_url):
         """Test title input"""
-        authenticated_page.goto(f"{base_url}/notes/quick-note/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/quick-note/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("input[name='title'], #id_title, .form-control[name='title']")
         if element.count() > 0:
@@ -1017,8 +1017,8 @@ class TestQuickNoteFormUIExtended:
 
     def test_content_textarea(self, authenticated_page: Page, base_url):
         """Test content textarea"""
-        authenticated_page.goto(f"{base_url}/notes/quick-note/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/quick-note/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("textarea[name='content'], #id_content")
         if element.count() > 0:
@@ -1030,8 +1030,8 @@ class TestCategoryFormUIExtended:
 
     def test_category_form_button(self, authenticated_page: Page, base_url):
         """Test category form submit button"""
-        authenticated_page.goto(f"{base_url}/notes/categories/create/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/notes/categories/create/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button[type='submit'], input[type='submit'], .btn:has-text('Save')")
         if element.count() > 0:

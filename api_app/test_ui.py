@@ -83,8 +83,8 @@ class TestSwaggerUI:
 
     def test_swagger_page_loads(self, page: Page, base_url):
         """Test Swagger UI page loads"""
-        page.goto(f"{base_url}/swagger/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/swagger/")
+        page.wait_for_load_state("load")
         
         element = page.locator(".swagger-ui, #swagger-ui")
         if element.count() > 0:
@@ -92,8 +92,8 @@ class TestSwaggerUI:
 
     def test_swagger_info(self, page: Page, base_url):
         """Test Swagger info section"""
-        page.goto(f"{base_url}/swagger/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/swagger/")
+        page.wait_for_load_state("load")
         
         element = page.locator(".info, .info-title")
         if element.count() > 0:
@@ -105,8 +105,8 @@ class TestReDocUI:
 
     def test_redoc_page_loads(self, page: Page, base_url):
         """Test ReDoc page loads"""
-        page.goto(f"{base_url}/redoc/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/redoc/")
+        page.wait_for_load_state("load")
         
         element = page.locator("redoc, .redoc-wrap")
         if element.count() > 0:
@@ -118,8 +118,8 @@ class TestAPIRootUI:
 
     def test_api_root_loads(self, page: Page, base_url):
         """Test API root page loads"""
-        page.goto(f"{base_url}/api/v1/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/v1/")
+        page.wait_for_load_state("load")
         
         # DRF browsable API
         element = page.locator(".api-root, pre, .response-info")
@@ -128,8 +128,8 @@ class TestAPIRootUI:
 
     def test_endpoints_visible(self, page: Page, base_url):
         """Test API endpoints are visible"""
-        page.goto(f"{base_url}/api/v1/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/v1/")
+        page.wait_for_load_state("load")
         
         # Check for links to API endpoints
         element = page.locator("a[href*='api']")
@@ -142,8 +142,8 @@ class TestDashboardUIExtended:
 
     def test_view_all_link(self, page: Page, base_url):
         """Test link: View All →"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('View All'), .text-dark")
         if element.count() > 0:
@@ -151,8 +151,8 @@ class TestDashboardUIExtended:
 
     def test_orders_api(self, page: Page, base_url):
         """Test link: Orders API"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Orders'), .list-group-item:has-text('Orders')")
         if element.count() > 0:
@@ -160,8 +160,8 @@ class TestDashboardUIExtended:
 
     def test_health_check(self, page: Page, base_url):
         """Test link: Health Check"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Health'), .list-group-item:has-text('Health')")
         if element.count() > 0:
@@ -169,8 +169,8 @@ class TestDashboardUIExtended:
 
     def test_global_search(self, page: Page, base_url):
         """Test link: Global Search"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Search'), .list-group-item:has-text('Search')")
         if element.count() > 0:
@@ -178,8 +178,8 @@ class TestDashboardUIExtended:
 
     def test_products_gallery(self, page: Page, base_url):
         """Test link: Products Gallery"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Products'), .list-group-item:has-text('Products')")
         if element.count() > 0:
@@ -187,8 +187,8 @@ class TestDashboardUIExtended:
 
     def test_orders_list(self, page: Page, base_url):
         """Test link: Orders List"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Orders List'), .list-group-item:has-text('Orders')")
         if element.count() > 0:
@@ -196,8 +196,8 @@ class TestDashboardUIExtended:
 
     def test_dashboard_links_visible(self, page: Page, base_url):
         """Test that dashboard has navigation links"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator(".btn, a.list-group-item")
         if element.count() > 0:

@@ -16,8 +16,8 @@ class TestPublicFormUI:
 
     def test_button(self, page: Page, base_url):
         """Test close button"""
-        page.goto(f"{base_url}/file-manager/public/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/file-manager/public/")
+        page.wait_for_load_state("load")
         
         element = page.locator(".btn-close, button.close")
         if element.count() > 0:
@@ -25,8 +25,8 @@ class TestPublicFormUI:
 
     def test_upload_file(self, page: Page, base_url):
         """Test button: Upload File"""
-        page.goto(f"{base_url}/file-manager/public/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/file-manager/public/")
+        page.wait_for_load_state("load")
         
         element = page.locator("button:has-text('Upload'), input[type='submit']")
         if element.count() > 0:
@@ -34,8 +34,8 @@ class TestPublicFormUI:
 
     def test_form(self, page: Page, base_url):
         """Test form: upload form"""
-        page.goto(f"{base_url}/file-manager/public/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/file-manager/public/")
+        page.wait_for_load_state("load")
         
         element = page.locator("form")
         if element.count() > 0:
@@ -43,8 +43,8 @@ class TestPublicFormUI:
 
     def test_back_to_home(self, page: Page, base_url):
         """Test link: Back to Home"""
-        page.goto(f"{base_url}/file-manager/public/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/file-manager/public/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Home'), a:has-text('Back')")
         if element.count() > 0:
@@ -52,8 +52,8 @@ class TestPublicFormUI:
 
     def test_view(self, page: Page, base_url):
         """Test link: View uploaded files"""
-        page.goto(f"{base_url}/file-manager/public/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/file-manager/public/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('View')")
         if element.count() > 0:
@@ -65,8 +65,8 @@ class TestPrivateFormUI:
 
     def test_button(self, authenticated_page: Page, base_url):
         """Test close button"""
-        authenticated_page.goto(f"{base_url}/file-manager/private/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/private/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn-close, button.close")
         if element.count() > 0:
@@ -74,8 +74,8 @@ class TestPrivateFormUI:
 
     def test_upload_file(self, authenticated_page: Page, base_url):
         """Test button: Upload File"""
-        authenticated_page.goto(f"{base_url}/file-manager/private/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/private/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("button:has-text('Upload'), input[type='submit']")
         if element.count() > 0:
@@ -83,8 +83,8 @@ class TestPrivateFormUI:
 
     def test_form(self, authenticated_page: Page, base_url):
         """Test form: upload form"""
-        authenticated_page.goto(f"{base_url}/file-manager/private/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/private/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -92,8 +92,8 @@ class TestPrivateFormUI:
 
     def test_back_to_home(self, authenticated_page: Page, base_url):
         """Test link: Back to Home"""
-        authenticated_page.goto(f"{base_url}/file-manager/private/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/private/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Home'), a:has-text('Back')")
         if element.count() > 0:
@@ -101,8 +101,8 @@ class TestPrivateFormUI:
 
     def test_view(self, authenticated_page: Page, base_url):
         """Test link: View uploaded files"""
-        authenticated_page.goto(f"{base_url}/file-manager/private/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/private/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('View')")
         if element.count() > 0:
@@ -110,8 +110,8 @@ class TestPrivateFormUI:
 
     def test_file_input(self, authenticated_page: Page, base_url):
         """Test file input field"""
-        authenticated_page.goto(f"{base_url}/file-manager/private/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/private/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("input[type='file']")
         if element.count() > 0:
@@ -123,8 +123,8 @@ class TestFileListUI:
 
     def test_download(self, authenticated_page: Page, base_url):
         """Test download link"""
-        authenticated_page.goto(f"{base_url}/file-manager/files/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/files/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Download'), a[download]")
         if element.count() > 0:
@@ -132,8 +132,8 @@ class TestFileListUI:
 
     def test_delete(self, authenticated_page: Page, base_url):
         """Test delete button"""
-        authenticated_page.goto(f"{base_url}/file-manager/files/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/files/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator("a:has-text('Delete'), button:has-text('Delete')")
         if element.count() > 0:
@@ -150,8 +150,8 @@ class TestUploadPrivateFileUIExtended:
 
     def test_view_secure_link(self, authenticated_page: Page, base_url):
         """Test View (Secure) link"""
-        authenticated_page.goto(f"{base_url}/file-manager/private/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
+        authenticated_page.goto(f"{base_url}/file-manager/private/")
+        authenticated_page.wait_for_load_state("load")
         
         element = authenticated_page.locator(".btn:has-text('View'), a:has-text('Secure')")
         if element.count() > 0:
