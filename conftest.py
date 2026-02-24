@@ -51,7 +51,7 @@ def authenticated_page(page: Page, test_user_credentials, base_url):
     
     # Explicitly wait for navigation to complete
     page.wait_for_url(lambda url: "/login" not in url, timeout=30000)
-    page.wait_for_load_state("networkidle", timeout=60000)
+    page.wait_for_load_state("load")
     
     # Check if login succeeded (not still on login page with errors)
     current_url = page.url
