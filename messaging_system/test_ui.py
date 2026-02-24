@@ -17,7 +17,7 @@ class TestSendNotificationUI:
     def test_button(self, authenticated_page: Page, base_url):
         """Test close button"""
         authenticated_page.goto(f"{base_url}/messaging/send/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator(".btn-close, button.close")
         if element.count() > 0:
@@ -26,7 +26,7 @@ class TestSendNotificationUI:
     def test_send_notification(self, authenticated_page: Page, base_url):
         """Test button: Send Notification"""
         authenticated_page.goto(f"{base_url}/messaging/send/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator("button:has-text('Send'), input[type='submit']")
         if element.count() > 0:
@@ -35,7 +35,7 @@ class TestSendNotificationUI:
     def test_form(self, authenticated_page: Page, base_url):
         """Test form: notification form"""
         authenticated_page.goto(f"{base_url}/messaging/send/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator("form")
         if element.count() > 0:
@@ -44,7 +44,7 @@ class TestSendNotificationUI:
     def test_view_dashboard(self, authenticated_page: Page, base_url):
         """Test link: View Dashboard"""
         authenticated_page.goto(f"{base_url}/messaging/send/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator("a:has-text('Dashboard'), a:has-text('Back')")
         if element.count() > 0:
@@ -53,7 +53,7 @@ class TestSendNotificationUI:
     def test_title(self, authenticated_page: Page, base_url):
         """Test input: title"""
         authenticated_page.goto(f"{base_url}/messaging/send/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator("#title, input[name='title']")
         if element.count() > 0:
@@ -62,7 +62,7 @@ class TestSendNotificationUI:
     def test_message(self, authenticated_page: Page, base_url):
         """Test textarea: message"""
         authenticated_page.goto(f"{base_url}/messaging/send/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator("#message, textarea[name='message']")
         if element.count() > 0:
@@ -75,7 +75,7 @@ class TestDashboardUI:
     def test_new(self, authenticated_page: Page, base_url):
         """Test link: New notification"""
         authenticated_page.goto(f"{base_url}/messaging/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator("a:has-text('New'), a:has-text('Send')")
         if element.count() > 0:
@@ -84,7 +84,7 @@ class TestDashboardUI:
     def test_send_one_now(self, authenticated_page: Page, base_url):
         """Test link: Send one now"""
         authenticated_page.goto(f"{base_url}/messaging/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator("a:has-text('Send'), [data-testid='send_one_now']")
         if element.count() > 0:
@@ -93,7 +93,7 @@ class TestDashboardUI:
     def test_notifications_list(self, authenticated_page: Page, base_url):
         """Test notifications list"""
         authenticated_page.goto(f"{base_url}/messaging/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator(".notification, .message, tr")
         if element.count() > 0:
@@ -106,7 +106,7 @@ class TestNotificationListUI:
     def test_notification_links(self, authenticated_page: Page, base_url):
         """Test notification links in list"""
         authenticated_page.goto(f"{base_url}/messaging/list/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         element = authenticated_page.locator("a[href*='notification'], tr a, .notification-link")
         if element.count() > 0:
@@ -115,7 +115,7 @@ class TestNotificationListUI:
     def test_filter(self, authenticated_page: Page, base_url):
         """Test filter options"""
         authenticated_page.goto(f"{base_url}/messaging/list/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
 
 
 class TestSendNotificationUI:

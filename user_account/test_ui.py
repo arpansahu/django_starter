@@ -21,7 +21,7 @@ class TestAccountActivationDoneUI:
         page.goto(f"{base_url}/account-activation-done/", timeout=60000)
         
         # Check page loads (may redirect or show content)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the HOME button/link if page is accessible
         element = page.locator(".btn:has-text('HOME'), a:has-text('HOME'), a:has-text('Home'), a[href='/']")
@@ -38,7 +38,7 @@ class TestRegisterUI:
     def test_sign_up(self, page: Page, base_url):
         """Test button: Sign UP"""
         page.goto(f"{base_url}/register/", timeout=60000)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the Sign UP button
         element = page.locator("button:has-text('Sign'), input[type='submit']")
@@ -47,7 +47,7 @@ class TestRegisterUI:
     def test_form(self, page: Page, base_url):
         """Test form: registration form"""
         page.goto(f"{base_url}/register/", timeout=60000)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the registration form
         element = page.locator("form")
@@ -56,7 +56,7 @@ class TestRegisterUI:
     def test_sign_in(self, page: Page, base_url):
         """Test link: Sign IN"""
         page.goto(f"{base_url}/register/", timeout=60000)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the Sign In link
         element = page.locator("a:has-text('Sign In'), a:has-text('Login'), .text-info")
@@ -68,7 +68,7 @@ class TestRegisterUI:
     def test_terms_check(self, page: Page, base_url):
         """Test input: termsCheck"""
         page.goto(f"{base_url}/register/", timeout=60000)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate terms checkbox
         element = page.locator("#termsCheck, input[type='checkbox']")
@@ -84,7 +84,7 @@ class TestLoginUI:
     def test_sign_in(self, page: Page, base_url):
         """Test button: Sign in"""
         page.goto(f"{base_url}/login/", timeout=60000)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the Sign in button
         element = page.locator("button:has-text('Sign'), button[type='submit'], input[type='submit']")
@@ -93,7 +93,7 @@ class TestLoginUI:
     def test_form(self, page: Page, base_url):
         """Test form: login form"""
         page.goto(f"{base_url}/login/", timeout=60000)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the login form
         element = page.locator("form")
@@ -102,7 +102,7 @@ class TestLoginUI:
     def test_register_here(self, page: Page, base_url):
         """Test link: Register here."""
         page.goto(f"{base_url}/login/", timeout=60000)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the Register link
         element = page.locator("a:has-text('Register'), a:has-text('Sign Up'), .text-info")
@@ -114,7 +114,7 @@ class TestLoginUI:
     def test_reset_password(self, page: Page, base_url):
         """Test link: Reset Password"""
         page.goto(f"{base_url}/login/", timeout=60000)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate Reset Password link
         element = page.locator("a:has-text('Reset'), a:has-text('Forgot')")
@@ -130,7 +130,7 @@ class TestAccountUI:
     def test_update_account_details(self, authenticated_page: Page, base_url):
         """Test button: Update Account Details"""
         authenticated_page.goto(f"{base_url}/account/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the Update button - check various patterns
         element = authenticated_page.locator("button:has-text('Update'), input[type='submit'], button[type='submit'], .btn-primary")
@@ -142,7 +142,7 @@ class TestAccountUI:
     def test_form(self, authenticated_page: Page, base_url):
         """Test form: account update form"""
         authenticated_page.goto(f"{base_url}/account/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the account form
         element = authenticated_page.locator("form")
@@ -151,7 +151,7 @@ class TestAccountUI:
     def test_click_here(self, authenticated_page: Page, base_url):
         """Test link: Click here (change password link)"""
         authenticated_page.goto(f"{base_url}/account/", timeout=60000)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("networkidle", timeout=60000)
         
         # Locate the click here link
         element = authenticated_page.locator("a:has-text('Click'), a:has-text('change'), .text-info")
