@@ -16,8 +16,8 @@ class TestDashboardUI:
 
     def test_swagger_docs(self, page: Page, base_url):
         """Test link: Swagger Docs"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Swagger'), a[href*='swagger']")
         if element.count() > 0:
@@ -25,8 +25,8 @@ class TestDashboardUI:
 
     def test_re_doc(self, page: Page, base_url):
         """Test link: ReDoc"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('ReDoc'), a[href*='redoc']")
         if element.count() > 0:
@@ -34,8 +34,8 @@ class TestDashboardUI:
 
     def test_view_all(self, page: Page, base_url):
         """Test link: View All"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('View All')")
         if element.count() > 0:
@@ -43,8 +43,8 @@ class TestDashboardUI:
 
     def test_api_root(self, page: Page, base_url):
         """Test link: API Root"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('API Root'), a[href*='api-root']")
         if element.count() > 0:
@@ -52,8 +52,8 @@ class TestDashboardUI:
 
     def test_products_api(self, page: Page, base_url):
         """Test link: Products API"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Products'), a[href*='products']")
         if element.count() > 0:
@@ -61,8 +61,8 @@ class TestDashboardUI:
 
     def test_reviews_api(self, page: Page, base_url):
         """Test link: Reviews API"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Reviews'), a[href*='reviews']")
         if element.count() > 0:
@@ -70,8 +70,8 @@ class TestDashboardUI:
 
     def test_users_api(self, page: Page, base_url):
         """Test link: Users API"""
-        page.goto(f"{base_url}/api/", timeout=60000)
-        page.wait_for_load_state("networkidle", timeout=60000)
+        page.goto(f"{base_url}/api/")
+        page.wait_for_load_state("load")
         
         element = page.locator("a:has-text('Users'), a[href*='users']")
         if element.count() > 0:
